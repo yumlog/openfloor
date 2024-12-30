@@ -1,0 +1,79 @@
+@font-face {
+  font-family: "Jalnan Gothic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(JalnanGothic.woff2) format("woff2");
+}
+@font-face {
+  font-family: "Jalnan Gothic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(JalnanGothic.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+  src: url(Pretendard-Thin.woff) format("woff");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+  src: url(Pretendard-ExtraLight.woff) format("woff");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url(Pretendard-Light.woff) format("woff");
+}
+
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url(Pretendard-Regular.woff) format("woff");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url(Pretendard-Medium.woff) format("woff");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url(Pretendard-SemiBold.woff) format("woff");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url(Pretendard-Bold.woff) format("woff");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  src: url(Pretendard-ExtraBold.woff) format("woff");
+}
+@font-face {
+  font-family: "Pretendard";
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  src: url(Pretendard-Black.woff) format("woff");
+}
