@@ -1,3 +1,4 @@
+import Header from "@/components/Header";
 import Button from "@/components/Button";
 import TextField from "@/components/Forms/TextField";
 import TextArea from "@/components/Forms/TextArea";
@@ -6,6 +7,7 @@ import Image from "next/image";
 export default function Main() {
   return (
     <div className={`flex flex-col gap-4 p-4`}>
+      <Header />
       <section className="border">
         <h1 className="text-h5 font-bold border-b px-4 py-2 ">Font Size</h1>
         <ul className="flex flex-col gap-4 p-4">
