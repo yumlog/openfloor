@@ -1,0 +1,13 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="icon_40_technology">
+<path id="Polygon 1" d="M26.1939 22.8818L28.8367 27.4397H3.08224L5.67391 22.97L9.51718 16.3418L15.9595 5.23114L22.4018 16.3418L26.1939 22.8818Z" stroke="#E32A2A" stroke-width="2.64"/>
+<g id="Mask group">
+<mask id="mask0_437_2935" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="2" width="32" height="27">
+<path id="Polygon 3" d="M26.2545 22.8477L28.9582 27.5107H2.96074L5.61336 22.9359L9.45662 16.3077L15.9595 5.09257L22.4624 16.3077L26.2545 22.8477Z" stroke="#282828" stroke-width="2.5"/>
+</mask>
+<g mask="url(#mask0_437_2935)">
+<rect id="Icon" x="7.14648" y="2.60059" width="17.7062" height="14.4" fill="#E32A2A"/>
+</g>
+</g>
+</g>
+</svg>

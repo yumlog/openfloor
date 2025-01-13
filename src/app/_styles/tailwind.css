@@ -21,7 +21,7 @@
   --gray-9: #0d0d0d;
 
   /* font */
-  --font-display: "Jalnan Gothic", sans-serif;
+  --font-display: "Montserrat", sans-serif;
   --font-body: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui,
     Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR",
     "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
@@ -60,6 +60,7 @@
     line-height: normal;
     color: var(--gray-9);
     touch-action: pan-x pan-y;
+    cursor: url('/images/window.svg') 16 16, auto;
   }
   p {
     margin: 0;
