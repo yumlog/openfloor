@@ -1,44 +1,57 @@
 .section1 {
-  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100vh;
+  background-color: var(--black);
 
-  .h1-wrap {
-    position: fixed;
-    top: 50%;
-    left: 50%;
+  div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
-  .h1 {
+  h1 {
     font-family: var(--font-display);
     font-size: 56px;
     font-weight: 800;
+    line-height: 140%;
+    color: var(--white);
+    margin: 44px 0 12px 0;
+  }
+
+  p {
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 140%;
     color: var(--white);
   }
 }
 
 .section2 {
-  position: relative;
-  height: 100vh;
-  padding: 120px 100px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  padding: 180px 100px 160px 100px;
 
-  .h1 {
+  .h1-wrap {
+    margin-top: 180px;
+  }
+
+  h1 {
     font-family: var(--font-display);
     font-size: 92px;
     font-weight: 800;
-    line-height: 130%;
+    line-height: 140%;
     letter-spacing: -1.84px;
     text-transform: uppercase;
+    color: var(--black);
   }
 
   .box-list {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     column-gap: 24px;
-  
+    margin-top: 122px;
+
     > li {
       display: flex;
       flex-direction: column;
@@ -46,7 +59,7 @@
       border-radius: 20px;
       background-color: var(--gray-1);
       transition: all 0.3s ease;
-      
+
       p {
         font-family: var(--font-display);
         font-size: 32px;
@@ -108,48 +121,99 @@
   }
 }
 
-
 .section3 {
+  background-color: var(--primary);
+  height: 100vh;
+}
+
+.section4 {
   position: relative;
   height: 100vh;
-  background-color: var(--black);
 
-  .marquee-container {
+  h1 {
     position: absolute;
-    overflow: hidden;
-    white-space: nowrap;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    font-size: 100px;
+  }
+
+  .bg-wrap {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    position: relative;
+    display: block;
+    left: 0px;
+    top: 0px;
+    height: 100%;
     width: 100%;
-    height: 268px;
-
-    &.top {
-      top: 0;
-      left: 0;
-      right: inherit;
-      bottom: inherit;
-    }
-
-    &.bottom {
-      top: inherit;
-      left: inherit;
-      right: 0;
-      bottom: 0;
-    }
+    // transform: translate3d(15px, 13px, 0px);
+    overflow: hidden;
   }
-  
-  .marquee {
+
+  .bg {
+    background: url(https://images.unsplash.com/photo-1471623432079-b009d30b6729?dpr=1&auto=compress,format&fit=crop&w=1199&h=799&q=80&cs=tinysrgb&crop=);
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
     position: absolute;
-    display: flex;
-    white-space: nowrap;
-    will-change: transform;
-  }
-  
-  .text {
-    display: inline-block;
-    padding-right: 2rem;
-    font-family: var(--font-display);
-    font-size: 220px;
-    font-weight: 700;
-    -webkit-text-stroke: 1px var(--white);
-    color: var(--transparent);
+    width: 110%;
+    height: 110%;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    transition: all 1s linear;
   }
 }
+
+.footer {
+  height: 228px;
+  background-color: var(--gray-8);
+}
+
+// .section3 {
+//   position: relative;
+//   height: 100vh;
+//   background-color: var(--black);
+
+//   .marquee-container {
+//     position: absolute;
+//     overflow: hidden;
+//     white-space: nowrap;
+//     width: 100%;
+//     height: 268px;
+
+//     &.top {
+//       top: 0;
+//       left: 0;
+//       right: inherit;
+//       bottom: inherit;
+//     }
+
+//     &.bottom {
+//       top: inherit;
+//       left: inherit;
+//       right: 0;
+//       bottom: 0;
+//     }
+//   }
+
+//   .marquee {
+//     position: absolute;
+//     display: flex;
+//     white-space: nowrap;
+//     will-change: transform;
+//   }
+
+//   .text {
+//     display: inline-block;
+//     padding-right: 2rem;
+//     font-family: var(--font-display);
+//     font-size: 220px;
+//     font-weight: 700;
+//     -webkit-text-stroke: 1px var(--white);
+//     color: var(--transparent);
+//   }
+// }
