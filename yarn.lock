@@ -3831,6 +3831,11 @@ react-locomotive-scroll@^0.2.2:
     use-debounce "6.0.1"
     use-resize-observer "6.1.0"
 
+react-parallax-tilt@^1.7.272:
+  version "1.7.272"
+  resolved "https://registry.yarnpkg.com/react-parallax-tilt/-/react-parallax-tilt-1.7.272.tgz#dd6ed4c74baa700b2008b1e07e597b28fc45b9bc"
+  integrity sha512-mzJFR+gB9cbAnFwwq6QngQ+j51WSlGA2N2dyyzlEo/mwq11Amdw+RndF1tKRBlkVHQVbgv8pDFEFUeS/TVHPyA==
+
 react@^19.0.0:
   version "19.0.0"
   resolved "https://registry.yarnpkg.com/react/-/react-19.0.0.tgz#6e1969251b9f108870aa4bff37a0ce9ddfaaabdd"

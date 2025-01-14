@@ -62,7 +62,8 @@
     line-height: normal;
     color: var(--gray-9);
     touch-action: pan-x pan-y;
-    cursor: url("/images/window.svg"), auto;
+    cursor: none;
+    /* cursor: url("/images/window.svg"), auto; */
   }
   p {
     margin: 0;
@@ -74,6 +75,9 @@
   input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+  }
+  button {
+    cursor: none;
   }
 }
 
