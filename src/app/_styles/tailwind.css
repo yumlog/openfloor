@@ -28,15 +28,14 @@
     sans-serif;
 
   /* font size */
-  --h1: 80px;
+  --h1: 92px;
   --h2: 56px;
-  --h3: 56px;
-  --h4: 36px;
-  --h5: 28px;
+  --h3: 32px;
+  --h4: 24px;
 
-  --text-lg: 24px;
-  --text-md: 20px;
-  --text-sm: 18px;
+  --text-lg: 32px;
+  --text-md: 28px;
+  --text-sm: 20px;
   --text-xs: 16px;
 }
 
