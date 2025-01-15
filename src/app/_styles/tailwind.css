@@ -62,7 +62,10 @@
     color: var(--gray-9);
     touch-action: pan-x pan-y;
     cursor: none;
-    /* cursor: url("/images/window.svg"), auto; */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
   p {
     margin: 0;

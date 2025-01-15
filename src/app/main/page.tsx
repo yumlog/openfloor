@@ -297,7 +297,15 @@ export default function Main() {
             <motion.div {...motionProps}>
               <ul className={cx("box-list")}>
                 <li data-scroll data-scroll-speed="0">
-                  <div></div>
+                  <div>
+                    <Image
+                      aria-hidden
+                      src="/images/cosulting.jpg"
+                      alt="Window icon"
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
                   <p>Consulting</p>
                   <ul className={cx("dot-list")}>
                     <li>시장 분석 기반 맞춤형 마케팅 전략</li>
@@ -305,7 +313,15 @@ export default function Main() {
                   </ul>
                 </li>
                 <li data-scroll data-scroll-speed="1">
-                  <div></div>
+                  <div>
+                    <Image
+                      aria-hidden
+                      src="/images/data-marketing.jpg"
+                      alt="Window icon"
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
                   <p>Data Marketing</p>
                   <ul className={cx("dot-list")}>
                     <li>PPC·SNS 광고와 A/B 테스트로 성과 최적화</li>
@@ -313,7 +329,15 @@ export default function Main() {
                   </ul>
                 </li>
                 <li data-scroll data-scroll-speed="2">
-                  <div></div>
+                  <div>
+                    <Image
+                      aria-hidden
+                      src="/images/seo.jpg"
+                      alt="Window icon"
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
                   <p>SEO</p>
                   <ul className={cx("dot-list")}>
                     <li>SEO 콘텐츠로 가시성 및 고객 유입 증대</li>
@@ -374,8 +398,8 @@ export default function Main() {
             />
           </div>
           <div data-scroll data-scroll-speed="2" className={cx("section-wrap")}>
-            <motion.div {...motionProps}>
-              <div className={cx("text")}>
+            <div className={cx("text")}>
+              <motion.div {...motionProps}>
                 <h1>Business Partner</h1>
                 <p>
                   오픈플로어는 AI, 클라우드, 검색 기술을 바탕으로 기존 사업을
@@ -384,12 +408,14 @@ export default function Main() {
                   비즈니스 파트너와 함께 새로운 성장 동력을 발굴하는 IT 기업을
                   지향합니다.
                 </p>
+              </motion.div>
+              <motion.div {...motionProps}>
                 <button className={cx("hover-target")}>
                   <DownloadIcon width={40} height={40} />
                   회사소개서 다운로드
                 </button>
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </div>
         </section>
         {/* <section data-scroll-section className={cx("section6")}>
@@ -471,7 +497,33 @@ export default function Main() {
           </ul>
         </section> */}
         <div data-scroll-section className={cx("footer")}>
-          <div>OPENFLOOR</div>
+          <p className={cx("name")}>OPENFLOOR</p>
+          <div className={cx("address")}>
+            <div>
+              <p>
+                <span>주소</span>서울 용산구 한강대로 379-2 은재빌딩 2층 (04320)
+              </p>
+            </div>
+            <div>
+              <p>
+                <span>대표이사</span>이병윤
+              </p>
+              <p>
+                <span>대표번호</span>0507-1371-6210
+              </p>
+              <p>
+                <span>이메일</span>lee@openfloor.kr
+              </p>
+            </div>
+            <div>
+              <p>
+                <span>사업자등록번호</span>715-88-00866
+              </p>
+            </div>
+          </div>
+          <p className={cx("copyright")}>
+            COPYRIGHT © Openfloor ALL RIGHTS RESERVED.
+          </p>
         </div>
       </main>
     </LocomotiveScrollProvider>
