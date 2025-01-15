@@ -10,8 +10,11 @@ import Image from "next/image";
 import TestIcon from "/public/images/window.svg";
 import LinkIcon from "/public/images/icon-48-link.svg";
 import DownloadIcon from "/public/images/icon-40-download.svg";
+import EfficiencyIcon from "/public/images/icon-40-efficiency.svg";
+import TechnologyIcon from "/public/images/icon-40-technology.svg";
+import QualityIcon from "/public/images/icon-40-quality.svg";
+import ContactIcon from "/public/images/icon-40-contact.svg";
 import LogoBackground from "/public/images/logo-bg.svg";
-import Logo from "/public/images/logo.svg";
 
 const cx = classNames.bind(styles);
 
@@ -47,6 +50,18 @@ export default function Main() {
       ease: "easeInOut",
       duration: 1,
       y: { duration: 0.8 },
+    },
+  };
+
+  const motionProps2 = {
+    initial: { opacity: 0, y: 200 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: false },
+    transition: {
+      ease: "easeInOut",
+      duration: 1,
+      y: { duration: 0.8 },
+      delay: 1,
     },
   };
 
@@ -90,6 +105,16 @@ export default function Main() {
     };
   }, []);
 
+  // 로고 애니메이션
+  const pathRef = useRef<SVGPathElement | null>(null);
+
+  useEffect(() => {
+    const path = pathRef.current;
+    if (path) {
+      path.style.animation = "draw 2s forwards, fill 1s 0.5s forwards";
+    }
+  }, []);
+
   return (
     <LocomotiveScrollProvider
       options={{
@@ -108,8 +133,64 @@ export default function Main() {
         </div>
         <section data-scroll-section className={cx("section1")}>
           <div data-scroll data-scroll-speed="1">
-            <motion.div {...motionProps}>
-              <Logo width={160} height={142} />
+            <svg
+              width="180"
+              height="180"
+              viewBox="0 0 180 180"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{
+                animation: "float 1s 1s both",
+              }}
+            >
+              <path
+                ref={pathRef}
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M89.8898 19L12.2833 151.219H12.28L7 160.219L172.79 160.22L167.51 151.219H167.506L95.1092 27.8911L95.11 27.8897L89.8898 19ZM154.465 146.787L94.5 44.6211V119.24L154.465 146.787ZM142.555 151.219L94.5 129.144V151.219H142.555ZM85.5 119.639V101.419L40.6466 139.845L85.5 119.639ZM85.5 44.2594L32.0128 135.391L85.5 89.5674V44.2594ZM85.5 129.51L37.3096 151.219H85.5V129.51Z"
+                fill="#E32A2A"
+                stroke="#E32A2A"
+                strokeWidth="2"
+                strokeDasharray="1000"
+                strokeDashoffset="1000"
+                style={{
+                  fillOpacity: 0,
+                  animation: "draw 2s forwards, fill 1s 0.5s forwards",
+                }}
+              />
+              <style jsx>
+                {`
+                  path {
+                    stroke-dasharray: 1000;
+                    stroke-dashoffset: 1000;
+                  }
+                  @keyframes float {
+                    from {
+                      transform: translateY(85px);
+                    }
+                    to {
+                      transform: translateY(0px);
+                    }
+                  }
+                  @keyframes draw {
+                    from {
+                      stroke-dashoffset: 1000;
+                    }
+                    to {
+                      stroke-dashoffset: 0;
+                    }
+                  }
+                  @keyframes fill {
+                    from {
+                      fill-opacity: 0;
+                    }
+                    to {
+                      fill-opacity: 1;
+                    }
+                  }
+                `}
+              </style>
+            </svg>
+            <motion.div {...motionProps2}>
               <h1>Openfloor Makes Quality</h1>
               <p>최고의 가치를 오픈플로어와 함께 합니다.</p>
             </motion.div>
@@ -127,7 +208,7 @@ export default function Main() {
             <motion.div {...motionProps}>
               <ul className={cx("box-list")}>
                 <li>
-                  <TestIcon width={32} height={32} />
+                  <EfficiencyIcon width={40} height={40} />
                   <p>Efficiency</p>
                   <ul className={cx("dot-list")}>
                     <li>불필요한 개발 과정 축소</li>
@@ -135,7 +216,7 @@ export default function Main() {
                   </ul>
                 </li>
                 <li>
-                  <TestIcon width={32} height={32} />
+                  <TechnologyIcon width={40} height={40} />
                   <p>Technology</p>
                   <ul className={cx("dot-list")}>
                     <li>트랜드에 맞는 최신 기술력 보유</li>
@@ -143,7 +224,7 @@ export default function Main() {
                   </ul>
                 </li>
                 <li>
-                  <TestIcon width={32} height={32} />
+                  <QualityIcon width={40} height={40} />
                   <p>Quality</p>
                   <ul className={cx("dot-list")}>
                     <li>다양한 경험을 통한 깔끔한 코드</li>
@@ -151,18 +232,61 @@ export default function Main() {
                   </ul>
                 </li>
                 <li>
-                  <button className={cx("hover-target")}>
-                    <LinkIcon width={48} height={48} />
-                  </button>
-                  <TestIcon width={32} height={32} />
+                  <ContactIcon width={40} height={40} />
                   <p>Contact</p>
                   <ul className={cx("dot-list")}>
                     <li>고객 맞춤형 상담과 신속한 피드백</li>
                     <li>원활한 소통으로 요구사항 파악</li>
                   </ul>
+                  <button className={cx("hover-target")}>
+                    <LinkIcon width={48} height={48} />
+                  </button>
                 </li>
               </ul>
             </motion.div>
+            <div className={cx("scroll-down")}>
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 40 40"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g id="Scroll Icon">
+                  <path
+                    id="Vector"
+                    d="M9.58594 15.0007C9.58594 9.2477 14.2496 4.58398 20.0026 4.58398C25.7556 4.58398 30.4193 9.2477 30.4193 15.0007V25.0007C30.4193 30.7536 25.7556 35.4173 20.0026 35.4173C14.2496 35.4173 9.58594 30.7536 9.58594 25.0007V15.0007Z"
+                    stroke="black"
+                    strokeWidth="2.5"
+                  />
+                  <path
+                    id="Vector_2"
+                    className="wheel-animation"
+                    d="M18.3359 11.5C18.3359 10.672 19.0826 10 20.0026 10C20.9226 10 21.6693 10.672 21.6693 11.5V16C21.6693 16.828 20.9226 17.5 20.0026 17.5C19.0826 17.5 18.3359 16.828 18.3359 16V11.5Z"
+                    fill="#E32A2A"
+                  />
+                </g>
+                <style jsx>
+                  {`
+                    .wheel-animation {
+                      animation: dropFade 1.5s infinite;
+                    }
+
+                    @keyframes dropFade {
+                      0% {
+                        transform: translateY(0);
+                        opacity: 1;
+                      }
+                      100% {
+                        transform: translateY(12px);
+                        opacity: 0;
+                      }
+                    }
+                  `}
+                </style>
+              </svg>
+              <span>Scroll Down</span>
+            </div>
           </div>
         </section>
         <section data-scroll-section className={cx("section3")}>
@@ -201,38 +325,40 @@ export default function Main() {
           </div>
         </section>
         <section data-scroll-section className={cx("section4")}>
-          <motion.div {...motionProps}>
-            <Tilt
-              className={cx("triangle-wrap")}
-              tiltMaxAngleX={40}
-              tiltMaxAngleY={40}
-              perspective={800}
-              transitionSpeed={1500}
-              scale={1}
-              gyroscope={true}
-              trackOnWindow={true}
-              // reset={false}
-            >
-              <Image
-                className={cx("triangle")}
-                aria-hidden
-                src="/images/triangle.png"
-                alt="Window icon"
-                width={385}
-                height={330}
-              />
-            </Tilt>
-          </motion.div>
-          <motion.div {...motionProps}>
-            <div className={cx("text")}>
-              <span>AI Consulting</span>
-              <h1>Mastering AI Prompt</h1>
-              <p>
-                기업의 핵심 문제를 해결하기 위해 맞춤형 AI 프롬프트를 설계하고
-                생산성을 극대화합니다.
-              </p>
-            </div>
-          </motion.div>
+          <div data-scroll data-scroll-speed="-1">
+            <motion.div {...motionProps}>
+              <Tilt
+                className={cx("triangle-wrap")}
+                tiltMaxAngleX={40}
+                tiltMaxAngleY={40}
+                perspective={800}
+                transitionSpeed={1500}
+                scale={1}
+                gyroscope={true}
+                trackOnWindow={true}
+                // reset={false}
+              >
+                <Image
+                  className={cx("triangle")}
+                  aria-hidden
+                  src="/images/triangle.png"
+                  alt="Window icon"
+                  width={385}
+                  height={330}
+                />
+              </Tilt>
+            </motion.div>
+            <motion.div {...motionProps}>
+              <div className={cx("text")}>
+                <span>AI Consulting</span>
+                <h1>Mastering AI Prompt</h1>
+                <p>
+                  기업의 핵심 문제를 해결하기 위해 맞춤형 AI 프롬프트를 설계하고
+                  생산성을 극대화합니다.
+                </p>
+              </div>
+            </motion.div>
+          </div>
         </section>
         <section data-scroll-section className={cx("section5")}>
           <div
@@ -247,22 +373,24 @@ export default function Main() {
               }}
             />
           </div>
-          <motion.div {...motionProps}>
-            <div className={cx("text")}>
-              <h1>Business Partner</h1>
-              <p>
-                오픈플로어는 AI, 클라우드, 검색 기술을 바탕으로 기존 사업을
-                가속화하며,
-                <br />
-                비즈니스 파트너와 함께 새로운 성장 동력을 발굴하는 IT 기업을
-                지향합니다.
-              </p>
-              <button className={cx("hover-target")}>
-                <DownloadIcon width={40} height={40} />
-                회사소개서 다운로드
-              </button>
-            </div>
-          </motion.div>
+          <div data-scroll data-scroll-speed="2" className={cx("section-wrap")}>
+            <motion.div {...motionProps}>
+              <div className={cx("text")}>
+                <h1>Business Partner</h1>
+                <p>
+                  오픈플로어는 AI, 클라우드, 검색 기술을 바탕으로 기존 사업을
+                  가속화하며,
+                  <br />
+                  비즈니스 파트너와 함께 새로운 성장 동력을 발굴하는 IT 기업을
+                  지향합니다.
+                </p>
+                <button className={cx("hover-target")}>
+                  <DownloadIcon width={40} height={40} />
+                  회사소개서 다운로드
+                </button>
+              </div>
+            </motion.div>
+          </div>
         </section>
         {/* <section data-scroll-section className={cx("section6")}>
           <div className={cx("marquee-container", "top")}>
@@ -343,7 +471,7 @@ export default function Main() {
           </ul>
         </section> */}
         <div data-scroll-section className={cx("footer")}>
-          OPENFLOOR
+          <div>OPENFLOOR</div>
         </div>
       </main>
     </LocomotiveScrollProvider>
