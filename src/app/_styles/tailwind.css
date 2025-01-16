@@ -37,6 +37,11 @@
   --text-md: 28px;
   --text-sm: 20px;
   --text-xs: 16px;
+
+  /* border radius */
+  --rounded-full: 9999px;
+  --rounded-lg: 24px;
+  --rounded: 20px;
 }
 
 @tailwind base;

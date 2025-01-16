@@ -24,8 +24,8 @@ const menuNav: MenuItem[] = [
     menuPath: "/",
   },
   {
-    menuName: "메인",
-    menuPath: "/main",
+    menuName: "서브",
+    menuPath: "/sub",
   },
 ];
 
