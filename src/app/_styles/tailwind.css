@@ -40,7 +40,8 @@
 
   /* border radius */
   --rounded-full: 9999px;
-  --rounded-lg: 24px;
+  --rounded-lg: 40px;
+  --rounded-md: 24px;
   --rounded: 20px;
 }
 
@@ -66,7 +67,7 @@
     line-height: normal;
     color: var(--gray-9);
     touch-action: pan-x pan-y;
-    cursor: none;
+    /* cursor: none; */
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;

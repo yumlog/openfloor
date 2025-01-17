@@ -3,6 +3,9 @@
 import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { LocomotiveScrollProvider } from "react-locomotive-scroll";
+import { Swiper, SwiperSlide } from "swiper/react";
+import SwiperCore from "swiper";
+import "swiper/css";
 import Tilt from "react-parallax-tilt";
 import Image from "next/image";
 import LinkIcon from "/public/images/icon-48-link.svg";
@@ -132,6 +135,12 @@ export default function Main() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // 스와이퍼 관련
+  const handleInit = (swiper: SwiperCore) => {
+    // swiper.wrapperEl은 swiper-wrapper 요소를 참조합니다.
+    swiper.wrapperEl.classList.add(cx("open-swiper-wrapper"));
+  };
 
   return (
     <LocomotiveScrollProvider
@@ -380,6 +389,124 @@ export default function Main() {
                 </li>
               </ul>
             </motion.div>
+          </div>
+        </section>
+        <section data-scroll-section className={cx("section3-test")}>
+          <div
+            data-scroll
+            data-scroll-speed="-1"
+            className={cx("section-inner")}
+          >
+            <div className={cx("text")}>
+              <motion.div {...motionProps}>
+                <h1>
+                  Digital Marketing
+                  <br />
+                  Counsulting
+                </h1>
+              </motion.div>
+              <motion.div {...motionProps}>
+                <p>
+                  맞춤형 전략과 데이터 기반 마케팅으로 ROI를 극대화하며,
+                  <br />
+                  콘텐츠와 SEO로 브랜드 가시성과 고객 유입을 높입니다.
+                </p>
+              </motion.div>
+            </div>
+            <Swiper
+              spaceBetween={40}
+              // slidesPerView={2.4}
+              breakpoints={{
+                640: {
+                  slidesPerView: 1,
+                },
+                1000: {
+                  slidesPerView: 2,
+                },
+                1500: {
+                  slidesPerView: 2.4,
+                },
+              }}
+              className={cx("open-swiper")}
+              slideActiveClass={cx("open-swiper-slide-active")}
+              onInit={handleInit}
+              onSlideChange={() => console.log("slide change")}
+              onSwiper={(swiper) => {
+                // Swiper 인스턴스를 저장하거나 초기 설정
+                swiper.on("slideChange", () => {
+                  // 슬라이드 이동 제한 (3번째 인덱스까지만 허용)
+                  if (swiper.activeIndex > 2) {
+                    swiper.slideTo(2); // 강제로 2번째 인덱스로 이동
+                  }
+                });
+                swiper.on("touchMove", () => {
+                  // 드래그 제한 (3번째 인덱스까지만 허용)
+                  if (swiper.activeIndex > 2) {
+                    swiper.slideTo(2); // 강제로 2번째 인덱스로 이동
+                  }
+                });
+              }}
+            >
+              <SwiperSlide  data-scroll data-scroll-speed="0" className={cx("open-swiper-slide")}>
+                <Image
+                  aria-hidden
+                  src="/images/cosulting.jpg"
+                  alt="Window icon"
+                  fill
+                  style={{ objectFit: "cover" }}
+                />
+                <div className={cx("item")}>
+                  <p>Consulting</p>
+                  <small>
+                    시장 분석 기반 맞춤형 마케팅 전략
+                    <br />
+                    체계적인 성과 개선과 비즈니스 성장을 지원
+                  </small>
+                </div>
+              </SwiperSlide>
+              <SwiperSlide  data-scroll data-scroll-speed="1" className={cx("open-swiper-slide")}>
+                <Image
+                  aria-hidden
+                  src="/images/data-marketing.jpg"
+                  alt="Window icon"
+                  fill
+                  style={{ objectFit: "cover" }}
+                />
+                <div className={cx("item")}>
+                  <p>Data Marketing</p>
+                  <small>
+                    PPC·SNS 광고와 A/B 테스트로 성과 최적화
+                    <br />
+                    ROI를 극대화하는 정교한 마케팅을 제공
+                  </small>
+                </div>
+              </SwiperSlide>
+              <SwiperSlide  data-scroll data-scroll-speed="2" className={cx("open-swiper-slide")}>
+                <Image
+                  aria-hidden
+                  src="/images/seo.jpg"
+                  alt="Window icon"
+                  fill
+                  style={{ objectFit: "cover" }}
+                />
+                <div className={cx("item")}>
+                  <p>SEO</p>
+                  <small>
+                    SEO 콘텐츠로 가시성 및 고객 유입 증대
+                    <br />
+                    가치 있는 콘텐츠로 고객과 신뢰를 구축
+                  </small>
+                </div>
+              </SwiperSlide>
+              {Array.from({ length: 2 }).map((_, index) => (
+                <SwiperSlide
+                  key={`empty-slide-${index}`} // 고유한 key 추가
+                  className={cx("open-swiper-slide", "empty")}
+                >
+                  빈공간
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
         </section>
         <section data-scroll-section className={cx("section4")}>
