@@ -4,8 +4,11 @@ import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { LocomotiveScrollProvider } from "react-locomotive-scroll";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
 import SwiperCore from "swiper";
 import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import Tilt from "react-parallax-tilt";
 import Image from "next/image";
 import LinkIcon from "/public/images/icon-48-link.svg";
@@ -231,7 +234,7 @@ export default function Main() {
             </motion.div>
           </div>
         </section>
-        <section data-scroll-section className={cx("section2")}>
+        {/* <section data-scroll-section className={cx("section2")}>
           <div
             data-scroll
             data-scroll-speed="-1"
@@ -327,8 +330,151 @@ export default function Main() {
               <span>Scroll Down</span>
             </div>
           </div>
+        </section> */}
+        <section data-scroll-section className={cx("section2-test")}>
+          <div
+            data-scroll
+            data-scroll-speed="-1"
+            className={cx("section-inner")}
+          >
+            <motion.div {...motionProps}>
+              <h1>
+                Service
+                <br />
+                Philosophy
+              </h1>
+            </motion.div>
+            <motion.div>
+              <Swiper
+                modules={[Navigation]}
+                spaceBetween={24}
+                breakpoints={{
+                  500: {
+                    slidesPerView: 1,
+                  },
+                  800: {
+                    slidesPerView: 2,
+                  },
+                  1100: {
+                    slidesPerView: 3,
+                  },
+                  1500: {
+                    slidesPerView: 4,
+                  },
+                }}
+                navigation={{
+                  prevEl: `.${cx("open-swiper-nav-prev")}`,
+                  nextEl: `.${cx("open-swiper-nav-next")}`,
+                }}
+                pagination={{
+                  clickable: true,
+                  el: `.${cx("open-swiper-pagination")}`,
+                  bulletClass: cx("open-swiper-pagination-bullet"),
+                  bulletActiveClass: cx("open-swiper-pagination-active"),
+                }}
+                loop={true}
+                className={cx("open-swiper")}
+                slideActiveClass={cx("open-swiper-slide-active")}
+                onInit={handleInit}
+                onSlideChange={() => console.log("slide change")}
+              >
+                <SwiperSlide
+                  className={cx("open-swiper-slide")}
+                  data-scroll
+                  data-scroll-speed="0"
+                >
+                  <EfficiencyIcon width={40} height={40} />
+                  <p>Efficiency</p>
+                  <ul className={cx("dot-list")}>
+                    <li>불필요한 개발 과정 축소</li>
+                    <li>결과를 극대화할 수 있는 리소스 보유</li>
+                  </ul>
+                </SwiperSlide>
+                <SwiperSlide
+                  className={cx("open-swiper-slide")}
+                  data-scroll
+                  data-scroll-speed="1"
+                >
+                  <TechnologyIcon width={40} height={40} />
+                  <p>Technology</p>
+                  <ul className={cx("dot-list")}>
+                    <li>트랜드에 맞는 최신 기술력 보유</li>
+                    <li>AI, 디지털 트윈 등 IT 트렌드 선도</li>
+                  </ul>
+                </SwiperSlide>
+                <SwiperSlide
+                  className={cx("open-swiper-slide")}
+                  data-scroll
+                  data-scroll-speed="2"
+                >
+                  <QualityIcon width={40} height={40} />
+                  <p>Quality</p>
+                  <ul className={cx("dot-list")}>
+                    <li>다양한 경험을 통한 깔끔한 코드</li>
+                    <li>파트별 검증 과정을 통한 높은 결과물</li>
+                  </ul>
+                </SwiperSlide>
+                <SwiperSlide className={cx("open-swiper-slide")}>
+                  <ContactIcon width={40} height={40} />
+                  <p>Contact</p>
+                  <ul className={cx("dot-list")}>
+                    <li>고객 맞춤형 상담과 신속한 피드백</li>
+                    <li>원활한 소통으로 요구사항 파악</li>
+                  </ul>
+                  <button className={cx("hover-target")}>
+                    <LinkIcon width={48} height={48} />
+                  </button>
+                </SwiperSlide>
+                <button className={cx("open-swiper-nav-prev")}>이전</button>
+                <button className={cx("open-swiper-nav-next")}>다음</button>
+              </Swiper>
+            </motion.div>
+            <div className={cx("scroll-down")}>
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 40 40"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g id="Scroll Icon">
+                  <path
+                    id="Vector"
+                    d="M9.58594 15.0007C9.58594 9.2477 14.2496 4.58398 20.0026 4.58398C25.7556 4.58398 30.4193 9.2477 30.4193 15.0007V25.0007C30.4193 30.7536 25.7556 35.4173 20.0026 35.4173C14.2496 35.4173 9.58594 30.7536 9.58594 25.0007V15.0007Z"
+                    stroke="black"
+                    strokeWidth="2.5"
+                  />
+                  <path
+                    id="Vector_2"
+                    className="wheel-animation"
+                    d="M18.3359 11.5C18.3359 10.672 19.0826 10 20.0026 10C20.9226 10 21.6693 10.672 21.6693 11.5V16C21.6693 16.828 20.9226 17.5 20.0026 17.5C19.0826 17.5 18.3359 16.828 18.3359 16V11.5Z"
+                    fill="#E32A2A"
+                  />
+                </g>
+                <style jsx>
+                  {`
+                    .wheel-animation {
+                      animation: dropFade 1.5s infinite;
+                    }
+
+                    @keyframes dropFade {
+                      0% {
+                        transform: translateY(0);
+                        opacity: 1;
+                      }
+                      100% {
+                        transform: translateY(12px);
+                        opacity: 0;
+                      }
+                    }
+                  `}
+                </style>
+              </svg>
+              <span>Scroll Down</span>
+            </div>
+          </div>
         </section>
-        <section data-scroll-section className={cx("section3")}>
+        {/* <section data-scroll-section className={cx("section3")}>
           <div
             data-scroll
             data-scroll-speed="-1"
@@ -390,7 +536,7 @@ export default function Main() {
               </ul>
             </motion.div>
           </div>
-        </section>
+        </section> */}
         <section data-scroll-section className={cx("section3-test")}>
           <div
             data-scroll
@@ -447,7 +593,7 @@ export default function Main() {
                 });
               }}
             >
-              <SwiperSlide  data-scroll data-scroll-speed="0" className={cx("open-swiper-slide")}>
+              <SwiperSlide className={cx("open-swiper-slide")}>
                 <Image
                   aria-hidden
                   src="/images/cosulting.jpg"
@@ -464,7 +610,7 @@ export default function Main() {
                   </small>
                 </div>
               </SwiperSlide>
-              <SwiperSlide  data-scroll data-scroll-speed="1" className={cx("open-swiper-slide")}>
+              <SwiperSlide className={cx("open-swiper-slide")}>
                 <Image
                   aria-hidden
                   src="/images/data-marketing.jpg"
@@ -481,7 +627,7 @@ export default function Main() {
                   </small>
                 </div>
               </SwiperSlide>
-              <SwiperSlide  data-scroll data-scroll-speed="2" className={cx("open-swiper-slide")}>
+              <SwiperSlide className={cx("open-swiper-slide")}>
                 <Image
                   aria-hidden
                   src="/images/seo.jpg"
@@ -549,7 +695,7 @@ export default function Main() {
             </motion.div>
           </div>
         </section>
-        <section data-scroll-section className={cx("section5")}>
+        {/* <section data-scroll-section className={cx("section5")}>
           <div
             data-scroll
             data-scroll-speed="2"
@@ -600,8 +746,40 @@ export default function Main() {
               }}
             />
           </div>
-        </section>
+        </section> */}
         <section data-scroll-section className={cx("section6")}>
+          <div className={cx("text-btn")}>
+            <motion.div {...motionProps}>
+              <h1>Business Partner</h1>
+              {/* <p>
+                오픈플로어는 AI, 클라우드, 검색 기술을 바탕으로 기존 사업을
+                가속화하며,
+                <br />
+                비즈니스 파트너와 함께 새로운 성장 동력을 발굴하는 IT 기업을
+                지향합니다.
+              </p> */}
+            </motion.div>
+            <motion.div {...motionProps}>
+              <Tilt
+                tiltMaxAngleX={20}
+                tiltMaxAngleY={20}
+                perspective={1000}
+                transitionSpeed={1500}
+                scale={1.1}
+                gyroscope={false}
+                glareEnable={true}
+                glareMaxOpacity={0.5}
+                glareColor="#fff"
+                glarePosition="all"
+                glareBorderRadius="100px"
+              >
+                <button className={cx("hover-target")}>
+                  <DownloadIcon width={40} height={40} />
+                  회사소개서 다운로드
+                </button>
+              </Tilt>
+            </motion.div>
+          </div>
           <div className={cx("marquee-container", "top")}>
             <motion.div
               className={cx("marquee")}
@@ -670,14 +848,14 @@ export default function Main() {
               </span>
             </motion.div>
           </div>
-          <ul className={cx("test")}>
+          {/* <ul className={cx("test")}>
             <li data-scroll data-scroll-speed="2">
               빨라
             </li>
             <li data-scroll data-scroll-speed="-2">
               느려
             </li>
-          </ul>
+          </ul> */}
         </section>
         <div data-scroll-section className={cx("footer")}>
           <p className={cx("name")}>OPENFLOOR</p>
