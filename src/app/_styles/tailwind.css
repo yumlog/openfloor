@@ -29,7 +29,7 @@
 
   /* font size */
   --h1: 92px;
-  --h2: 56px;
+  --h2: 64px;
   --h3: 32px;
   --h4: 24px;
 
@@ -40,9 +40,27 @@
 
   /* border radius */
   --rounded-full: 9999px;
-  --rounded-lg: 40px;
+  --rounded-lg: 32px;
   --rounded-md: 24px;
   --rounded: 20px;
+
+  @media all and (max-width: 500px) {
+    --h1: 32px;
+    --h2: 24px;
+    --h3: 20px;
+    --h4: 18px;
+
+    --text-lg: 24px;
+    --text-md: 14px;
+    --text-sm: 16px;
+  }
+
+  @media all and (min-width: 501px) and (max-width: 1024px) {
+    --h1: 64px;
+    --h2: 40px;
+    --h3: 26px;
+    --h4: 20px;
+  }
 }
 
 @tailwind base;
@@ -67,7 +85,7 @@
     line-height: normal;
     color: var(--gray-9);
     touch-action: pan-x pan-y;
-    cursor: none;
+    /* cursor: none; */
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
