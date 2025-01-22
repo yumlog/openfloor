@@ -18,6 +18,12 @@ import TechnologyIcon from "/public/images/icon-40-technology.svg";
 import QualityIcon from "/public/images/icon-40-quality.svg";
 import ContactIcon from "/public/images/icon-40-contact.svg";
 import LogoBackground from "/public/images/logo-bg.svg";
+import IbmLogo from "/public/images/logo-ibm.svg";
+import IntelLogo from "/public/images/logo-intel.svg";
+import AmazonLogo from "/public/images/logo-amazon.svg";
+import CiscoLogo from "/public/images/logo-cisco.svg";
+import NetflixLogo from "/public/images/logo-netflix.svg";
+import OracleLogo from "/public/images/logo-oracle.svg";
 import styles from "@/app/_styles/main.module.scss";
 import classNames from "classnames/bind";
 const cx = classNames.bind(styles);
@@ -44,6 +50,18 @@ export default function Main() {
       duration: 1,
       y: { duration: 0.8 },
       delay: 1,
+    },
+  };
+
+  const motionProps3 = {
+    initial: { opacity: 0, y: 200 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: false },
+    transition: {
+      ease: "easeInOut",
+      duration: 1,
+      y: { duration: 0.8, delay: 0.4 },
+      delay: 0.4,
     },
   };
 
@@ -344,7 +362,7 @@ export default function Main() {
                 Philosophy
               </h1>
             </motion.div>
-            <motion.div>
+            <motion.div {...motionProps}>
               <Swiper
                 modules={[Navigation]}
                 spaceBetween={24}
@@ -381,7 +399,7 @@ export default function Main() {
                 <SwiperSlide
                   className={cx("open-swiper-slide")}
                   data-scroll
-                  data-scroll-speed="0"
+                  data-scroll-speed="1"
                 >
                   <EfficiencyIcon width={40} height={40} />
                   <p>Efficiency</p>
@@ -393,7 +411,7 @@ export default function Main() {
                 <SwiperSlide
                   className={cx("open-swiper-slide")}
                   data-scroll
-                  data-scroll-speed="1"
+                  data-scroll-speed="-1"
                 >
                   <TechnologyIcon width={40} height={40} />
                   <p>Technology</p>
@@ -405,7 +423,7 @@ export default function Main() {
                 <SwiperSlide
                   className={cx("open-swiper-slide")}
                   data-scroll
-                  data-scroll-speed="2"
+                  data-scroll-speed="0"
                 >
                   <QualityIcon width={40} height={40} />
                   <p>Quality</p>
@@ -414,7 +432,11 @@ export default function Main() {
                     <li>파트별 검증 과정을 통한 높은 결과물</li>
                   </ul>
                 </SwiperSlide>
-                <SwiperSlide className={cx("open-swiper-slide")}>
+                <SwiperSlide
+                  className={cx("open-swiper-slide")}
+                  data-scroll
+                  data-scroll-speed="-2"
+                >
                   <ContactIcon width={40} height={40} />
                   <p>Contact</p>
                   <ul className={cx("dot-list")}>
@@ -441,7 +463,7 @@ export default function Main() {
                   <path
                     id="Vector"
                     d="M9.58594 15.0007C9.58594 9.2477 14.2496 4.58398 20.0026 4.58398C25.7556 4.58398 30.4193 9.2477 30.4193 15.0007V25.0007C30.4193 30.7536 25.7556 35.4173 20.0026 35.4173C14.2496 35.4173 9.58594 30.7536 9.58594 25.0007V15.0007Z"
-                    stroke="black"
+                    stroke="white"
                     strokeWidth="2.5"
                   />
                   <path
@@ -559,100 +581,105 @@ export default function Main() {
                 </p>
               </motion.div>
             </div>
-            <Swiper
-              spaceBetween={40}
-              // slidesPerView={2.4}
-              breakpoints={{
-                640: {
-                  slidesPerView: 1,
-                },
-                1000: {
-                  slidesPerView: 2,
-                },
-                1500: {
-                  slidesPerView: 2.4,
-                },
-              }}
-              className={cx("open-swiper")}
-              slideActiveClass={cx("open-swiper-slide-active")}
-              onInit={handleInit}
-              onSlideChange={() => console.log("slide change")}
-              onSwiper={(swiper) => {
-                // Swiper 인스턴스를 저장하거나 초기 설정
-                swiper.on("slideChange", () => {
-                  // 슬라이드 이동 제한 (3번째 인덱스까지만 허용)
-                  if (swiper.activeIndex > 2) {
-                    swiper.slideTo(2); // 강제로 2번째 인덱스로 이동
-                  }
-                });
-                swiper.on("touchMove", () => {
-                  // 드래그 제한 (3번째 인덱스까지만 허용)
-                  if (swiper.activeIndex > 2) {
-                    swiper.slideTo(2); // 강제로 2번째 인덱스로 이동
-                  }
-                });
-              }}
-            >
-              <SwiperSlide className={cx("open-swiper-slide")}>
-                <Image
-                  aria-hidden
-                  src="/images/cosulting.jpg"
-                  alt="Window icon"
-                  fill
-                  style={{ objectFit: "cover" }}
-                />
-                <div className={cx("item")}>
-                  <p>Consulting</p>
-                  <small>
-                    시장 분석 기반 맞춤형 마케팅 전략
-                    <br />
-                    체계적인 성과 개선과 비즈니스 성장을 지원
-                  </small>
-                </div>
-              </SwiperSlide>
-              <SwiperSlide className={cx("open-swiper-slide")}>
-                <Image
-                  aria-hidden
-                  src="/images/data-marketing.jpg"
-                  alt="Window icon"
-                  fill
-                  style={{ objectFit: "cover" }}
-                />
-                <div className={cx("item")}>
-                  <p>Data Marketing</p>
-                  <small>
-                    PPC·SNS 광고와 A/B 테스트로 성과 최적화
-                    <br />
-                    ROI를 극대화하는 정교한 마케팅을 제공
-                  </small>
-                </div>
-              </SwiperSlide>
-              <SwiperSlide className={cx("open-swiper-slide")}>
-                <Image
-                  aria-hidden
-                  src="/images/seo.jpg"
-                  alt="Window icon"
-                  fill
-                  style={{ objectFit: "cover" }}
-                />
-                <div className={cx("item")}>
-                  <p>SEO</p>
-                  <small>
-                    SEO 콘텐츠로 가시성 및 고객 유입 증대
-                    <br />
-                    가치 있는 콘텐츠로 고객과 신뢰를 구축
-                  </small>
-                </div>
-              </SwiperSlide>
-              {Array.from({ length: 2 }).map((_, index) => (
-                <SwiperSlide
-                  key={`empty-slide-${index}`} // 고유한 key 추가
-                  className={cx("open-swiper-slide", "empty")}
-                >
-                  빈공간
+            <motion.div {...motionProps3} className={cx("swiper-test")}>
+              <Swiper
+                spaceBetween={40}
+                // slidesPerView={2.4}
+                breakpoints={{
+                  900: {
+                    slidesPerView: 1,
+                  },
+                  1200: {
+                    slidesPerView: 2,
+                  },
+                  1400: {
+                    slidesPerView: 3,
+                  },
+                  1600: {
+                    slidesPerView: 2.4,
+                  },
+                }}
+                className={cx("open-swiper")}
+                slideActiveClass={cx("open-swiper-slide-active")}
+                onInit={handleInit}
+                onSlideChange={() => console.log("slide change")}
+                onSwiper={(swiper) => {
+                  // Swiper 인스턴스를 저장하거나 초기 설정
+                  swiper.on("slideChange", () => {
+                    // 슬라이드 이동 제한 (3번째 인덱스까지만 허용)
+                    if (swiper.activeIndex > 2) {
+                      swiper.slideTo(2); // 강제로 2번째 인덱스로 이동
+                    }
+                  });
+                  swiper.on("touchMove", () => {
+                    // 드래그 제한 (3번째 인덱스까지만 허용)
+                    if (swiper.activeIndex > 2) {
+                      swiper.slideTo(2); // 강제로 2번째 인덱스로 이동
+                    }
+                  });
+                }}
+              >
+                <SwiperSlide className={cx("open-swiper-slide")}>
+                  <Image
+                    aria-hidden
+                    src="/images/cosulting.jpg"
+                    alt="Window icon"
+                    fill
+                    style={{ objectFit: "cover" }}
+                  />
+                  <div className={cx("item")}>
+                    <p>Consulting</p>
+                    <small>
+                      시장 분석 기반 맞춤형 마케팅 전략
+                      <br />
+                      체계적인 성과 개선과 비즈니스 성장을 지원
+                    </small>
+                  </div>
                 </SwiperSlide>
-              ))}
-            </Swiper>
+                <SwiperSlide className={cx("open-swiper-slide")}>
+                  <Image
+                    aria-hidden
+                    src="/images/data-marketing.jpg"
+                    alt="Window icon"
+                    fill
+                    style={{ objectFit: "cover" }}
+                  />
+                  <div className={cx("item")}>
+                    <p>Data Marketing</p>
+                    <small>
+                      PPC·SNS 광고와 A/B 테스트로 성과 최적화
+                      <br />
+                      ROI를 극대화하는 정교한 마케팅을 제공
+                    </small>
+                  </div>
+                </SwiperSlide>
+                <SwiperSlide className={cx("open-swiper-slide")}>
+                  <Image
+                    aria-hidden
+                    src="/images/seo.jpg"
+                    alt="Window icon"
+                    fill
+                    style={{ objectFit: "cover" }}
+                  />
+                  <div className={cx("item")}>
+                    <p>SEO</p>
+                    <small>
+                      SEO 콘텐츠로 가시성 및 고객 유입 증대
+                      <br />
+                      가치 있는 콘텐츠로 고객과 신뢰를 구축
+                    </small>
+                  </div>
+                </SwiperSlide>
+                {Array.from({ length: 2 }).map((_, index) => (
+                  <SwiperSlide
+                    key={`empty-slide-${index}`} // 고유한 key 추가
+                    className={cx("open-swiper-slide", "empty")}
+                  >
+                    빈공간
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </motion.div>
           </div>
         </section>
         <section data-scroll-section className={cx("section4")}>
@@ -661,6 +688,18 @@ export default function Main() {
             data-scroll
             data-scroll-speed="-1"
           >
+            <motion.div {...motionProps}>
+              <div className={cx("text")}>
+                <h1>Mastering AI Prompt</h1>
+                <p>
+                  기업의 핵심 문제를 분석해 AI 맞춤형 프롬프트를 설계하고,
+                  자동화로 일관된 결과와 생산성을
+                  <br />
+                  극대화합니다. 이를 통해 스마트 업무 환경을 구축하고 비즈니스
+                  성과를 강화합니다.
+                </p>
+              </div>
+            </motion.div>
             <motion.div {...motionProps}>
               <Tilt
                 className={cx("triangle-wrap")}
@@ -676,22 +715,12 @@ export default function Main() {
                 <Image
                   className={cx("triangle")}
                   aria-hidden
-                  src="/images/triangle.png"
+                  src="/images/triangle-sample.png"
                   alt="Window icon"
                   width={385}
                   height={330}
                 />
               </Tilt>
-            </motion.div>
-            <motion.div {...motionProps}>
-              <div className={cx("text")}>
-                <span>AI Consulting</span>
-                <h1>Mastering AI Prompt</h1>
-                <p>
-                  기업의 핵심 문제를 해결하기 위해 맞춤형 AI 프롬프트를 설계하고
-                  생산성을 극대화합니다.
-                </p>
-              </div>
             </motion.div>
           </div>
         </section>
@@ -827,9 +856,33 @@ export default function Main() {
                 ease: "linear",
               }}
             >
-              <span className={cx("text")}>
+              <div className={cx("partner")}>
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <ul key={`partner-list-${index}`}>
+                    <li>
+                      <IbmLogo width={83} height={34} />
+                    </li>
+                    <li>
+                      <IntelLogo width={66} height={44} />
+                    </li>
+                    <li>
+                      <AmazonLogo width={118} height={36} />
+                    </li>
+                    <li>
+                      <CiscoLogo width={84} height={48} />
+                    </li>
+                    <li>
+                      <NetflixLogo width={120} height={32} />
+                    </li>
+                    <li>
+                      <OracleLogo width={223} height={30} />
+                    </li>
+                  </ul>
+                ))}
+              </div>
+              {/* <span className={cx("text")}>
                 {"Openfloor Makes Quality".repeat(10)}
-              </span>
+              </span> */}
             </motion.div>
             <motion.div
               className={cx("marquee")}
@@ -843,9 +896,33 @@ export default function Main() {
                 ease: "linear",
               }}
             >
-              <span className={cx("text")}>
+              <div className={cx("partner")}>
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <ul key={`partner-list-${index}`}>
+                    <li>
+                      <IbmLogo width={83} height={34} />
+                    </li>
+                    <li>
+                      <IntelLogo width={66} height={44} />
+                    </li>
+                    <li>
+                      <AmazonLogo width={118} height={36} />
+                    </li>
+                    <li>
+                      <CiscoLogo width={84} height={48} />
+                    </li>
+                    <li>
+                      <NetflixLogo width={120} height={32} />
+                    </li>
+                    <li>
+                      <OracleLogo width={223} height={30} />
+                    </li>
+                  </ul>
+                ))}
+              </div>
+              {/* <span className={cx("text")}>
                 {"Openfloor Makes Quality".repeat(10)}
-              </span>
+              </span> */}
             </motion.div>
           </div>
           {/* <ul className={cx("test")}>
