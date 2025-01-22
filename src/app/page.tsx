@@ -17,6 +17,8 @@ import EfficiencyIcon from "/public/images/icon-40-efficiency.svg";
 import TechnologyIcon from "/public/images/icon-40-technology.svg";
 import QualityIcon from "/public/images/icon-40-quality.svg";
 import ContactIcon from "/public/images/icon-40-contact.svg";
+import LeftIcon from "/public/images/icon-20-arrow-left.svg";
+import RightIcon from "/public/images/icon-20-arrow-right.svg";
 import LogoBackground from "/public/images/logo-bg.svg";
 import IbmLogo from "/public/images/logo-ibm.svg";
 import IntelLogo from "/public/images/logo-intel.svg";
@@ -274,12 +276,6 @@ export default function Main() {
                   prevEl: `.${cx("open-swiper-nav-prev")}`,
                   nextEl: `.${cx("open-swiper-nav-next")}`,
                 }}
-                pagination={{
-                  clickable: true,
-                  el: `.${cx("open-swiper-pagination")}`,
-                  bulletClass: cx("open-swiper-pagination-bullet"),
-                  bulletActiveClass: cx("open-swiper-pagination-active"),
-                }}
                 loop={true}
                 className={cx("open-swiper")}
                 slideActiveClass={cx("open-swiper-slide-active")}
@@ -337,8 +333,12 @@ export default function Main() {
                     <LinkIcon width={48} height={48} />
                   </button>
                 </SwiperSlide>
-                <button className={cx("open-swiper-nav-prev")}>이전</button>
-                <button className={cx("open-swiper-nav-next")}>다음</button>
+                <button className={cx("open-swiper-nav-prev", "hover-target")}>
+                  <LeftIcon width={20} height={20} />
+                </button>
+                <button className={cx("open-swiper-nav-next", "hover-target")}>
+                  <RightIcon width={20} height={20} />
+                </button>
               </Swiper>
             </motion.div>
             <div className={cx("scroll-down")}>
@@ -410,21 +410,27 @@ export default function Main() {
             </div>
             <motion.div {...motionProps3} className={cx("swiper-test")}>
               <Swiper
+                modules={[Pagination]}
                 spaceBetween={40}
-                // slidesPerView={2.4}
                 breakpoints={{
-                  900: {
+                  500: {
                     slidesPerView: 1,
                   },
-                  1200: {
+                  768: {
                     slidesPerView: 2,
                   },
-                  1400: {
+                  1280: {
                     slidesPerView: 3,
                   },
                   1600: {
                     slidesPerView: 2.4,
                   },
+                }}
+                pagination={{
+                  clickable: true,
+                  el: `.${cx("open-swiper-pagination")}`,
+                  bulletClass: cx("open-swiper-pagination-bullet"),
+                  bulletActiveClass: cx("open-swiper-pagination-active"),
                 }}
                 className={cx("open-swiper")}
                 slideActiveClass={cx("open-swiper-slide-active")}
@@ -505,6 +511,7 @@ export default function Main() {
                     빈공간
                   </SwiperSlide>
                 ))}
+                <div className={cx("open-swiper-pagination")}></div>
               </Swiper>
             </motion.div>
           </div>
@@ -551,7 +558,7 @@ export default function Main() {
             </motion.div>
           </div>
         </section>
-        <div style={{height: 140}} />
+        <div style={{ height: 140 }} />
         <section data-scroll-section className={cx("section5")}>
           <div className={cx("text")}>
             <motion.div {...motionProps}>
