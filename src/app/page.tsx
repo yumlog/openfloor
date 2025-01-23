@@ -26,6 +26,7 @@ import AmazonLogo from "/public/images/logo-amazon.svg";
 import CiscoLogo from "/public/images/logo-cisco.svg";
 import NetflixLogo from "/public/images/logo-netflix.svg";
 import OracleLogo from "/public/images/logo-oracle.svg";
+import HeaderLogo from "/public/images/logo-white.svg";
 import styles from "@/app/_styles/main.module.scss";
 import classNames from "classnames/bind";
 const cx = classNames.bind(styles);
@@ -190,8 +191,8 @@ export default function Main() {
                 fillRule="evenodd"
                 clipRule="evenodd"
                 d="M89.8898 19L12.2833 151.219H12.28L7 160.219L172.79 160.22L167.51 151.219H167.506L95.1092 27.8911L95.11 27.8897L89.8898 19ZM154.465 146.787L94.5 44.6211V119.24L154.465 146.787ZM142.555 151.219L94.5 129.144V151.219H142.555ZM85.5 119.639V101.419L40.6466 139.845L85.5 119.639ZM85.5 44.2594L32.0128 135.391L85.5 89.5674V44.2594ZM85.5 129.51L37.3096 151.219H85.5V129.51Z"
-                fill="#E32A2A"
-                stroke="#E32A2A"
+                fill="var(--primary)"
+                stroke="var(--primary)"
                 strokeWidth="2"
                 strokeDasharray="1000"
                 strokeDashoffset="1000"
@@ -353,14 +354,14 @@ export default function Main() {
                   <path
                     id="Vector"
                     d="M9.58594 15.0007C9.58594 9.2477 14.2496 4.58398 20.0026 4.58398C25.7556 4.58398 30.4193 9.2477 30.4193 15.0007V25.0007C30.4193 30.7536 25.7556 35.4173 20.0026 35.4173C14.2496 35.4173 9.58594 30.7536 9.58594 25.0007V15.0007Z"
-                    stroke="white"
+                    stroke="var(--white)"
                     strokeWidth="2.5"
                   />
                   <path
                     id="Vector_2"
                     className="wheel-animation"
                     d="M18.3359 11.5C18.3359 10.672 19.0826 10 20.0026 10C20.9226 10 21.6693 10.672 21.6693 11.5V16C21.6693 16.828 20.9226 17.5 20.0026 17.5C19.0826 17.5 18.3359 16.828 18.3359 16V11.5Z"
-                    fill="#E32A2A"
+                    fill="var(--primary)"
                   />
                 </g>
                 <style jsx>
@@ -527,10 +528,11 @@ export default function Main() {
                 <h1>Mastering AI Prompt</h1>
                 <p>
                   기업의 핵심 문제를 분석해 AI 맞춤형 프롬프트를 설계하고,
-                  자동화로 일관된 결과와 생산성을
                   <br />
-                  극대화합니다. 이를 통해 스마트 업무 환경을 구축하고 비즈니스
-                  성과를 강화합니다.
+                  자동화로 일관된 결과와 생산성을 극대화합니다.
+                  <br />
+                  이를 통해 스마트 업무 환경을 구축하고 비즈니스 성과를
+                  강화합니다.
                 </p>
               </div>
             </motion.div>
@@ -558,7 +560,6 @@ export default function Main() {
             </motion.div>
           </div>
         </section>
-        <div style={{ height: 140 }} />
         <section data-scroll-section className={cx("section5")}>
           <div className={cx("text")}>
             <motion.div {...motionProps}>
@@ -635,23 +636,23 @@ export default function Main() {
               <div className={cx("partner")}>
                 {Array.from({ length: 10 }).map((_, index) => (
                   <ul key={`partner-list-${index}`}>
-                    <li>
-                      <IbmLogo width={83} height={34} />
+                    <li className={cx("ibm")}>
+                      <IbmLogo />
                     </li>
-                    <li>
-                      <IntelLogo width={66} height={44} />
+                    <li className={cx("intel")}>
+                      <IntelLogo />
                     </li>
-                    <li>
-                      <AmazonLogo width={118} height={36} />
+                    <li className={cx("amazon")}>
+                      <AmazonLogo />
                     </li>
-                    <li>
-                      <CiscoLogo width={84} height={48} />
+                    <li className={cx("cisco")}>
+                      <CiscoLogo />
                     </li>
-                    <li>
-                      <NetflixLogo width={120} height={32} />
+                    <li className={cx("netflix")}>
+                      <NetflixLogo />
                     </li>
-                    <li>
-                      <OracleLogo width={223} height={30} />
+                    <li className={cx("oracle")}>
+                      <OracleLogo />
                     </li>
                   </ul>
                 ))}
@@ -725,6 +726,12 @@ export default function Main() {
             COPYRIGHT © Openfloor ALL RIGHTS RESERVED.
           </p>
         </div>
+        <header className={cx("header")}>
+          <button className={cx("hover-target")}>
+            <HeaderLogo width={40} height={40} />
+            OPENFLOOR
+          </button>
+        </header>
         <div className={cx("custom-cursor")} ref={cursorRef} />
         <div className={cx("logo-bg")}>
           <LogoBackground />

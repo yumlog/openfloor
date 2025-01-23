@@ -55,6 +55,9 @@
 }
 
 .section1 {
+  position: relative;
+  z-index: 2;
+
   .section-inner {
     @extend %flex-col-center;
     height: var(--100vh);
@@ -387,9 +390,31 @@
     gap: 124px;
   }
 
+  .text {
+    @extend %flex-col;
+    align-items: center;
+    gap: 32px;
+
+    h1 {
+      @extend %triangle-title;
+      align-items: center;
+      text-align: center;
+      color: var(--white);
+    }
+
+    p {
+      font-size: var(--text-sm);
+      font-weight: 500;
+      line-height: var(--140lh);
+      letter-spacing: -0.4px;
+      text-align: center;
+      color: var(--gray-2);
+    }
+  }
+
   .triangle-wrap {
     position: relative;
-    right: -30px;
+    right: -5%;
     width: 435px;
     height: 353px;
     transform-style: preserve-3d;
@@ -403,25 +428,8 @@
     }
   }
 
-  .text {
-    @extend %flex-col;
-    align-items: center;
-    gap: 32px;
-    color: var(--white);
-
-    h1 {
-      @extend %triangle-title;
-      align-items: center;
-      text-align: center;
-    }
-
-    p {
-      font-size: var(--text-sm);
-      font-weight: 500;
-      line-height: var(--140lh);
-      letter-spacing: -0.4px;
-      text-align: center;
-    }
+  .triangle-mobile {
+    display: none;
   }
 }
 
@@ -453,6 +461,11 @@
       background-color: var(--primary);
       pointer-events: auto;
       letter-spacing: -0.56px;
+
+      svg {
+        width: 36px;
+        height: 36px;
+      }
     }
   }
 
@@ -503,6 +516,36 @@
       display: flex;
       align-items: center;
       gap: 100px;
+    }
+
+    .ibm {
+      width: 83px;
+      height: 34px;
+    }
+
+    .intel {
+      width: 66px;
+      height: 44px;
+    }
+
+    .amazon {
+      width: 118px;
+      height: 36px;
+    }
+
+    .cisco {
+      width: 84px;
+      height: 48px;
+    }
+
+    .netflix {
+      width: 120px;
+      height: 32px;
+    }
+
+    .oracle {
+      width: 223px;
+      height: 30px;
     }
   }
 }
@@ -602,7 +645,26 @@
   }
 }
 
-// 반응형요소
+.header {
+  @extend %flex-center-align;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 88px;
+  padding: 0 100px;
+
+  button {
+    @extend %flex-center-align;
+    gap: 8px;
+    font-size: var(--h4);
+    font-weight: 700;
+    color: var(--white);
+  }
+}
+
+// 모바일
 @media all and (max-width: 500px) {
   %triangle-title {
     align-items: center;
@@ -671,13 +733,139 @@
 
   .section3 {
     .section-inner {
-      padding: 66px 16px;
+      padding: 80px 16px 0 16px;
+    }
+    .text {
+      p {
+        margin-top: 16px;
+      }
     }
     .swiper-test {
       width: 100%;
     }
+    .open-swiper {
+      margin-top: 32px;
+    }
+    .open-swiper-slide {
+      .item {
+        bottom: 40px;
+        gap: 16px;
+      }
+    }
     .open-swiper-pagination {
       display: flex;
+    }
+  }
+
+  .section4 {
+    height: 80vh;
+    .section-wrap {
+      padding: 0 16px;
+      gap: 16px;
+    }
+
+    .text {
+      gap: 16px;
+    }
+
+    .triangle-wrap {
+      scale: 0.6;
+    }
+  }
+
+  .section5 {
+    .text {
+      h1 {
+        margin-bottom: 20px;
+      }
+
+      button {
+        gap: 4px;
+        padding: 12px 16px;
+
+        svg {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+
+    .marquee-container {
+      width: calc(100% - 32px);
+      &.top {
+        top: 0;
+        left: 16px;
+        height: 126px;
+      }
+      &.bottom {
+        right: 16px;
+        bottom: 100px;
+        height: 28px;
+      }
+    }
+
+    .marquee-text {
+      font-size: 90px;
+    }
+
+    .partner {
+      ul {
+        gap: 40px;
+      }
+
+      .ibm {
+        width: 46px;
+        height: 18px;
+      }
+
+      .intel {
+        width: 36px;
+        height: 24px;
+      }
+
+      .amazon {
+        width: 66px;
+        height: 20px;
+      }
+
+      .cisco {
+        width: 46px;
+        height: 26px;
+      }
+
+      .netflix {
+        width: 66px;
+        height: 18px;
+      }
+
+      .oracle {
+        width: 124px;
+        height: 16px;
+      }
+    }
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 32px;
+    padding: 42px 16px;
+
+    .address {
+      gap: 8px;
+      div:nth-child(2) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      p {
+        gap: 8px;
+      }
+    }
+
+    .copyright {
+      position: inherit;
+      top: inherit;
+      right: inherit;
     }
   }
 
@@ -687,8 +875,19 @@
       height: 235px;
     }
   }
+
+  .header {
+    height: 56px;
+    padding: 0 16px;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
 }
 
+// 태블릿
 @media all and (min-width: 501px) and (max-width: 1024px) {
 }
 
@@ -701,10 +900,6 @@
 
     .swiper-test {
       width: 100%;
-    }
-
-    .open-swiper {
-      margin-top: 64px;
     }
 
     .section-inner {
