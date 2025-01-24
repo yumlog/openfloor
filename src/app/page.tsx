@@ -31,6 +31,8 @@ import styles from "@/app/_styles/main.module.scss";
 import classNames from "classnames/bind";
 const cx = classNames.bind(styles);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export default function Main() {
   // 페이드인 모션
   const motionProps = {

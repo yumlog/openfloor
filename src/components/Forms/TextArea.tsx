@@ -64,6 +64,7 @@ const TextArea = forwardRef<HTMLTextAreaElement, InputProps>(
     );
   }
 );
+TextArea.displayName = "TextArea";
 export default TextArea;
 
 const Textarea = forwardRef<HTMLTextAreaElement, InputProps>(

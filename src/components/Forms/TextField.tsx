@@ -59,6 +59,7 @@ const TextField = forwardRef<HTMLInputElement, InputProps>(
     );
   }
 );
+TextField.displayName = "TextField";
 export default TextField;
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
