@@ -106,7 +106,7 @@
     line-height: normal;
     color: var(--gray-9);
     touch-action: pan-x pan-y;
-    /* cursor: none; */
+    cursor: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
