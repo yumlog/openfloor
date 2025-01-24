@@ -456,6 +456,7 @@
     @extend %flex-col-center-align;
     text-align: center;
     transition: var(--transition);
+    margin-top: -3%;
 
     h1 {
       @extend %triangle-title;
@@ -936,10 +937,6 @@
       width: 276px;
       height: 235px;
     }
-  }
-
-  .custom-cursor {
-    display: none;
   }
 
   .header {
