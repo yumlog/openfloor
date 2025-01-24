@@ -31,8 +31,6 @@ import styles from "@/app/_styles/main.module.scss";
 import classNames from "classnames/bind";
 const cx = classNames.bind(styles);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-
 export default function Main() {
   // 페이드인 모션
   const motionProps = {
@@ -121,6 +119,7 @@ export default function Main() {
 
   // 스크롤 부드럽게 + 렌더링후 2초 스크롤 막기
   const containerRef = useRef(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const scrollRef = useRef<any>(null);
   const [isScrollDisabled, setScrollDisabled] = useState(true);
 
@@ -169,6 +168,7 @@ export default function Main() {
       }}
       watch={[]}
       containerRef={containerRef}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onUpdate={(scroll: any) => {
         scrollRef.current = scroll;
         if (isScrollDisabled) {
