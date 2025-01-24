@@ -73,35 +73,40 @@
   svg {
     width: 160px;
     height: 142px;
+    transition: var(--transition);
   }
 
   .text {
     @extend %flex-col-center;
     gap: 12px;
+    text-align: center;
     transition: var(--transition);
   }
 
   h1 {
     font-family: var(--font-display);
-    font-size: var(--h2);
+    font-size: var(--sec1-tit);
     font-weight: 800;
     line-height: var(--140lh);
     letter-spacing: -1.12px;
     color: var(--white);
+    transition: var(--transition);
   }
 
   p {
-    font-size: var(--text-md);
+    font-size: var(--sec1-txt);
     font-weight: 400;
     line-height: var(--140lh);
     letter-spacing: -0.56px;
     color: var(--white);
+    transition: var(--transition);
   }
 }
 
 .section2 {
   .section-inner {
     padding: 140px 100px 110px 100px;
+    transition: var(--transition);
   }
 
   h1 {
@@ -112,6 +117,7 @@
     letter-spacing: -1.84px;
     text-transform: uppercase;
     color: var(--white);
+    transition: var(--transition);
   }
 
   .open-swiper {
@@ -136,6 +142,7 @@
     > svg {
       width: 40px;
       height: 40px;
+      transition: var(--transition);
 
       path {
         transition: var(--transition);
@@ -148,8 +155,8 @@
       font-weight: 700;
       letter-spacing: -0.64px;
       color: var(--white);
-      transition: var(--transition);
       margin-top: 20px;
+      transition: var(--transition);
     }
 
     button {
@@ -216,6 +223,10 @@
     }
   }
 
+  .open-swiper-container {
+    position: relative;
+  }
+
   .open-swiper-nav-prev,
   .open-swiper-nav-next {
     position: absolute;
@@ -227,16 +238,16 @@
     transform: translateY(-50%);
     width: 40px;
     height: 40px;
-    background-color: var(--gray-6);
+    background: rgba(102, 102, 102, 0.6);
     border-radius: var(--rounded-full);
   }
 
   .open-swiper-nav-prev {
-    left: 4px;
+    left: -8px;
   }
 
   .open-swiper-nav-next {
-    right: 4px;
+    right: -8px;
   }
 
   .scroll-down {
@@ -257,13 +268,12 @@
 }
 
 .section3 {
-  width: 100%;
-
   .section-inner {
     display: flex;
     gap: 12%;
     padding: 110px 100px 220px 100px;
     width: 100%;
+    transition: var(--transition);
   }
 
   .text {
@@ -271,6 +281,7 @@
 
     h1 {
       @extend %triangle-title;
+      transition: var(--transition);
     }
 
     p {
@@ -280,10 +291,11 @@
       letter-spacing: -0.4px;
       color: var(--gray-2);
       margin-top: 32px;
+      transition: var(--transition);
     }
   }
 
-  .swiper-test {
+  .open-swiper-container {
     width: 58%;
   }
 
@@ -336,6 +348,7 @@
       width: 100%;
       transform: translateX(-50%);
       text-align: center;
+      transition: var(--transition);
 
       p {
         font-family: var(--font-display);
@@ -388,18 +401,21 @@
     @extend %flex-col-center;
     height: var(--100vh);
     gap: 124px;
+    transition: var(--transition);
   }
 
   .text {
     @extend %flex-col;
     align-items: center;
     gap: 32px;
+    transition: var(--transition);
 
     h1 {
       @extend %triangle-title;
       align-items: center;
       text-align: center;
       color: var(--white);
+      transition: var(--transition);
     }
 
     p {
@@ -409,6 +425,7 @@
       letter-spacing: -0.4px;
       text-align: center;
       color: var(--gray-2);
+      transition: var(--transition);
     }
   }
 
@@ -422,14 +439,11 @@
     background-image: url("/images/triangle-back.svg");
     background-size: contain;
     background-repeat: no-repeat;
+    transition: var(--transition);
 
     .triangle {
       transform: translateZ(50px) scale(0.9);
     }
-  }
-
-  .triangle-mobile {
-    display: none;
   }
 }
 
@@ -441,12 +455,14 @@
   .text {
     @extend %flex-col-center-align;
     text-align: center;
+    transition: var(--transition);
 
     h1 {
       @extend %triangle-title;
       align-items: center;
       text-align: center;
       margin-bottom: 32px;
+      transition: var(--transition);
     }
 
     button {
@@ -455,16 +471,18 @@
       display: inline-flex;
       align-items: center;
       gap: 16px;
-      font-size: var(--text-md);
+      font-size: var(--btn-txt);
       font-weight: 700;
       color: var(--white);
       background-color: var(--primary);
       pointer-events: auto;
       letter-spacing: -0.56px;
+      transition: var(--transition);
 
       svg {
         width: 36px;
         height: 36px;
+        transition: var(--transition);
       }
     }
   }
@@ -498,11 +516,12 @@
       display: inline-block;
       padding-right: 30px;
       font-family: var(--font-display);
-      font-size: 188px;
+      font-size: var(--marquee-txt);
       font-weight: 700;
       -webkit-text-stroke: 2px var(--gray-3);
       color: var(--transparent);
       letter-spacing: -7.535px;
+      transition: var(--transition);
     }
   }
 
@@ -511,11 +530,17 @@
     align-items: center;
     gap: 100px;
     opacity: 0.5;
+    transition: var(--transition);
 
     ul {
       display: flex;
       align-items: center;
       gap: 100px;
+      transition: var(--transition);
+    }
+
+    li {
+      transition: var(--transition);
     }
 
     .ibm {
@@ -573,11 +598,13 @@
     font-size: var(--text-lg);
     font-weight: 700;
     color: var(--primary);
+    transition: var(--transition);
   }
 
   .address {
     @extend %flex-col;
     gap: 12px;
+    transition: var(--transition);
 
     p {
       @extend %flex-center-align;
@@ -587,6 +614,7 @@
       line-height: var(--140lh);
       letter-spacing: -0.4px;
       color: var(--gray-3);
+      transition: var(--transition);
 
       span {
         color: var(--gray-4);
@@ -596,6 +624,7 @@
     div {
       @extend %flex-center-align;
       gap: 40px;
+      transition: var(--transition);
     }
   }
 
@@ -608,6 +637,7 @@
     line-height: var(--140lh);
     letter-spacing: -0.4px;
     color: var(--gray-4);
+    transition: var(--transition);
   }
 }
 
@@ -621,6 +651,7 @@
   svg {
     width: 775px;
     height: 680px;
+    transition: var(--transition);
   }
 }
 
@@ -632,11 +663,11 @@
   width: 30px;
   height: 30px;
   pointer-events: none;
-  transition: all 0.15s ease-out;
   will-change: transform;
   background: url("/images/logo.svg") no-repeat center;
   margin: -15px;
   mix-blend-mode: difference;
+  // transition: all 0.15s ease-out;
 
   &.hovered {
     width: 50px;
@@ -654,6 +685,7 @@
   width: 100%;
   height: 88px;
   padding: 0 100px;
+  transition: var(--transition);
 
   button {
     @extend %flex-center-align;
@@ -661,10 +693,16 @@
     font-size: var(--h4);
     font-weight: 700;
     color: var(--white);
+    transition: var(--transition);
+
+    svg {
+      width: 40px;
+      height: 40px;
+      transition: var(--transition);
+    }
   }
 }
 
-// 모바일
 @media all and (max-width: 500px) {
   %triangle-title {
     align-items: center;
@@ -696,12 +734,14 @@
     .section-inner {
       padding: 122px 16px 66px 16px;
     }
+
     .open-swiper-wrapper {
       padding-top: 52px;
       padding-bottom: 52px;
     }
+
     .open-swiper-slide {
-      padding: 36px 32px;
+      padding: 66px 32px;
       align-items: center;
       text-align: center;
 
@@ -716,42 +756,63 @@
 
       .dot-list {
         gap: 4px;
+        margin-top: 28px;
 
         li:before {
           display: none;
         }
       }
     }
+
     .open-swiper-nav-prev,
     .open-swiper-nav-next {
       display: flex;
     }
+
     .scroll-down {
       display: none;
     }
   }
 
   .section3 {
-    .section-inner {
-      padding: 80px 16px 0 16px;
+    %triangle-title {
+      align-items: center;
     }
+
     .text {
+      text-align: center;
+
       p {
         margin-top: 16px;
       }
     }
-    .swiper-test {
+
+    .open-swiper-container {
       width: 100%;
     }
+
     .open-swiper {
       margin-top: 32px;
     }
+
+    .section-inner {
+      display: block;
+      padding: 80px 16px 80px 16px;
+    }
+
     .open-swiper-slide {
+      height: 460px;
+
       .item {
         bottom: 40px;
         gap: 16px;
       }
     }
+
+    .open-swiper-slide.empty {
+      display: none;
+    }
+
     .open-swiper-pagination {
       display: flex;
     }
@@ -759,6 +820,7 @@
 
   .section4 {
     height: 80vh;
+
     .section-wrap {
       padding: 0 16px;
       gap: 16px;
@@ -792,11 +854,13 @@
 
     .marquee-container {
       width: calc(100% - 32px);
+
       &.top {
         top: 0;
         left: 16px;
         height: 126px;
       }
+
       &.bottom {
         right: 16px;
         bottom: 100px;
@@ -804,11 +868,9 @@
       }
     }
 
-    .marquee-text {
-      font-size: 90px;
-    }
-
     .partner {
+      gap: 40px;
+
       ul {
         gap: 40px;
       }
@@ -861,8 +923,8 @@
         gap: 8px;
       }
     }
-
     .copyright {
+      margin-top: 24px;
       position: inherit;
       top: inherit;
       right: inherit;
@@ -876,30 +938,208 @@
     }
   }
 
+  .custom-cursor {
+    display: none;
+  }
+
   .header {
     height: 56px;
     padding: 0 16px;
 
-    svg {
-      width: 24px;
-      height: 24px;
+    button {
+      svg {
+        width: 24px;
+        height: 24px;
+      }
     }
   }
 }
 
-// 태블릿
-@media all and (min-width: 501px) and (max-width: 1024px) {
-}
+@media all and (min-width: 501px) and (max-width: 1200px) {
+  .section1 {
+    .section-inner {
+      gap: 32px;
+    }
 
-// 스와이프용
-@media all and (max-width: 1599px) {
+    svg {
+      width: 120px;
+      height: 106px;
+    }
+
+    .text {
+      gap: 8px;
+    }
+  }
+
+  .section2 {
+    .section-inner {
+      padding: 70px 50px 110px 50px;
+    }
+  }
+
   .section3 {
+    %triangle-title {
+      align-items: center;
+    }
+
     .text {
       text-align: center;
     }
 
-    .swiper-test {
+    .open-swiper-container {
       width: 100%;
+    }
+
+    .open-swiper {
+      margin-top: 64px;
+    }
+
+    .section-inner {
+      display: block;
+      padding: 110px 50px 110px 50px;
+    }
+
+    .open-swiper-slide {
+      height: 460px;
+    }
+
+    .open-swiper-slide.empty {
+      display: none;
+    }
+  }
+
+  .section5 {
+    .text {
+      h1 {
+        margin-bottom: 20px;
+      }
+
+      button {
+        gap: 10px;
+        padding: 20px 28px;
+
+        svg {
+          width: 28px;
+          height: 28px;
+        }
+      }
+    }
+
+    .marquee-container {
+      width: calc(100% - 100px);
+
+      &.top {
+        top: 0;
+        left: 50px;
+        height: 170px;
+      }
+
+      &.bottom {
+        right: 50px;
+        bottom: 100px;
+        height: 42px;
+      }
+    }
+
+    .partner {
+      gap: 70px;
+
+      ul {
+        gap: 70px;
+      }
+
+      .ibm {
+        width: 64px;
+        height: 26px;
+      }
+
+      .intel {
+        width: 52px;
+        height: 34px;
+      }
+
+      .amazon {
+        width: 92px;
+        height: 28px;
+      }
+
+      .cisco {
+        width: 66px;
+        height: 38px;
+      }
+
+      .netflix {
+        width: 94px;
+        height: 26px;
+      }
+
+      .oracle {
+        width: 174px;
+        height: 24px;
+      }
+    }
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 32px;
+    padding: 42px 50px;
+
+    .address {
+      gap: 10px;
+      div:nth-child(2) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      p {
+        gap: 10px;
+      }
+    }
+    .copyright {
+      margin-top: 24px;
+      position: inherit;
+      top: inherit;
+      right: inherit;
+    }
+  }
+
+  .logo-bg {
+    svg {
+      width: 524px;
+      height: 458px;
+    }
+  }
+
+  .header {
+    height: 72px;
+    padding: 0 50px;
+
+    button {
+      svg {
+        width: 32px;
+        height: 32px;
+      }
+    }
+  }
+}
+
+@media all and (min-width: 1201px) and (max-width: 1600px) {
+  .section3 {
+    %triangle-title {
+      align-items: center;
+    }
+
+    .text {
+      text-align: center;
+    }
+
+    .open-swiper-container {
+      width: 100%;
+    }
+
+    .open-swiper {
+      margin-top: 92px;
     }
 
     .section-inner {
@@ -914,9 +1154,17 @@
       display: none;
     }
   }
+
+  .footer {
+    .copyright {
+      position: inherit;
+      top: inherit;
+      right: inherit;
+    }
+  }
 }
 
-@media all and (min-width: 1600px) {
+@media all and (min-width: 1601px) {
   .section3 {
     .section-inner {
       padding-right: 0;

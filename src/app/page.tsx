@@ -143,8 +143,12 @@ export default function Main() {
 
   // 스와이퍼 관련
   const handleInit = (swiper: SwiperCore) => {
-    // swiper.wrapperEl은 swiper-wrapper 요소를 참조합니다.
     swiper.wrapperEl.classList.add(cx("open-swiper-wrapper"));
+  };
+
+  // 로고 누르면 최상단으로
+  const handleScrollToTop = () => {
+    scrollRef.current.scrollTo(0, { duration: 800 });
   };
 
   return (
@@ -170,7 +174,13 @@ export default function Main() {
         }
       }}
     >
-      <main data-scroll-container ref={containerRef} className={cx("main")}>
+      <div data-scroll-container ref={containerRef} className={cx("main")}>
+        <header className={cx("header")}>
+          <button className={cx("hover-target")} onClick={handleScrollToTop}>
+            <HeaderLogo width={40} height={40} />
+            OPENFLOOR
+          </button>
+        </header>
         <section data-scroll-section className={cx("section1")}>
           <div
             data-scroll
@@ -255,7 +265,10 @@ export default function Main() {
                 Philosophy
               </h1>
             </motion.div>
-            <motion.div {...motionProps}>
+            <motion.div
+              {...motionProps}
+              className={cx("open-swiper-container")}
+            >
               <Swiper
                 modules={[Navigation]}
                 spaceBetween={24}
@@ -266,10 +279,10 @@ export default function Main() {
                   800: {
                     slidesPerView: 2,
                   },
-                  1100: {
+                  1200: {
                     slidesPerView: 3,
                   },
-                  1500: {
+                  1600: {
                     slidesPerView: 4,
                   },
                 }}
@@ -334,13 +347,13 @@ export default function Main() {
                     <LinkIcon width={48} height={48} />
                   </button>
                 </SwiperSlide>
-                <button className={cx("open-swiper-nav-prev", "hover-target")}>
-                  <LeftIcon width={20} height={20} />
-                </button>
-                <button className={cx("open-swiper-nav-next", "hover-target")}>
-                  <RightIcon width={20} height={20} />
-                </button>
               </Swiper>
+              <button className={cx("open-swiper-nav-prev", "hover-target")}>
+                <LeftIcon width={20} height={20} />
+              </button>
+              <button className={cx("open-swiper-nav-next", "hover-target")}>
+                <RightIcon width={20} height={20} />
+              </button>
             </motion.div>
             <div className={cx("scroll-down")}>
               <svg
@@ -409,7 +422,10 @@ export default function Main() {
                 </p>
               </motion.div>
             </div>
-            <motion.div {...motionProps3} className={cx("swiper-test")}>
+            <motion.div
+              {...motionProps3}
+              className={cx("open-swiper-container")}
+            >
               <Swiper
                 modules={[Pagination]}
                 spaceBetween={40}
@@ -417,10 +433,10 @@ export default function Main() {
                   500: {
                     slidesPerView: 1,
                   },
-                  768: {
+                  800: {
                     slidesPerView: 2,
                   },
-                  1280: {
+                  1200: {
                     slidesPerView: 3,
                   },
                   1600: {
@@ -457,7 +473,7 @@ export default function Main() {
                   <Image
                     aria-hidden
                     src="/images/cosulting.jpg"
-                    alt="Window icon"
+                    alt=""
                     fill
                     style={{ objectFit: "cover" }}
                   />
@@ -474,7 +490,7 @@ export default function Main() {
                   <Image
                     aria-hidden
                     src="/images/data-marketing.jpg"
-                    alt="Window icon"
+                    alt=""
                     fill
                     style={{ objectFit: "cover" }}
                   />
@@ -491,7 +507,7 @@ export default function Main() {
                   <Image
                     aria-hidden
                     src="/images/seo.jpg"
-                    alt="Window icon"
+                    alt=""
                     fill
                     style={{ objectFit: "cover" }}
                   />
@@ -552,7 +568,7 @@ export default function Main() {
                   className={cx("triangle")}
                   aria-hidden
                   src="/images/triangle-sample.png"
-                  alt="Window icon"
+                  alt=""
                   width={385}
                   height={330}
                 />
@@ -560,6 +576,7 @@ export default function Main() {
             </motion.div>
           </div>
         </section>
+        <div style={{ height: 140 }} />
         <section data-scroll-section className={cx("section5")}>
           <div className={cx("text")}>
             <motion.div {...motionProps}>
@@ -697,7 +714,7 @@ export default function Main() {
             </motion.div>
           </div>
         </section>
-        <div data-scroll-section className={cx("footer")}>
+        <footer data-scroll-section className={cx("footer")}>
           <p className={cx("name")}>OPENFLOOR</p>
           <div className={cx("address")}>
             <div>
@@ -721,22 +738,16 @@ export default function Main() {
                 <span>사업자등록번호</span>715-88-00866
               </p>
             </div>
+            <div className={cx("copyright")}>
+              COPYRIGHT © Openfloor ALL RIGHTS RESERVED.
+            </div>
           </div>
-          <p className={cx("copyright")}>
-            COPYRIGHT © Openfloor ALL RIGHTS RESERVED.
-          </p>
-        </div>
-        <header className={cx("header")}>
-          <button className={cx("hover-target")}>
-            <HeaderLogo width={40} height={40} />
-            OPENFLOOR
-          </button>
-        </header>
+        </footer>
         <div className={cx("custom-cursor")} ref={cursorRef} />
         <div className={cx("logo-bg")}>
           <LogoBackground />
         </div>
-      </main>
+      </div>
     </LocomotiveScrollProvider>
   );
 }

@@ -38,6 +38,11 @@
   --text-sm: 20px;
   --text-xs: 16px;
 
+  --sec1-tit: 56px;
+  --sec1-txt: 28px;
+  --marquee-txt: 188px;
+  --btn-txt: 28px;
+
   /* border radius */
   --rounded-full: 9999px;
   --rounded-lg: 32px;
@@ -53,19 +58,29 @@
     --text-lg: 24px;
     --text-md: 24px;
     --text-sm: 14px;
-    --text-xs: 12px;
+    --text-xs: 14px;
+
+    --sec1-tit: 20px;
+    --sec1-txt: 14px;
+    --marquee-txt: 90px;
+    --btn-txt: 14px;
   }
 
-  @media all and (min-width: 501px) and (max-width: 1024px) {
+  @media all and (min-width: 501px) and (max-width: 1200px) {
     --h1: 64px;
     --h2: 40px;
     --h3: 26px;
     --h4: 20px;
 
-    --text-lg: 24px;
-    --text-md: 24px;
-    --text-sm: 14px;
-    --text-xs: 12px;
+    --text-lg: 28px;
+    --text-md: 26px;
+    --text-sm: 16px;
+    --text-xs: 14px;
+
+    --sec1-tit: 28px;
+    --sec1-txt: 20px;
+    --marquee-txt: 138px;
+    --btn-txt: 22px;
   }
 }
 
