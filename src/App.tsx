@@ -71,7 +71,7 @@ export default function App() {
         <AboutSection active={index === 1} />
         <PhilosophySection active={index === 2} />
         <VisionSection />
-        <PortfolioSection />
+        <PortfolioSection active={index === 4} />
         <ContactSection />
       </Slides>
 

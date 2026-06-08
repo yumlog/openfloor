@@ -13,7 +13,16 @@ export interface SlideDef {
   label: string
   /** which background the section sits on (drives bg crossfade + text color) */
   theme: SlideTheme
+  /**
+   * Optional explicit background color (raw hex) overriding the theme default
+   * in the crossfade — for light sections that sit on an off-white instead of
+   * pure #fff. Keep in sync with whatever the section itself paints.
+   */
+  bg?: string
 }
+
+/** Off-white backdrop for the Portfolio slide (carousel cards read better on it). */
+export const BG_PORTFOLIO = '#fafafa'
 
 /** Section order. Index === slide value. */
 export const SLIDES: SlideDef[] = [
@@ -21,7 +30,7 @@ export const SLIDES: SlideDef[] = [
   { id: 'about', label: 'About', theme: 'dark' },
   { id: 'philosophy', label: 'Philosophy', theme: 'light' },
   { id: 'vision', label: 'Vision', theme: 'dark' },
-  { id: 'portfolio', label: 'Portfolio', theme: 'light' },
+  { id: 'portfolio', label: 'Portfolio', theme: 'light', bg: BG_PORTFOLIO },
   { id: 'contact', label: 'Contact', theme: 'dark' },
 ]
 
@@ -40,8 +49,8 @@ export const BG_LIGHT = '#ffffff'
  * SLIDES grows.
  */
 export const BG_STOPS: number[] = SLIDES.map((_, i) => i)
-export const BG_COLORS: string[] = SLIDES.map((s) =>
-  s.theme === 'dark' ? BG_DARK : BG_LIGHT
+export const BG_COLORS: string[] = SLIDES.map(
+  (s) => s.bg ?? (s.theme === 'dark' ? BG_DARK : BG_LIGHT)
 )
 
 /** Header navigation — maps a label to the slide it scrolls to. */
