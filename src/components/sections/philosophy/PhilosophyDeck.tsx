@@ -7,13 +7,19 @@ import { PHILOSOPHY_CARDS } from './cards'
    Philosophy deck — the desktop state machine.
 
    Two states driven by `selected` (the centered card index, or null):
-     standing   selected === null   3 cards fanned into a 3D deck.
+     standing   selected === null   3 identical cards stacked into a deck.
      expanded   selected !== null   flat 3-up; selected card centered (body +
                                      scrim + closing quote), the other two on
                                      the sides (image + name only).
 
    Click rules: standing card -> expand it center. Side card -> slide it to
    center. Centered card -> fold back to the deck.
+
+   STANDING is a 2D oblique stack (NOT 3D perspective): every card shares the
+   exact same size and skewY, stepped by a constant diagonal offset, so the
+   three read as tidy identical parallelograms (vertical edges stay vertical;
+   only top/bottom edges slope). This keeps hit-testing exact and the shapes
+   uniform — a real perspective deck gave each card a different angle.
 
    EVERYTHING here is in design pixels (1440 reference). The whole stage is
    transform:scale(ratio)'d by the parent so these literals shrink fluidly with
@@ -30,26 +36,14 @@ const CARD_GAP = 40
 // Distance from stage center to a side-card center.
 const SLOT_X = CENTER / 2 + CARD_GAP + SIDE / 2 // 480
 
-// Standing deck card size + fan offsets (philosophy-standing.png). Big cards
-// with a wide fan: front card large + lower-left, each card stepping right /
-// up / back behind it.
-//
-// The source card is WIDER than it is tall (W ≈ H / cos(FAN_ROTY)) so that the
-// Y-rotation foreshortens it back to a *square-looking* projection — a square
-// source would read as a tall sliver once rotated.
-const FAN_ROTY = -38
-const DECK_H = 460
-const DECK_W = 580 // ≈ 460 / cos(38°) -> projects ~square
-// Wide step (esp. vertical) so even the back card keeps a generous exposed
-// strip to hover / click — not just its right edge.
-const FAN_X = 140
-const FAN_Y = 64
-const FAN_Z = 70
-const FAN_RZ = 4
-const HOVER_LIFT = 28
-// Closer perspective than the default so the Y-rotation foreshortens hard
-// (near edge tall, far edge short) like the reference.
-const PERSPECTIVE = 1200
+// Standing deck (philosophy-standing-name.png): identical square cards, one
+// shared skew, constant up-right diagonal step. Front (index 0) sits lowest-
+// left and on top; the back card steps up-right and underneath.
+const DECK = 360
+const SKEW = 12 // skewY, deg — "\" lean (left edge high); vertical edges stay vertical
+const STEP_X = 116
+const STEP_Y = 46
+const HOVER_LIFT = 22
 
 const TRANSITION: Transition = {
   type: 'spring',
@@ -57,7 +51,7 @@ const TRANSITION: Transition = {
   damping: 30,
   mass: 0.9,
 }
-const FADE: Transition = { duration: 0.35, ease: 'easeOut' }
+const FADE: Transition = { duration: 0.3, ease: 'easeOut' }
 
 /**
  * Target transform for card `index` given the current `selected` card and the
@@ -69,20 +63,17 @@ function targetFor(
   selected: number | null,
   hovered: number | null
 ): TargetAndTransition {
-  // standing — fanned deck.
+  // standing — identical skewed cards on a constant diagonal step.
   if (selected === null) {
-    const isHover = hovered === index
-    const cx = (index - 1) * FAN_X
-    const cy = (1 - index) * FAN_Y - (isHover ? HOVER_LIFT : 0)
+    const cx = (index - 1) * STEP_X
+    const cy = (1 - index) * STEP_Y - (hovered === index ? HOVER_LIFT : 0)
     return {
-      width: DECK_W,
-      height: DECK_H,
-      x: cx - DECK_W / 2,
-      y: cy - DECK_H / 2,
-      rotateY: FAN_ROTY,
-      rotateZ: (index - 1) * FAN_RZ,
-      z: -index * FAN_Z + (isHover ? 40 : 0),
-      zIndex: 30 - index * 10 + (isHover ? 5 : 0),
+      width: DECK,
+      height: DECK,
+      x: cx - DECK / 2,
+      y: cy - DECK / 2,
+      skewY: SKEW,
+      zIndex: 30 - index * 10 + (hovered === index ? 5 : 0),
     }
   }
 
@@ -93,9 +84,7 @@ function targetFor(
       height: CENTER,
       x: -CENTER / 2,
       y: -CENTER / 2,
-      rotateY: 0,
-      rotateZ: 0,
-      z: 0,
+      skewY: 0,
       zIndex: 30,
     }
   }
@@ -108,9 +97,7 @@ function targetFor(
     height: SIDE,
     x: cx - SIDE / 2,
     y: -SIDE / 2,
-    rotateY: 0,
-    rotateZ: 0,
-    z: 0,
+    skewY: 0,
     zIndex: 20,
   }
 }
@@ -137,6 +124,8 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
   const handleClick = (i: number) =>
     setSelected((prev) => (prev === null ? i : prev === i ? null : i))
 
+  const standing = selected === null
+
   return (
     <div
       className="relative shrink-0"
@@ -144,19 +133,15 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
         width: CANVAS_W,
         height: CANVAS_H,
         transform: `scale(${ratio})`,
-        perspective: PERSPECTIVE,
-        transformStyle: 'preserve-3d',
       }}
     >
       {PHILOSOPHY_CARDS.map((card, i) => {
         const t = targetFor(i, selected, hovered)
         const isSelected = selected === i
-        const standing = selected === null
         return (
           <motion.div
             key={card.id}
             className="absolute top-1/2 left-1/2 cursor-pointer select-none"
-            style={{ transformStyle: 'preserve-3d' }}
             animate={t}
             transition={TRANSITION}
             onClick={() => handleClick(i)}
@@ -192,30 +177,22 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
               </motion.div>
             </div>
 
-            {/* Standing hover label — the card's own name at its bottom-right,
-                so it tracks the hovered card. It lives OUTSIDE the overflow-hidden
-                image (no clipping), stays on one line (nowrap), and is
-                counter-rotated out of the deck's Y/Z tilt so it reads flat. The
-                forward z-lift keeps the (counter-rotated) label fully in front of
-                the card plane instead of dipping behind it. */}
+            {/* Name below the card — shown only when expanded (centered). */}
             <motion.p
-              className="text-card-name pointer-events-none absolute right-[28px] bottom-[24px] text-[24px] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap"
-              style={{ transformStyle: 'preserve-3d' }}
-              animate={{
-                opacity: standing && hovered === i ? 1 : 0,
-                rotateY: -FAN_ROTY,
-                rotateZ: -(i - 1) * FAN_RZ,
-                z: 120,
-              }}
+              className="text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-center text-[20px] leading-[1.4] font-bold tracking-[-0.04em]"
+              animate={{ opacity: selected !== null ? 1 : 0 }}
               transition={FADE}
             >
               {card.name}
             </motion.p>
 
-            {/* Name below the card — shown only when expanded. */}
+            {/* Standing name — lives inside the card group, so it inherits the
+                card's skew and sits right below the hovered card (reference
+                "MILLA"). Shares the expanded label's style. Shown only for the
+                hovered card while standing. */}
             <motion.p
-              className="text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-center text-[20px] leading-[1.4] font-bold tracking-[-0.04em]"
-              animate={{ opacity: selected !== null ? 1 : 0 }}
+              className="text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-right text-[20px] leading-[1.4] font-bold tracking-[-0.04em]"
+              animate={{ opacity: standing && hovered === i ? 1 : 0 }}
               transition={FADE}
             >
               {card.name}
