@@ -48,7 +48,9 @@ export function PortfolioModal({ project, onClose }: PortfolioModalProps) {
         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative h-full w-full overflow-hidden rounded-[20px]">
+        {/* Solid white base so a slide crossfade (both layers <1 opacity) shows
+            white, not the dim behind — also a backstop once real images land. */}
+        <div className="relative h-full w-full overflow-hidden rounded-[20px] bg-white">
           <AnimatePresence>
             <motion.div
               key={i}

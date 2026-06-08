@@ -41,7 +41,10 @@ const CANVAS_H = 600
 const CARD_W = 320
 const CARD_H = 420
 
-const R = 1280
+// R sets the inter-card spacing (≈ R·sin(ANG) between adjacent centers); at the
+// original 1280 that was ~310px < the 320 card width, so neighbors overlapped.
+// 1680 → ~406px spacing, a comfortable gap between cards (see 5.png).
+const R = 1680
 const ANG = 14 // degrees per slot
 const ANG_RAD = (ANG * Math.PI) / 180
 
@@ -89,10 +92,11 @@ function PortfolioCard({
   const rotate = useTransform(p, (v) => v * ANG)
   const zIndex = useTransform(p, (v) => Math.round(100 - Math.abs(v) * 10))
   // Fade the cards that swing past the visible arc; also drop their pointer
-  // events so an invisible card can't intercept a click.
+  // events so an invisible card can't intercept a click. Visible cards INHERIT
+  // (so the parent's active-gating decides whether the wheel is interactive).
   const opacity = useTransform(p, [-2.6, -2.2, 2.2, 2.6], [0, 1, 1, 0])
   const pointerEvents = useTransform(opacity, (o) =>
-    o < 0.05 ? 'none' : 'auto'
+    o < 0.05 ? 'none' : 'inherit'
   )
   const light = isLightColor(project.color)
 
@@ -133,7 +137,7 @@ function PortfolioCard({
 
 interface PortfolioCarouselProps {
   projects: Project[]
-  /** True while Portfolio is the active slide — gates fade-in + auto-rotate. */
+  /** True while Portfolio is the active slide — gates auto-rotate + interactivity. */
   active: boolean
   /** True while the detail modal is open — freezes the wheel on the open card. */
   modalOpen: boolean
@@ -253,22 +257,29 @@ export function PortfolioCarousel({
   )
 
   return (
-    <div className="flex w-full flex-1 flex-col">
-      {/* Wheel — fades/rises in on every (re)entry. */}
-      <motion.div
+    <div className="flex min-h-0 w-full flex-1 flex-col">
+      {/* Wheel band — the interactive surface (hover-to-pause + card pointer
+          events flow from here). It sits BELOW the title spacer, so enabling
+          pointer events while active never covers the header/nav above it; the
+          whole layer's opacity fade lives on the portal root in the section. */}
+      <div
         className="relative flex min-h-0 flex-1 items-center justify-center"
-        animate={{ opacity: active ? 1 : 0, y: active ? 0 : 16 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        style={{ pointerEvents: active ? 'auto' : 'none' }}
+        onPointerEnter={() => setHovered(true)}
+        onPointerLeave={() => setHovered(false)}
       >
+        {/* Stage: cards are placed on a fixed-px arc around viewport center and
+            only scaled DOWN on narrow screens (ratio<=1). The portal layer is
+            full-viewport with overflow hidden, so the outer cards clip at the
+            real screen edges rather than the 1440 frame. */}
         <div
           className="relative shrink-0"
           style={{
             width: CANVAS_W,
             height: CANVAS_H,
             transform: `scale(${ratio})`,
+            pointerEvents: 'inherit',
           }}
-          onPointerEnter={() => setHovered(true)}
-          onPointerLeave={() => setHovered(false)}
         >
           {projects.map((proj, i) => (
             <PortfolioCard
@@ -281,12 +292,12 @@ export function PortfolioCarousel({
             />
           ))}
         </div>
-      </motion.div>
+      </div>
 
       {/* Centered brand name — separate from the wheel. Crosses over (old up /
           new in from below) as the centered card changes. Its bottom sits the
           section's bottom margin (100px) above the slide edge. */}
-      <div className="relative flex min-h-[clamp(28px,2.78vw,40px)] shrink-0 items-start justify-center pb-[clamp(58px,6.94vw,100px)]">
+      <div className="pointer-events-none relative flex min-h-[clamp(28px,2.78vw,40px)] shrink-0 items-start justify-center pb-[clamp(58px,6.94vw,100px)]">
         <AnimatePresence>
           <motion.p
             key={centerIndex}
