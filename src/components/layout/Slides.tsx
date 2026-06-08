@@ -13,7 +13,7 @@ interface SlidesProps {
  */
 export function Slides({ trackY, children }: SlidesProps) {
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className="relative z-20 h-full w-full overflow-hidden">
       <motion.div
         className="flex flex-col will-change-transform"
         style={{ y: trackY }}

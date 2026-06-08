@@ -16,16 +16,18 @@ interface HeaderProps {
  */
 export function Header({ index, goTo }: HeaderProps) {
   const onDark = SLIDES[index]?.theme === 'dark'
-  const baseText = onDark ? 'text-title-on-dark' : 'text-title-on-light'
+  // On dark slides the nav uses the muted nav grey; on light slides it falls
+  // back to the dark title color so it stays legible.
+  const baseText = onDark ? 'text-text-nav' : 'text-title-on-light'
 
   return (
     <header className="absolute inset-x-0 top-0 z-30">
-      <Container className="flex items-center justify-between py-6">
+      <Container className="flex h-[65px] items-center justify-between">
         <button
           type="button"
           onClick={() => goTo(0)}
           className={cn(
-            'text-lg font-bold tracking-tight transition-colors',
+            'text-[20px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors',
             index === 0 ? 'text-accent' : baseText
           )}
         >
@@ -39,7 +41,7 @@ export function Header({ index, goTo }: HeaderProps) {
               type="button"
               onClick={() => goTo(item.index)}
               className={cn(
-                'text-sm font-medium transition-colors',
+                'hover:text-accent text-[18px] leading-[1.4] font-medium tracking-[-0.04em] transition-colors',
                 index === item.index ? 'text-accent' : baseText
               )}
             >

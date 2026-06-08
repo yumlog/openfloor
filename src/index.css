@@ -18,6 +18,12 @@
   --color-title-on-dark: #ffffff;
   --color-text-on-dark: #a3a3a3;
 
+  /* Nav / logo text (header) */
+  --color-text-nav: #d4d4d4;
+
+  /* Oversized ghost background text on dark slides */
+  --color-ghost-on-dark: #262626;
+
   /* Text on light backgrounds */
   --color-title-on-light: #111111;
   --color-text-on-light: #666666;
@@ -50,13 +56,20 @@
 
 /* ---------------------------------------------------------------------------
    Central video blend. Multiply lets the (alpha-less) clip sit on light
-   backdrops; on dark slides the body.is-dark class swaps to normal so the
-   object isn't crushed against near-black.
+   backdrops. On dark slides, invert the source so its white background becomes
+   black and the dark glass becomes bright, then composite with lighten —
+   black-on-near-black disappears, leaving the bright object visible.
+   hue-rotate(180deg) after invert cancels the complementary-color shift so the
+   glass tone stays neutral instead of leaning yellow.
 --------------------------------------------------------------------------- */
 .central-video {
   mix-blend-mode: multiply;
 }
 
 body.is-dark .central-video {
-  mix-blend-mode: normal;
+  mix-blend-mode: lighten;
+}
+
+body.is-dark .central-video__el {
+  filter: invert(1) hue-rotate(180deg);
 }

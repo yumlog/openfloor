@@ -42,7 +42,7 @@ export default function App() {
       />
 
       <Slides trackY={trackY}>
-        <HeroSection />
+        <HeroSection slide={slide} goTo={goTo} />
         <AboutSection />
         <PhilosophySection />
         <VisionSection />

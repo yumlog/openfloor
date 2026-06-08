@@ -36,7 +36,7 @@ Scripts: `yarn dev`, `yarn build` (tsc -b + vite build), `yarn preview`,
 - **Design frame** is `max-width: 1440px`, centered. Wider viewports get equal
   side margins, and that margin **bleeds the current slide's background color**.
 - **Full-bleed elements** (section backgrounds, the bg crossfade) must NOT be
-  capped at 1440. Only *content* lives inside the frame. Use `<Container>` for
+  capped at 1440. Only _content_ lives inside the frame. Use `<Container>` for
   content; keep backgrounds outside it.
 - **Each section is exactly one screen tall.** Use `100dvh` / `svh` (mobile
   address-bar safe), never `vh`.
@@ -50,17 +50,17 @@ Scripts: `yarn dev`, `yarn build` (tsc -b + vite build), `yarn preview`,
 
 ## Design tokens (`@theme` in `src/index.css`)
 
-| Token                     | Value     | Utility example        |
-| ------------------------- | --------- | ---------------------- |
-| `--color-bg-dark`         | `#171717` | `bg-bg-dark`           |
-| `--color-bg-light`        | `#ffffff` | `bg-bg-light`          |
-| `--color-accent`          | `#FB3640` | `text-accent`          |
-| `--color-title-on-dark`   | `#ffffff` | `text-title-on-dark`   |
-| `--color-text-on-dark`    | `#a3a3a3` | `text-text-on-dark`    |
-| `--color-title-on-light`  | `#111111` | `text-title-on-light`  |
-| `--color-text-on-light`   | `#666666` | `text-text-on-light`   |
-| `--font-sans`             | Montserrat → Pretendard | `font-sans` |
-| `--container-frame`       | `1440px`  | `max-w-frame`          |
+| Token                    | Value                   | Utility example       |
+| ------------------------ | ----------------------- | --------------------- |
+| `--color-bg-dark`        | `#171717`               | `bg-bg-dark`          |
+| `--color-bg-light`       | `#ffffff`               | `bg-bg-light`         |
+| `--color-accent`         | `#FB3640`               | `text-accent`         |
+| `--color-title-on-dark`  | `#ffffff`               | `text-title-on-dark`  |
+| `--color-text-on-dark`   | `#a3a3a3`               | `text-text-on-dark`   |
+| `--color-title-on-light` | `#111111`               | `text-title-on-light` |
+| `--color-text-on-light`  | `#666666`               | `text-text-on-light`  |
+| `--font-sans`            | Montserrat → Pretendard | `font-sans`           |
+| `--container-frame`      | `1440px`                | `max-w-frame`         |
 
 - **Fonts:** Montserrat (Google Fonts) for Latin, Pretendard (jsDelivr CDN) for
   Korean. Both linked in `index.html`. Default stack is Montserrat → Pretendard.

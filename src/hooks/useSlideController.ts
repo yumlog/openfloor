@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { animate, useMotionValue, type MotionValue } from 'motion/react'
-import { COOLDOWN_MS, SLIDE_DURATION, SLIDE_EASE } from '@/config/slides'
+import { COOLDOWN_MS, SLIDE_DURATION, SLIDE_EASE, SLIDES } from '@/config/slides'
 
 export interface SlideController {
   /** Real-valued slide progress (0 = first section). Drives all animation. */
@@ -52,13 +52,18 @@ export function useSlideController({
     }
   }, [])
 
-  // Scroll-spy index + dark-mode toggle for the video blend.
+  // Scroll-spy index + dark-mode toggle for the video blend. `is-dark` follows
+  // the current slide's configured theme (not an arbitrary progress threshold),
+  // so the dark-blend treatment holds for the whole time the video is on a dark
+  // slide (hero + about).
   useEffect(() => {
-    const unsub = slide.on('change', (v) => {
-      const next = Math.round(v)
+    const apply = (v: number) => {
+      const next = clamp(Math.round(v), 0, SLIDES.length - 1)
       setIndex((prev) => (prev === next ? prev : next))
-      document.body.classList.toggle('is-dark', v > 0.55)
-    })
+      document.body.classList.toggle('is-dark', SLIDES[next]?.theme === 'dark')
+    }
+    apply(slide.get())
+    const unsub = slide.on('change', apply)
     return () => unsub()
   }, [slide])
 

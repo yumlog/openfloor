@@ -18,3 +18,118 @@
 .animate-block-reveal {
   animation: block-reveal 0.8s cubic-bezier(0.77, 0, 0.175, 1) both;
 }
+
+/* ---------------------------------------------------------------------------
+   Hero headline reveal — the effect lives ONLY on the moving boundary.
+
+   A soft-edged boundary sweeps each line left -> right. Three zones:
+     left of edge   already revealed -> clean white, no blur / no chroma
+     the edge strip currently revealing -> soft blur + subtle cyan/red split
+     right of edge  not yet revealed -> hidden (dark page shows through)
+
+   Two stacked copies of the line:
+     A (.hero-reveal-clean) clean white, opaque up to the edge.
+     B (.hero-reveal-edge)  blurred + chroma, windowed to a narrow strip that
+                            rides the edge, so a glyph only goes
+                            (blur + faint chroma) -> clean as the edge passes.
+
+   IMPLEMENTATION: each mask is a soft gradient 3x the line width, rasterized
+   once; the reveal animates ONLY mask-position (100% -> 0%), sliding that soft
+   edge across the line. We deliberately do NOT animate the gradient stops (e.g.
+   via an @property var), because that re-rasterizes the mask every frame and
+   stutters once staggered lines overlap. mask-position is cheap and stays
+   smooth. Widen / narrow the moving strip by moving the gradient stops below.
+
+   Tunables (override per line on .hero-reveal-line):
+     --edge-blur       blur inside the strip
+     --chroma-offset   cyan/red split inside the strip (keep it subtle)
+     --reveal-duration per-line duration
+   Per-line top -> bottom stagger comes from inline --line-delay.
+   Plays once on mount (not scroll-linked).
+--------------------------------------------------------------------------- */
+.hero-reveal-line {
+  --edge-blur: 4px;
+  --chroma-offset: 2px;
+  --reveal-duration: 1.5s;
+
+  position: relative;
+  /* Shrink the line box to its text so BOTH layers below share the exact same
+     width. The masks are sized relative to their own box (mask-size: 300%); if
+     the clean (text-width) and edge (block-width) layers had different widths,
+     the same mask-position would travel at different speeds and the edge strip
+     would lag the text — worse on shorter lines. fit-content keeps them equal. */
+  display: block;
+  width: fit-content;
+}
+
+/* A — clean white, opaque behind the edge. Block so it fills the (text-width)
+   line box and matches the absolutely-positioned edge layer exactly. */
+.hero-reveal-clean {
+  position: relative;
+  z-index: 0;
+  display: block;
+  -webkit-mask-image: linear-gradient(to right, #000 47%, transparent 51%);
+  mask-image: linear-gradient(to right, #000 47%, transparent 51%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: hero-edge-sweep var(--reveal-duration) linear both;
+  animation-delay: var(--line-delay, 0s);
+}
+
+/* B — blurred + subtle cyan/red split, windowed to the moving edge strip. */
+.hero-reveal-edge {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Soft chromatic edge done entirely with text-shadow (a white halo to fake
+     the blur + offset cyan/red), so there is no per-frame filter:blur to
+     re-rasterize as the mask slides. */
+  text-shadow:
+    0 0 var(--edge-blur) rgba(255, 255, 255, 0.5),
+    calc(-1 * var(--chroma-offset)) 0 var(--edge-blur) #00ffff,
+    var(--chroma-offset) 0 var(--edge-blur) #ff003c;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 46%,
+    #000 49%,
+    transparent 52%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 46%,
+    #000 49%,
+    transparent 52%
+  );
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: hero-edge-sweep var(--reveal-duration) linear both;
+  animation-delay: var(--line-delay, 0s);
+}
+
+/* Slide the soft mask from fully-hidden (right) to fully-revealed (left). */
+@keyframes hero-edge-sweep {
+  from {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  to {
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
+  }
+}
+
+/* Slow continuous rotation — Hero circular badge. */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 14s linear infinite;
+}
