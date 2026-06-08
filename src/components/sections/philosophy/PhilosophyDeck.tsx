@@ -30,15 +30,26 @@ const CARD_GAP = 40
 // Distance from stage center to a side-card center.
 const SLOT_X = CENTER / 2 + CARD_GAP + SIDE / 2 // 480
 
-// Standing deck card size + fan offsets (philosophy-standing.png).
-const DECK_W = 360
-const DECK_H = 440
-const FAN_X = 60
-const FAN_Y = 26
-const FAN_Z = 90
-const FAN_ROTY = -26
-const FAN_RZ = 3
-const HOVER_LIFT = 24
+// Standing deck card size + fan offsets (philosophy-standing.png). Big cards
+// with a wide fan: front card large + lower-left, each card stepping right /
+// up / back behind it.
+//
+// The source card is WIDER than it is tall (W ≈ H / cos(FAN_ROTY)) so that the
+// Y-rotation foreshortens it back to a *square-looking* projection — a square
+// source would read as a tall sliver once rotated.
+const FAN_ROTY = -38
+const DECK_H = 460
+const DECK_W = 580 // ≈ 460 / cos(38°) -> projects ~square
+// Wide step (esp. vertical) so even the back card keeps a generous exposed
+// strip to hover / click — not just its right edge.
+const FAN_X = 140
+const FAN_Y = 64
+const FAN_Z = 70
+const FAN_RZ = 4
+const HOVER_LIFT = 28
+// Closer perspective than the default so the Y-rotation foreshortens hard
+// (near edge tall, far edge short) like the reference.
+const PERSPECTIVE = 1200
 
 const TRANSITION: Transition = {
   type: 'spring',
@@ -133,13 +144,14 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
         width: CANVAS_W,
         height: CANVAS_H,
         transform: `scale(${ratio})`,
-        perspective: 2000,
+        perspective: PERSPECTIVE,
         transformStyle: 'preserve-3d',
       }}
     >
       {PHILOSOPHY_CARDS.map((card, i) => {
         const t = targetFor(i, selected, hovered)
         const isSelected = selected === i
+        const standing = selected === null
         return (
           <motion.div
             key={card.id}
@@ -160,13 +172,13 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
             >
               {/* Scrim for white-text legibility — only on the centered card. */}
               <motion.div
-                className="absolute inset-0 bg-black/35"
+                className="pointer-events-none absolute inset-0 bg-black/35"
                 animate={{ opacity: isSelected ? 1 : 0 }}
                 transition={FADE}
               />
               {/* Body + closing quote — only on the centered card. */}
               <motion.div
-                className="absolute inset-0 px-[48px] py-[60px]"
+                className="pointer-events-none absolute inset-0 px-[48px] py-[60px]"
                 animate={{ opacity: isSelected ? 1 : 0 }}
                 transition={FADE}
                 aria-hidden={!isSelected}
@@ -180,9 +192,29 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
               </motion.div>
             </div>
 
+            {/* Standing hover label — the card's own name at its bottom-right,
+                so it tracks the hovered card. It lives OUTSIDE the overflow-hidden
+                image (no clipping), stays on one line (nowrap), and is
+                counter-rotated out of the deck's Y/Z tilt so it reads flat. The
+                forward z-lift keeps the (counter-rotated) label fully in front of
+                the card plane instead of dipping behind it. */}
+            <motion.p
+              className="text-card-name pointer-events-none absolute right-[28px] bottom-[24px] text-[24px] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap"
+              style={{ transformStyle: 'preserve-3d' }}
+              animate={{
+                opacity: standing && hovered === i ? 1 : 0,
+                rotateY: -FAN_ROTY,
+                rotateZ: -(i - 1) * FAN_RZ,
+                z: 120,
+              }}
+              transition={FADE}
+            >
+              {card.name}
+            </motion.p>
+
             {/* Name below the card — shown only when expanded. */}
             <motion.p
-              className="text-card-name absolute top-full right-0 left-0 mt-[28px] text-center text-[20px] leading-[1.4] font-bold tracking-[-0.04em]"
+              className="text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-center text-[20px] leading-[1.4] font-bold tracking-[-0.04em]"
               animate={{ opacity: selected !== null ? 1 : 0 }}
               transition={FADE}
             >
@@ -191,17 +223,6 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
           </motion.div>
         )
       })}
-
-      {/* Standing hover label — the hovered deck card's name, bottom-right. */}
-      <motion.p
-        className="text-card-name absolute right-[60px] bottom-[40px] text-[20px] leading-[1.4] font-bold tracking-[-0.04em]"
-        animate={{
-          opacity: selected === null && hovered !== null ? 1 : 0,
-        }}
-        transition={FADE}
-      >
-        {hovered !== null ? PHILOSOPHY_CARDS[hovered].name : ''}
-      </motion.p>
     </div>
   )
 }
