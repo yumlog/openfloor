@@ -2,13 +2,14 @@ import { ArrowDown } from 'lucide-react'
 
 /**
  * Hero circular badge — "SCROLL DOWN" set on a slowly-rotating ring with a
- * down arrow pinned at the center. 80px. The ring text is an SVG <textPath>;
+ * down arrow pinned at the center. 80px at the 1440 reference, scaled fluidly
+ * with the frame (floor 48px). The ring text is an SVG <textPath>;
  * the spin lives in keyframes.css (animate-spin-slow). Hovering anywhere on the
  * badge fades both the ring text and the arrow to the accent color.
  */
 export function CircularBadge() {
   return (
-    <div className="group relative h-20 w-20">
+    <div className="group relative size-[clamp(48px,5.56vw,80px)]">
       <svg
         viewBox="0 0 100 100"
         className="animate-spin-slow text-text-nav group-hover:text-accent h-full w-full transition-colors duration-300"
@@ -28,9 +29,8 @@ export function CircularBadge() {
       </svg>
 
       <ArrowDown
-        size={20}
         strokeWidth={2}
-        className="text-text-nav group-hover:text-accent absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-colors duration-300"
+        className="text-text-nav group-hover:text-accent absolute top-1/2 left-1/2 size-[clamp(12px,1.39vw,20px)] -translate-x-1/2 -translate-y-1/2 transition-colors duration-300"
       />
     </div>
   )

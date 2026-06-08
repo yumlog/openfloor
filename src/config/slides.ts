@@ -60,4 +60,3 @@ export const NAV_ITEMS: NavItem[] = [
 /* Snap engine timing. */
 export const SLIDE_DURATION = 1.05
 export const SLIDE_EASE = [0.77, 0, 0.175, 1] as const
-export const COOLDOWN_MS = 220

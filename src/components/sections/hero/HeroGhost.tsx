@@ -26,12 +26,12 @@ export function HeroGhost({ slide }: HeroGhostProps) {
       style={{ y, opacity }}
       className="pointer-events-none absolute inset-0 flex h-[100dvh] flex-col justify-end"
     >
-      <Container className="mb-[100px]">
+      <Container className="mb-[clamp(58px,6.94vw,100px)] max-md:mb-8">
         <motion.h2
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 1.2, ease: 'easeOut' }}
-          className="text-ghost-on-dark text-[115px] leading-none font-bold tracking-[-0.04em] whitespace-nowrap"
+          className="text-ghost-on-dark text-[clamp(46px,8vw,115px)] leading-none font-bold tracking-[-0.04em] whitespace-nowrap max-md:text-[44px]"
         >
           <span className="block">UNDERSTAND DEEPER</span>
           <span className="block">BUILD TO LAST</span>

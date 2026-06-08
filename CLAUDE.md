@@ -48,6 +48,31 @@ Scripts: `yarn dev`, `yarn build` (tsc -b + vite build), `yarn preview`,
 - **Keyframe animations** (block reveal, etc.) go in `src/styles/keyframes.css`,
   not crammed into Tailwind utility chains.
 
+## Responsive
+
+Strategy is **fluid scale (A)**: the 1440 design is fixed at ≥1440px and shrinks
+_proportionally_ with the frame width below that, down to a floor. Mobile
+(`<768px`) is a separate, purpose-built reflow — not the scaled desktop.
+
+- **Design reference width is 1440px.** At ≥1440 use the design value verbatim;
+  below, scale it.
+- **Fixed px → fluid:** a 1440-design value of `N`px becomes
+  `clamp(FLOOR, (N/14.4)vw, Npx)`. The `vw` term is `N/14.4` because `N` is
+  `N/1440` of the frame and `1vw = 1440/100` at the reference width.
+  Examples: `60px → clamp(36px, 4.17vw, 60px)`,
+  `16px → clamp(12px, 1.11vw, 16px)`, `115px → clamp(46px, 8vw, 115px)`.
+- **FLOOR** is ~55–60% of the design value (decorative elements may go lower).
+  Apply to **all** fixed px: type, spacing, max-widths, icons, ghost text,
+  badges — not just fonts.
+- **Mobile (`<768px`)** uses its own layout via `max-md:` overrides instead of
+  the scale (the desktop clamp would either overflow or read too large). Reflow,
+  re-stack, and re-size for the small screen explicitly.
+- **Every section must fit one screen (`100dvh`) at every width**, mobile
+  included — the scroll engine snaps one section per gesture on mobile too.
+- **The central video** (`App.tsx`) scales with `frame.w / 1440` (via
+  `useFrameSize`) so its hero→about composition keeps the same proportions at
+  every width; on mobile it also shifts clear of the stacked text.
+
 ## Design tokens (`@theme` in `src/index.css`)
 
 | Token                    | Value                   | Utility example       |

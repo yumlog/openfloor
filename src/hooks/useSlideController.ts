@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { animate, useMotionValue, type MotionValue } from 'motion/react'
-import {
-  COOLDOWN_MS,
-  SLIDE_DURATION,
-  SLIDE_EASE,
-  SLIDES,
-} from '@/config/slides'
+import { SLIDE_DURATION, SLIDE_EASE, SLIDES } from '@/config/slides'
 
 export interface SlideController {
   /** Real-valued slide progress (0 = first section). Drives all animation. */
@@ -46,6 +41,8 @@ export function useSlideController({
 
   const currentRef = useRef(0)
   const animatingRef = useRef(false)
+  // Direction (+1 / -1) of a gesture made mid-animation, replayed once it ends.
+  const queuedDirRef = useRef(0)
   // Stable handle so the returned goTo identity never changes.
   const goToRef = useRef<(next: number) => void>(() => {})
 
@@ -79,19 +76,33 @@ export function useSlideController({
       if (next === currentRef.current || animatingRef.current) return
       currentRef.current = next
       animatingRef.current = true
-      let cooldownTimer: ReturnType<typeof setTimeout>
       animate(slide, next, {
         duration: SLIDE_DURATION,
         ease: SLIDE_EASE,
         onComplete: () => {
-          cooldownTimer = setTimeout(() => {
-            animatingRef.current = false
-          }, COOLDOWN_MS)
+          animatingRef.current = false
+          // Replay a gesture that arrived mid-animation: step once more that way
+          // the instant the snap settles, so continuous scrolling never stalls.
+          const dir = queuedDirRef.current
+          if (dir !== 0) {
+            queuedDirRef.current = 0
+            goTo(currentRef.current + dir)
+          }
         },
       })
-      return () => clearTimeout(cooldownTimer)
     }
     goToRef.current = goTo
+
+    // One directional step. If a snap is in flight, don't drop the input — keep
+    // the latest direction and let onComplete replay it. No post-snap dead time;
+    // the wheel accumulator below is what keeps one gesture to one step.
+    const step = (dir: number) => {
+      if (animatingRef.current) {
+        queuedDirRef.current = dir
+      } else {
+        goTo(currentRef.current + dir)
+      }
+    }
 
     if (!enabled) return
 
@@ -100,16 +111,15 @@ export function useSlideController({
     let wheelResetTimer: ReturnType<typeof setTimeout>
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
-      if (animatingRef.current) return
       wheelAccum += e.deltaY
       clearTimeout(wheelResetTimer)
       wheelResetTimer = setTimeout(() => (wheelAccum = 0), WHEEL_RESET_MS)
       if (wheelAccum > WHEEL_THRESHOLD) {
         wheelAccum = 0
-        goTo(currentRef.current + 1)
+        step(1)
       } else if (wheelAccum < -WHEEL_THRESHOLD) {
         wheelAccum = 0
-        goTo(currentRef.current - 1)
+        step(-1)
       }
     }
 
@@ -124,17 +134,17 @@ export function useSlideController({
     const onTouchEnd = (e: TouchEvent) => {
       const delta = touchStartY - e.changedTouches[0].clientY
       if (Math.abs(delta) < TOUCH_THRESHOLD) return
-      goTo(currentRef.current + (delta > 0 ? 1 : -1))
+      step(delta > 0 ? 1 : -1)
     }
 
     // Keyboard.
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault()
-        goTo(currentRef.current + 1)
+        step(1)
       } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
         e.preventDefault()
-        goTo(currentRef.current - 1)
+        step(-1)
       } else if (e.key === 'Home') {
         e.preventDefault()
         goTo(0)

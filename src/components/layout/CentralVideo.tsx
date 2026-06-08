@@ -1,6 +1,8 @@
 import { motion, type MotionValue } from 'motion/react'
 
 interface CentralVideoProps {
+  /** Base (slide-0) box edge in px; scaled with the frame by App. */
+  size: number
   scale: MotionValue<number>
   x: MotionValue<number>
   y: MotionValue<number>
@@ -18,12 +20,18 @@ interface CentralVideoProps {
  * doesn't isolate), the scroll transform lives on a separate inner div, and the
  * blend element itself carries only opacity. Mirrors the old working structure.
  */
-export function CentralVideo({ scale, x, y, opacity }: CentralVideoProps) {
+export function CentralVideo({
+  size,
+  scale,
+  x,
+  y,
+  opacity,
+}: CentralVideoProps) {
   return (
     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
       <motion.div
-        className="central-video h-[860px] w-[860px]"
-        style={{ opacity }}
+        className="central-video"
+        style={{ opacity, width: size, height: size }}
       >
         <motion.div className="h-full w-full" style={{ scale, x, y }}>
           <video

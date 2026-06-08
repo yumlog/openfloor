@@ -12,7 +12,12 @@ import { PortfolioSection } from '@/components/sections/PortfolioSection'
 import { ContactSection } from '@/components/sections/ContactSection'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { useSlideController } from '@/hooks/useSlideController'
-import { BG_COLORS, BG_STOPS, TOTAL_SLIDES } from '@/config/slides'
+import {
+  BG_COLORS,
+  BG_STOPS,
+  DESIGN_WIDTH,
+  TOTAL_SLIDES,
+} from '@/config/slides'
 
 export default function App() {
   const frame = useFrameSize()
@@ -26,13 +31,27 @@ export default function App() {
 
   // Central video, slide 0 -> 1: shrink + move toward the upper-right, then
   // fade out before the Philosophy slide so the deck has the stage alone.
-  // Slide 0: 860 square centered. Slide 1: 354 square centered at
-  // (frame.w - 402, 301). The x/y translate moves the (centered) box by an
-  // absolute px amount, so it's independent of the base size — only the scale
-  // changes when the base grows (690 -> 860), keeping the about state identical.
+  //
+  // The whole composition is defined at the 1440 reference and scaled by
+  // `ratio` (frame.w / 1440) so it shrinks proportionally with the frame on
+  // narrower screens — base size, the about-state target size, and the
+  // about-state offsets (402 from the right, 301 from the top) all scale
+  // together, so the about state reads identically at every width.
+  // Slide 0: `videoSize` square centered. Slide 1: a 354/860 scale of it,
+  // centered at (frame.w - 402*ratio, 301*ratio). The x/y translate moves the
+  // centered box by an absolute px amount, so it's independent of the base
+  // size — only the scale (constant 354/860) shapes the about state.
+  // On mobile the slide-0 box is nudged down so it clears the stacked hero text.
+  const ratio = frame.w / DESIGN_WIDTH
+  const isMobile = frame.w < 768
+  const videoSize = 860 * ratio
   const videoScale = useTransform(slide, [0, 1], [1, 354 / 860])
-  const videoX = useTransform(slide, [0, 1], [0, frame.w / 2 - 402])
-  const videoY = useTransform(slide, [0, 1], [0, 301 - frame.h / 2])
+  const videoX = useTransform(slide, [0, 1], [0, frame.w / 2 - 402 * ratio])
+  const videoY = useTransform(
+    slide,
+    [0, 1],
+    [isMobile ? frame.h * 0.22 : 0, 301 * ratio - frame.h / 2]
+  )
   const videoOpacity = useTransform(slide, [1.3, 1.75], [1, 0])
 
   return (
@@ -40,6 +59,7 @@ export default function App() {
       <HeroGhost slide={slide} />
 
       <CentralVideo
+        size={videoSize}
         scale={videoScale}
         x={videoX}
         y={videoY}

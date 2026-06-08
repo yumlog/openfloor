@@ -39,10 +39,11 @@ export function HeroSection({ slide, goTo }: HeroSectionProps) {
         style={{ opacity }}
         className="flex h-full flex-col justify-between"
       >
-        {/* Top: headline + CTA (left), intro (right). pt reserves the header. */}
-        <Container className="flex justify-between pt-[65px]">
-          <div className="mt-[142px]">
-            <h1 className="text-title-on-dark text-[60px] leading-[1.5] font-bold tracking-normal">
+        {/* Top: headline + CTA (left), intro (right). pt reserves the header.
+            Mobile (<768): stack vertically — headline → CONTACT → intro. */}
+        <Container className="flex justify-between pt-[65px] max-md:flex-col max-md:gap-6 max-md:pt-[76px]">
+          <div className="mt-[clamp(82px,9.86vw,142px)] max-md:mt-0">
+            <h1 className="text-title-on-dark text-[clamp(36px,4.17vw,60px)] leading-[1.5] font-bold tracking-normal max-md:text-[clamp(26px,7vw,34px)]">
               {HEADLINE_LINES.map((line, i) => (
                 <span
                   key={line}
@@ -61,15 +62,18 @@ export function HeroSection({ slide, goTo }: HeroSectionProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55, duration: 0.6, ease: SLIDE_EASE }}
-              className="mt-8"
+              className="mt-[clamp(18px,2.22vw,32px)] max-md:mt-5"
             >
               <button
                 type="button"
                 onClick={() => goTo(CONTACT_INDEX)}
-                className="group border-accent text-accent hover:bg-accent inline-flex items-center gap-2 rounded-full border-2 py-3 pr-3 pl-4 text-[20px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors hover:text-white"
+                className="group border-accent text-accent hover:bg-accent inline-flex items-center gap-2 rounded-full border-2 py-[clamp(8px,0.83vw,12px)] pr-[clamp(8px,0.83vw,12px)] pl-[clamp(12px,1.11vw,16px)] text-[clamp(12px,1.39vw,20px)] leading-[1.2] font-bold tracking-[-0.04em] transition-colors hover:text-white"
               >
                 CONTACT
-                <ArrowUpRight size={24} strokeWidth={2} />
+                <ArrowUpRight
+                  strokeWidth={2}
+                  className="size-[clamp(16px,1.67vw,24px)] shrink-0"
+                />
               </button>
             </motion.div>
           </div>
@@ -78,7 +82,7 @@ export function HeroSection({ slide, goTo }: HeroSectionProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65, duration: 0.6, ease: SLIDE_EASE }}
-            className="text-text-on-dark mt-[160px] max-w-[264px] text-[16px] leading-[1.5] font-medium whitespace-pre-line"
+            className="text-text-on-dark mt-[clamp(93px,11.11vw,160px)] max-w-[clamp(153px,18.33vw,264px)] text-[clamp(12px,1.11vw,16px)] leading-[1.5] font-medium whitespace-pre-line max-md:mt-0 max-md:max-w-none max-md:text-[14px]"
           >
             {INTRO}
           </motion.p>
@@ -86,12 +90,12 @@ export function HeroSection({ slide, goTo }: HeroSectionProps) {
 
         {/* Bottom: rotating badge (right). The oversized ghost text behind it
             lives in the Frame layer (HeroGhost) so the video can blend over it. */}
-        <Container className="relative mb-[100px]">
+        <Container className="relative mb-[clamp(58px,6.94vw,100px)] max-md:mb-8">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.9, duration: 0.6 }}
-            className="absolute right-0 bottom-0"
+            className="absolute right-6 bottom-0 md:right-16"
           >
             <CircularBadge />
           </motion.div>
