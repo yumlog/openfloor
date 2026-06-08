@@ -36,14 +36,15 @@ const CARD_GAP = 40
 // Distance from stage center to a side-card center.
 const SLOT_X = CENTER / 2 + CARD_GAP + SIDE / 2 // 480
 
-// Standing deck (philosophy-standing-name.png): identical square cards, one
-// shared skew, constant up-right diagonal step. Front (index 0) sits lowest-
-// left and on top; the back card steps up-right and underneath.
-const DECK = 360
-const SKEW = 12 // skewY, deg — "\" lean (left edge high); vertical edges stay vertical
-const STEP_X = 116
-const STEP_Y = 46
-const HOVER_LIFT = 22
+// Standing deck (philosophy-standing-name.png): identical portrait cards
+// (W:H ≈ 0.7), one shared skew, constant diagonal step. Front (index 0) sits
+// on top; the back card steps over and underneath.
+const DECK_W = 280
+const DECK_H = 380 // ≈ DECK_W / 0.7 -> portrait like the reference
+const SKEW = 30 // skewY, deg — "\" lean (left edge high); vertical edges stay vertical
+const STEP_X = 100
+const STEP_Y = 0
+const HOVER_LIFT = 30
 
 const TRANSITION: Transition = {
   type: 'spring',
@@ -68,10 +69,10 @@ function targetFor(
     const cx = (index - 1) * STEP_X
     const cy = (1 - index) * STEP_Y - (hovered === index ? HOVER_LIFT : 0)
     return {
-      width: DECK,
-      height: DECK,
-      x: cx - DECK / 2,
-      y: cy - DECK / 2,
+      width: DECK_W,
+      height: DECK_H,
+      x: cx - DECK_W / 2,
+      y: cy - DECK_H / 2,
       skewY: SKEW,
       zIndex: 30 - index * 10 + (hovered === index ? 5 : 0),
     }
@@ -177,22 +178,19 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
               </motion.div>
             </div>
 
-            {/* Name below the card — shown only when expanded (centered). */}
+            {/* Name below the card. Single label for both states (they're
+                mutually exclusive): expanded shows every card's name centered;
+                standing shows only the hovered card's name right-aligned. Lives
+                inside the card group, so it inherits the card's skew and tracks
+                the hovered card (reference "MILLA"). */}
             <motion.p
-              className="text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-center text-[20px] leading-[1.4] font-bold tracking-[-0.04em]"
-              animate={{ opacity: selected !== null ? 1 : 0 }}
-              transition={FADE}
-            >
-              {card.name}
-            </motion.p>
-
-            {/* Standing name — lives inside the card group, so it inherits the
-                card's skew and sits right below the hovered card (reference
-                "MILLA"). Shares the expanded label's style. Shown only for the
-                hovered card while standing. */}
-            <motion.p
-              className="text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-right text-[20px] leading-[1.4] font-bold tracking-[-0.04em]"
-              animate={{ opacity: standing && hovered === i ? 1 : 0 }}
+              className={cn(
+                'text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-[20px] leading-[1.4] font-bold tracking-[-0.04em]',
+                standing ? 'text-right' : 'text-center'
+              )}
+              animate={{
+                opacity: standing ? (hovered === i ? 1 : 0) : 1,
+              }}
               transition={FADE}
             >
               {card.name}
