@@ -27,6 +27,8 @@
   /* Text on light backgrounds */
   --color-title-on-light: #111111;
   --color-text-on-light: #666666;
+  /* Card name labels (Philosophy deck) */
+  --color-card-name: #333333;
 
   /* Type: Latin first, then Korean fallback */
   --font-sans: 'Montserrat', 'Pretendard', sans-serif;

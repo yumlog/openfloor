@@ -45,7 +45,11 @@
      --chroma-offset   cyan/red split inside the strip (keep it subtle)
      --reveal-duration per-line duration
    Per-line top -> bottom stagger comes from inline --line-delay.
-   Plays once on mount (not scroll-linked).
+
+   The default (not-playing) state is fully HIDDEN; the sweep is applied only
+   while the line carries .is-playing (toggled by RevealText from the section's
+   `active`). So an off-screen / inactive section holds the hidden state instead
+   of the finished white text — no flash of revealed text when re-entering.
 --------------------------------------------------------------------------- */
 .hero-reveal-line {
   --edge-blur: 4px;
@@ -74,8 +78,9 @@
   mask-size: 300% 100%;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  animation: hero-edge-sweep var(--reveal-duration) linear both;
-  animation-delay: var(--line-delay, 0s);
+  /* Default: fully hidden (mask parked at the unrevealed end). */
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
 }
 
 /* B — blurred + subtle cyan/red split, windowed to the moving edge strip. */
@@ -107,6 +112,15 @@
   mask-size: 300% 100%;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  /* Default: fully hidden (mask parked at the unrevealed end). */
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+}
+
+/* Play the sweep only while active — RevealText adds .is-playing on entry and
+   removes it when the section goes inactive (reverting to the hidden default). */
+.hero-reveal-line.is-playing .hero-reveal-clean,
+.hero-reveal-line.is-playing .hero-reveal-edge {
   animation: hero-edge-sweep var(--reveal-duration) linear both;
   animation-delay: var(--line-delay, 0s);
 }

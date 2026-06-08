@@ -4,10 +4,16 @@ import { animate } from 'motion/react'
 /**
  * Counts from 0 up to `target` (ease-out) whenever `active` is true, and resets
  * to 0 when it isn't — so the count-up replays each time the owning section is
- * (re)entered. Returns the current rounded value; callers append any suffix
+ * (re)entered. `delay` holds at 0 before counting (used to fall in line with a
+ * column cascade). Returns the current rounded value; callers append any suffix
  * ("+", "%") themselves.
  */
-export function useCountUp(target: number, active: boolean, duration = 1.3) {
+export function useCountUp(
+  target: number,
+  active: boolean,
+  delay = 0,
+  duration = 1.3
+) {
   const [value, setValue] = useState(0)
 
   useEffect(() => {
@@ -17,11 +23,12 @@ export function useCountUp(target: number, active: boolean, duration = 1.3) {
     }
     const controls = animate(0, target, {
       duration,
+      delay,
       ease: 'easeOut',
       onUpdate: (v) => setValue(Math.round(v)),
     })
     return () => controls.stop()
-  }, [active, target, duration])
+  }, [active, target, delay, duration])
 
   return value
 }

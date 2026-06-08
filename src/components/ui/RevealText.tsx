@@ -5,6 +5,7 @@ import {
   type CSSProperties,
   type ElementType,
 } from 'react'
+import { cn } from '@/lib/cn'
 
 interface RevealTextProps {
   /** Each entry is one rendered line (pre-split; lines must not wrap). */
@@ -43,9 +44,9 @@ export function RevealText({
   stagger = 0.27,
   baseDelay = 0,
 }: RevealTextProps) {
-  // Start "played" when already active on mount (Hero), otherwise wait for the
-  // first activation (About). The initial off-screen play for an inactive
-  // section is never seen; only activation-triggered plays are visible.
+  // Bump a run id on every false -> true activation; used as the line key so
+  // React remounts the spans and the CSS sweep restarts cleanly. While inactive
+  // the lines drop .is-playing and rest in their hidden default (see keyframes).
   const wasActive = useRef(active)
   const [runId, setRunId] = useState(active ? 1 : 0)
 
@@ -59,7 +60,9 @@ export function RevealText({
       {lines.map((line, i) => (
         <span
           key={`${runId}-${i}`}
-          className="hero-reveal-line"
+          // .is-playing gates the sweep — without it the line holds its hidden
+          // default, so an inactive section never flashes the revealed text.
+          className={cn('hero-reveal-line', active && 'is-playing')}
           style={
             { '--line-delay': `${baseDelay + i * stagger}s` } as CSSProperties
           }

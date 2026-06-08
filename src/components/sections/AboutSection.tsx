@@ -1,16 +1,32 @@
 import { Fragment } from 'react'
+import { motion, type Variants } from 'motion/react'
 import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
 import { useCountUp } from '@/hooks/useCountUp'
+import { RISE, entryTransition } from '@/lib/motion'
 import { SLIDES } from '@/config/slides'
 
 const def = SLIDES[1]
+
+/* Entry-animation timing. The top block leads; the stat row cascades the three
+   columns left -> right, and inside each column label -> number -> caption. */
+const INTRO_DELAY = 0.5
+const STATS_BASE_DELAY = 0.35
+const STATS_STAGGER = 0.12
+/** Start delay for stat column `i` (left -> right cascade). */
+const columnDelay = (i: number) => STATS_BASE_DELAY + i * STATS_STAGGER
+
+/** Divider grows in (scaleY) outward from its center alongside its column. */
+const GROW: Variants = {
+  hidden: { scaleY: 0, opacity: 0 },
+  show: { scaleY: 1, opacity: 1 },
+}
 
 // Headline — pre-split so the reveal sweep stays even (each line must fit on
 // one line; the mask is sized per line box).
 const HEADLINE_LINES = [
   '닫힌 공간에서는 만들어질 수 없는 것이',
-  '있는데, 그것이 바로 시너지입니다.'
+  '있는데, 그것이 바로 시너지입니다.',
 ]
 
 const INTRO =
@@ -57,11 +73,18 @@ export function AboutSection({ active }: AboutSectionProps) {
       id={def.id}
       className="relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden"
     >
-      {/* Top block (left). 124px from the slide top, including the nav. */}
+      {/* Top block (left). 124px from the slide top, including the nav.
+          Label leads, headline reveals, intro follows. */}
       <Container className="pt-[clamp(71px,8.61vw,124px)] max-md:pt-[88px]">
-        <p className="text-accent text-[clamp(12px,1.39vw,20px)] leading-[1.4] font-bold tracking-[-0.04em] max-md:text-[15px]">
+        <motion.p
+          variants={RISE}
+          initial="hidden"
+          animate={active ? 'show' : 'hidden'}
+          transition={entryTransition(0)}
+          className="text-accent text-[clamp(12px,1.39vw,20px)] leading-[1.4] font-bold tracking-[-0.04em] max-md:text-[15px]"
+        >
           ABOUT US
-        </p>
+        </motion.p>
 
         <RevealText
           as="h2"
@@ -70,9 +93,15 @@ export function AboutSection({ active }: AboutSectionProps) {
           className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-[1.5] font-bold tracking-normal max-md:text-[22px]"
         />
 
-        <p className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-[1.5] font-normal whitespace-pre-line max-md:text-[14px]">
+        <motion.p
+          variants={RISE}
+          initial="hidden"
+          animate={active ? 'show' : 'hidden'}
+          transition={entryTransition(INTRO_DELAY)}
+          className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-[1.5] font-normal whitespace-pre-line max-md:text-[14px]"
+        >
           {INTRO}
-        </p>
+        </motion.p>
       </Container>
 
       {/* Stat row (bottom). 124px from the slide bottom; three equal-width
@@ -84,12 +113,16 @@ export function AboutSection({ active }: AboutSectionProps) {
           {STATS.map((stat, i) => (
             <Fragment key={stat.label}>
               {i > 0 && (
-                <div
+                <motion.div
                   aria-hidden
-                  className="bg-text-on-dark/50 h-[clamp(108px,13.19vw,190px)] w-px shrink-0 max-md:hidden"
+                  variants={GROW}
+                  initial="hidden"
+                  animate={active ? 'show' : 'hidden'}
+                  transition={entryTransition(columnDelay(i))}
+                  className="bg-text-on-dark/50 h-[clamp(108px,13.19vw,190px)] w-px shrink-0 origin-center max-md:hidden"
                 />
               )}
-              <StatItem stat={stat} active={active} />
+              <StatItem stat={stat} active={active} index={i} />
             </Fragment>
           ))}
         </div>
@@ -101,23 +134,39 @@ export function AboutSection({ active }: AboutSectionProps) {
 interface StatItemProps {
   stat: StatDef
   active: boolean
+  /** Column position — drives the left -> right cascade delay. */
+  index: number
 }
 
-function StatItem({ stat, active }: StatItemProps) {
-  const value = useCountUp(stat.target, active)
+function StatItem({ stat, active, index }: StatItemProps) {
+  const base = columnDelay(index)
+  // Number falls in line with its column; label leads it, caption trails.
+  const value = useCountUp(stat.target, active, base + 0.05)
 
   return (
     <div className="flex flex-col items-start md:min-w-0 md:flex-1">
-      <span className="text-accent/80 text-[clamp(12px,1.11vw,16px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[14px]">
+      <motion.span
+        variants={RISE}
+        initial="hidden"
+        animate={active ? 'show' : 'hidden'}
+        transition={entryTransition(base)}
+        className="text-accent/80 text-[clamp(12px,1.11vw,16px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[14px]"
+      >
         {stat.label}
-      </span>
+      </motion.span>
       <span className="font-num text-title-on-dark mt-[clamp(12px,1.39vw,20px)] mb-[clamp(12px,1.11vw,16px)] text-[clamp(46px,5.56vw,80px)] leading-[1.2] font-bold tracking-normal tabular-nums max-md:my-2 max-md:text-[40px]">
         {value}
         {stat.suffix}
       </span>
-      <span className="text-title-on-dark text-[clamp(16px,1.94vw,28px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[20px]">
+      <motion.span
+        variants={RISE}
+        initial="hidden"
+        animate={active ? 'show' : 'hidden'}
+        transition={entryTransition(base + 0.12)}
+        className="text-title-on-dark text-[clamp(16px,1.94vw,28px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[20px]"
+      >
         {stat.caption}
-      </span>
+      </motion.span>
     </div>
   )
 }
