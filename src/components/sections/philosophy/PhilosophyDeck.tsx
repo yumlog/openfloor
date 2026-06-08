@@ -42,7 +42,7 @@ const SLOT_X = CENTER / 2 + CARD_GAP + SIDE / 2 // 480
 const DECK_W = 280
 const DECK_H = 380 // ≈ DECK_W / 0.7 -> portrait like the reference
 const SKEW = 30 // skewY, deg — "\" lean (left edge high); vertical edges stay vertical
-const STEP_X = 100
+const STEP_X = 120
 const STEP_Y = 0
 const HOVER_LIFT = 30
 
@@ -55,6 +55,13 @@ const TRANSITION: Transition = {
   duration: 0.6,
 }
 const FADE: Transition = { duration: 0.3, ease: 'easeOut' }
+
+// Entry: each card pops up from below with a bouncy stagger ("통통통") when the
+// section becomes active; replayed on every false -> true (re-entry). Lives on
+// an OUTER wrapper so it stays independent of the inner layout state machine.
+const ENTRY_BASE = 0.15
+const ENTRY_STAGGER = 0.1
+const CARD_COUNT = PHILOSOPHY_CARDS.length
 
 /**
  * Target transform for card `index` given the current `selected` card and the
@@ -140,6 +147,9 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
     >
       {PHILOSOPHY_CARDS.map((card, i) => {
         const t = targetFor(i, selected, hovered)
+        // z-index belongs on the OUTER wrapper: the wrapper's opacity/transform
+        // creates a stacking context, so an inner z-index can't order siblings.
+        const { zIndex, ...layout } = t
         const isSelected = selected === i
         // Body/scrim fade. On expand, wait until the size spring has nearly
         // reached the final width so the reveal happens at the final line-wrap
@@ -149,61 +159,90 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
           ? { duration: 0.25, delay: 0.3, ease: 'easeOut' }
           : { duration: 0.12, ease: 'easeOut' }
         return (
+          // Outer = entry anchor: pops the card up from below (staggered) on
+          // section entry, independent of the inner layout/state machine.
           <motion.div
             key={card.id}
-            className="absolute top-1/2 left-1/2 cursor-pointer select-none"
-            animate={t}
-            transition={{ ...TRANSITION, zIndex: { duration: 0 } }}
-            onClick={() => handleClick(i)}
-            onHoverStart={() => setHovered(i)}
-            onHoverEnd={() => setHovered((h) => (h === i ? null : h))}
+            className="absolute top-1/2 left-1/2"
+            initial={false}
+            animate={{
+              ...(active
+                ? { opacity: 1, y: 0, scale: 1 }
+                : { opacity: 0, y: 40, scale: 0.92 }),
+              zIndex,
+            }}
+            transition={{
+              ...(active
+                ? {
+                    type: 'spring',
+                    bounce: 0.45,
+                    duration: 0.55,
+                    // Reverse order: back card (index 2) pops first, front
+                    // (index 0) last — so each new card lands on top.
+                    delay: ENTRY_BASE + (CARD_COUNT - 1 - i) * ENTRY_STAGGER,
+                  }
+                : { duration: 0.2 }),
+              // Stacking must snap instantly, never animate.
+              zIndex: { duration: 0 },
+            }}
           >
-            {/* Image placeholder — clips the scrim + body to the rounded card. */}
-            <div
-              className={cn(
-                'absolute inset-0 overflow-hidden rounded-[20px]',
-                card.tint
-              )}
+            {/* Inner = layout state machine (standing/expanded/hover). Anchored
+                at the outer origin (stage center); t's x/y translate from there. */}
+            <motion.div
+              className="absolute cursor-pointer select-none"
+              animate={layout}
+              transition={TRANSITION}
+              onClick={() => handleClick(i)}
+              onHoverStart={() => setHovered(i)}
+              onHoverEnd={() => setHovered((h) => (h === i ? null : h))}
             >
-              {/* Scrim for white-text legibility — only on the centered card. */}
-              <motion.div
-                className="pointer-events-none absolute inset-0 bg-black/35"
-                animate={{ opacity: isSelected ? 1 : 0 }}
-                transition={bodyFade}
-              />
-              {/* Body + closing quote — only on the centered card. */}
-              <motion.div
-                className="pointer-events-none absolute inset-0 px-[48px] py-[60px]"
-                animate={{ opacity: isSelected ? 1 : 0 }}
-                transition={bodyFade}
-                aria-hidden={!isSelected}
+              {/* Image placeholder — clips the scrim + body to the rounded card. */}
+              <div
+                className={cn(
+                  'absolute inset-0 overflow-hidden rounded-[20px]',
+                  card.tint
+                )}
               >
-                <p className="text-title-on-dark text-[32px] leading-[1.4] font-medium tracking-[-0.05em]">
-                  {card.body}
-                </p>
-                <span className="text-title-on-dark absolute right-[48px] bottom-[40px] h-[84px] w-[84px] text-[120px] leading-[0.7] font-bold">
-                  &rdquo;
-                </span>
-              </motion.div>
-            </div>
+                {/* Scrim for white-text legibility — only on the centered card. */}
+                <motion.div
+                  className="pointer-events-none absolute inset-0 bg-black/35"
+                  animate={{ opacity: isSelected ? 1 : 0 }}
+                  transition={bodyFade}
+                />
+                {/* Body + closing quote — only on the centered card. */}
+                <motion.div
+                  className="pointer-events-none absolute inset-0 px-[48px] py-[60px]"
+                  animate={{ opacity: isSelected ? 1 : 0 }}
+                  transition={bodyFade}
+                  aria-hidden={!isSelected}
+                >
+                  <p className="text-title-on-dark text-[32px] leading-[1.4] font-medium tracking-[-0.05em]">
+                    {card.body}
+                  </p>
+                  <span className="text-title-on-dark absolute right-[48px] bottom-[40px] h-[84px] w-[84px] text-[120px] leading-[0.7] font-bold">
+                    &rdquo;
+                  </span>
+                </motion.div>
+              </div>
 
-            {/* Name below the card. Single label for both states (they're
+              {/* Name below the card. Single label for both states (they're
                 mutually exclusive): expanded shows every card's name centered;
                 standing shows only the hovered card's name right-aligned. Lives
                 inside the card group, so it inherits the card's skew and tracks
                 the hovered card (reference "MILLA"). */}
-            <motion.p
-              className={cn(
-                'text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-[20px] leading-[1.4] font-bold tracking-[-0.04em]',
-                standing ? 'text-right' : 'text-center'
-              )}
-              animate={{
-                opacity: standing ? (hovered === i ? 1 : 0) : 1,
-              }}
-              transition={FADE}
-            >
-              {card.name}
-            </motion.p>
+              <motion.p
+                className={cn(
+                  'text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-[20px] leading-[1.4] font-bold tracking-[-0.04em]',
+                  standing ? 'text-right' : 'text-center'
+                )}
+                animate={{
+                  opacity: standing ? (hovered === i ? 1 : 0) : 1,
+                }}
+                transition={FADE}
+              >
+                {card.name}
+              </motion.p>
+            </motion.div>
           </motion.div>
         )
       })}
