@@ -22,7 +22,7 @@ export function CentralVideo({ scale, x, y, opacity }: CentralVideoProps) {
   return (
     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
       <motion.div
-        className="central-video h-[690px] w-[690px]"
+        className="central-video h-[860px] w-[860px]"
         style={{ opacity }}
       >
         <motion.div className="h-full w-full" style={{ scale, x, y }}>

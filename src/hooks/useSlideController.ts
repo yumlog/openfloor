@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { animate, useMotionValue, type MotionValue } from 'motion/react'
-import { COOLDOWN_MS, SLIDE_DURATION, SLIDE_EASE, SLIDES } from '@/config/slides'
+import {
+  COOLDOWN_MS,
+  SLIDE_DURATION,
+  SLIDE_EASE,
+  SLIDES,
+} from '@/config/slides'
 
 export interface SlideController {
   /** Real-valued slide progress (0 = first section). Drives all animation. */

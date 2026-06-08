@@ -11,8 +11,7 @@ const CONTACT_INDEX = SLIDES.length - 1
 const HEADLINE_LINES = ['더 깊이 이해하고', '더 안정적으로', '구현합니다']
 
 const INTRO =
-  '오픈플로어는 AI 워크플로우를 기반으로 기업의 주요 시스템과 디지털 서비스를 ' +
-  '기획부터 운영까지 함께 수행하는 개발 파트너입니다.'
+  '오픈플로어는 AI 워크플로우를 기반으로\n기업의 주요 시스템과 디지털 서비스를\n기획부터 운영까지 함께 수행하는\n개발 파트너입니다.'
 
 interface HeroSectionProps {
   /** The single scroll-engine motion value, for the leave-slide-0 fade. */
@@ -79,24 +78,15 @@ export function HeroSection({ slide, goTo }: HeroSectionProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.65, duration: 0.6, ease: SLIDE_EASE }}
-            className="text-text-on-dark mt-[160px] max-w-[360px] text-[16px] leading-[1.5] font-medium"
+            className="text-text-on-dark mt-[160px] max-w-[264px] text-[16px] leading-[1.5] font-medium whitespace-pre-line"
           >
             {INTRO}
           </motion.p>
         </Container>
 
-        {/* Bottom: oversized ghost text (left) + rotating badge (right). */}
+        {/* Bottom: rotating badge (right). The oversized ghost text behind it
+            lives in the Frame layer (HeroGhost) so the video can blend over it. */}
         <Container className="relative mb-[100px]">
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 1.2, ease: 'easeOut' }}
-            className="text-ghost-on-dark text-[115px] leading-none font-bold tracking-[-0.04em] whitespace-nowrap"
-          >
-            <span className="block">UNDERSTAND DEEPER</span>
-            <span className="block">BUILD TO LAST</span>
-          </motion.h2>
-
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
