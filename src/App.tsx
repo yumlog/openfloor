@@ -56,7 +56,7 @@ export default function App() {
 
   return (
     <Frame background={background}>
-      <HeroGhost slide={slide} />
+      <HeroGhost slide={slide} active={index === 0} />
 
       <CentralVideo
         size={videoSize}
@@ -67,8 +67,8 @@ export default function App() {
       />
 
       <Slides trackY={trackY}>
-        <HeroSection slide={slide} goTo={goTo} />
-        <AboutSection />
+        <HeroSection slide={slide} goTo={goTo} active={index === 0} />
+        <AboutSection active={index === 1} />
         <PhilosophySection />
         <VisionSection />
         <PortfolioSection />

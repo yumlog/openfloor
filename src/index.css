@@ -31,6 +31,9 @@
   /* Type: Latin first, then Korean fallback */
   --font-sans: 'Montserrat', 'Pretendard', sans-serif;
 
+  /* Numeric display (About stats) — Pretendard for the oversized figures */
+  --font-num: 'Pretendard', sans-serif;
+
   /* Design frame width — drives the max-w-frame utility */
   --container-frame: 1440px;
 }

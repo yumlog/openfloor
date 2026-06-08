@@ -1,9 +1,123 @@
-import { PlaceholderSection } from '@/components/ui/PlaceholderSection'
+import { Fragment } from 'react'
+import { Container } from '@/components/layout/Container'
+import { RevealText } from '@/components/ui/RevealText'
+import { useCountUp } from '@/hooks/useCountUp'
 import { SLIDES } from '@/config/slides'
 
 const def = SLIDES[1]
 
-// Placeholder — real content added later.
-export function AboutSection() {
-  return <PlaceholderSection id={def.id} label={def.label} theme={def.theme} />
+// Headline — pre-split so the reveal sweep stays even (each line must fit on
+// one line; the mask is sized per line box).
+const HEADLINE_LINES = [
+  '닫힌 공간에서는 만들어질 수 없는 것이',
+  '있는데, 그것이 바로 시너지입니다.'
+]
+
+const INTRO =
+  '우리는 개인의 역량보다, 서로의 역량이 연결되는 구조를 더 중요하게 생각합니다.\nAI 시대에는 개인 생산성보다 컨텍스트 공유, 의사결정 연결, 구조적 협업이 더 중요해집니다.\nOpenfloor는 그 구조를 만드는 회사입니다.'
+
+interface StatDef {
+  label: string
+  target: number
+  suffix: string
+  caption: string
+}
+
+const STATS: StatDef[] = [
+  { label: 'Partners', target: 6, suffix: '+', caption: '년간 파트너십' },
+  {
+    label: 'Full-Cycle Execution',
+    target: 100,
+    suffix: '%',
+    caption: '풀사이클 수행',
+  },
+  {
+    label: 'In-House R&D Solutions',
+    target: 5,
+    suffix: '',
+    caption: '자체 R&D 솔루션',
+  },
+]
+
+interface AboutSectionProps {
+  /** True while About is the active slide — drives reveal + count-up replay. */
+  active: boolean
+}
+
+/**
+ * Slide 1, dark. The central video's about-state sits in the upper-right
+ * (background layer), so the left-aligned, pre-broken content clears it without
+ * needing a width cap. Top block sits 124px from the slide top (nav included);
+ * the three-up stat row sits 124px from the bottom. Reveal + count-up replay on
+ * every entry via `active`.
+ */
+export function AboutSection({ active }: AboutSectionProps) {
+  return (
+    <section
+      id={def.id}
+      className="relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden"
+    >
+      {/* Top block (left). 124px from the slide top, including the nav. */}
+      <Container className="pt-[clamp(71px,8.61vw,124px)] max-md:pt-[88px]">
+        <p className="text-accent text-[clamp(12px,1.39vw,20px)] leading-[1.4] font-bold tracking-[-0.04em] max-md:text-[15px]">
+          ABOUT US
+        </p>
+
+        <RevealText
+          as="h2"
+          active={active}
+          lines={HEADLINE_LINES}
+          className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-[1.5] font-bold tracking-normal max-md:text-[22px]"
+        />
+
+        <p className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-[1.5] font-normal whitespace-pre-line max-md:text-[14px]">
+          {INTRO}
+        </p>
+      </Container>
+
+      {/* Stat row (bottom). 124px from the slide bottom; three equal-width
+          (flex-1) left-aligned columns spanning the full frame, separated by 1px
+          verticals with 130px clearance each side. Mobile: stack vertically,
+          drop the verticals. */}
+      <Container className="pb-[clamp(71px,8.61vw,124px)] max-md:pb-[48px]">
+        <div className="flex items-start gap-[clamp(74px,9.03vw,130px)] max-md:flex-col max-md:gap-6">
+          {STATS.map((stat, i) => (
+            <Fragment key={stat.label}>
+              {i > 0 && (
+                <div
+                  aria-hidden
+                  className="bg-text-on-dark/50 h-[clamp(108px,13.19vw,190px)] w-px shrink-0 max-md:hidden"
+                />
+              )}
+              <StatItem stat={stat} active={active} />
+            </Fragment>
+          ))}
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+interface StatItemProps {
+  stat: StatDef
+  active: boolean
+}
+
+function StatItem({ stat, active }: StatItemProps) {
+  const value = useCountUp(stat.target, active)
+
+  return (
+    <div className="flex flex-col items-start md:min-w-0 md:flex-1">
+      <span className="text-accent/80 text-[clamp(12px,1.11vw,16px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[14px]">
+        {stat.label}
+      </span>
+      <span className="font-num text-title-on-dark mt-[clamp(12px,1.39vw,20px)] mb-[clamp(12px,1.11vw,16px)] text-[clamp(46px,5.56vw,80px)] leading-[1.2] font-bold tracking-normal tabular-nums max-md:my-2 max-md:text-[40px]">
+        {value}
+        {stat.suffix}
+      </span>
+      <span className="text-title-on-dark text-[clamp(16px,1.94vw,28px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[20px]">
+        {stat.caption}
+      </span>
+    </div>
+  )
 }
