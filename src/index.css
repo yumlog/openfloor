@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+@import './styles/keyframes.css';
+
+/* ---------------------------------------------------------------------------
+   Design tokens. Everything (colors, fonts, frame width) lives here so
+   components never hardcode raw values — use the generated utilities instead
+   (e.g. text-title-on-dark, bg-bg-dark, max-w-frame).
+--------------------------------------------------------------------------- */
+@theme {
+  /* Backgrounds */
+  --color-bg-dark: #171717;
+  --color-bg-light: #ffffff;
+
+  /* Accent */
+  --color-accent: #fb3640;
+
+  /* Text on dark backgrounds */
+  --color-title-on-dark: #ffffff;
+  --color-text-on-dark: #a3a3a3;
+
+  /* Text on light backgrounds */
+  --color-title-on-light: #111111;
+  --color-text-on-light: #666666;
+
+  /* Type: Latin first, then Korean fallback */
+  --font-sans: 'Montserrat', 'Pretendard', sans-serif;
+
+  /* Design frame width — drives the max-w-frame utility */
+  --container-frame: 1440px;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    /* Initial paint matches the Hero slide so there's no white flash on load */
+    background-color: var(--color-bg-dark);
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Central video blend. Multiply lets the (alpha-less) clip sit on light
+   backdrops; on dark slides the body.is-dark class swaps to normal so the
+   object isn't crushed against near-black.
+--------------------------------------------------------------------------- */
+.central-video {
+  mix-blend-mode: multiply;
+}
+
+body.is-dark .central-video {
+  mix-blend-mode: normal;
+}

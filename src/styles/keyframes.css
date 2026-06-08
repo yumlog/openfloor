@@ -1,0 +1,20 @@
+/* ---------------------------------------------------------------------------
+   Standalone keyframe animations. Keep reveal-style / multi-step animations
+   here rather than forcing them into Tailwind utility chains. Section work in
+   later steps can add its own keyframes alongside these.
+--------------------------------------------------------------------------- */
+
+/* Block reveal — wipes content in from the left. Placeholder for the
+   reveal interactions the sections will use later. */
+@keyframes block-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.animate-block-reveal {
+  animation: block-reveal 0.8s cubic-bezier(0.77, 0, 0.175, 1) both;
+}
