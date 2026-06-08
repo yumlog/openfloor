@@ -46,11 +46,13 @@ const STEP_X = 100
 const STEP_Y = 0
 const HOVER_LIFT = 30
 
+// Underdamped spring so cards overshoot and settle with a little "boing" as
+// they move/resize between states (the x travel also reads as a side wobble).
+// zIndex must NOT animate — it's overridden to snap instantly per use.
 const TRANSITION: Transition = {
   type: 'spring',
-  stiffness: 220,
-  damping: 30,
-  mass: 0.9,
+  bounce: 0.3,
+  duration: 0.6,
 }
 const FADE: Transition = { duration: 0.3, ease: 'easeOut' }
 
@@ -139,12 +141,19 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
       {PHILOSOPHY_CARDS.map((card, i) => {
         const t = targetFor(i, selected, hovered)
         const isSelected = selected === i
+        // Body/scrim fade. On expand, wait until the size spring has nearly
+        // reached the final width so the reveal happens at the final line-wrap
+        // (no mid-resize reflow flicker). On collapse, vanish fast — before the
+        // shrink can reflow the visible text.
+        const bodyFade: Transition = isSelected
+          ? { duration: 0.25, delay: 0.3, ease: 'easeOut' }
+          : { duration: 0.12, ease: 'easeOut' }
         return (
           <motion.div
             key={card.id}
             className="absolute top-1/2 left-1/2 cursor-pointer select-none"
             animate={t}
-            transition={TRANSITION}
+            transition={{ ...TRANSITION, zIndex: { duration: 0 } }}
             onClick={() => handleClick(i)}
             onHoverStart={() => setHovered(i)}
             onHoverEnd={() => setHovered((h) => (h === i ? null : h))}
@@ -160,13 +169,13 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
               <motion.div
                 className="pointer-events-none absolute inset-0 bg-black/35"
                 animate={{ opacity: isSelected ? 1 : 0 }}
-                transition={FADE}
+                transition={bodyFade}
               />
               {/* Body + closing quote — only on the centered card. */}
               <motion.div
                 className="pointer-events-none absolute inset-0 px-[48px] py-[60px]"
                 animate={{ opacity: isSelected ? 1 : 0 }}
-                transition={FADE}
+                transition={bodyFade}
                 aria-hidden={!isSelected}
               >
                 <p className="text-title-on-dark text-[32px] leading-[1.4] font-medium tracking-[-0.05em]">
