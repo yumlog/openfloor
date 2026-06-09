@@ -116,6 +116,10 @@ export function useSlideController({
         const seat = next > from ? 0 : 1
         trap.progress.set(seat)
         rollTargetRef.current = seat
+        // `.set()` here interrupts any in-flight notch animation, so its
+        // onComplete never runs — clear the lock manually or it stays stuck
+        // true and the step() gate below blocks every later roll AND the exit.
+        rollAnimatingRef.current = false
       }
       currentRef.current = next
       animatingRef.current = true
@@ -194,6 +198,11 @@ export function useSlideController({
     // single small nudge just eases a little.
     const rollTo = (target: number) => {
       if (!trap) return
+      // A proportional roll supersedes any discrete notch; releasing the lock
+      // means that once the drum is wheeled/dragged to an end, step() can still
+      // fall through and advance out of the trap (it isn't blocked by a stale
+      // notch lock).
+      rollAnimatingRef.current = false
       rollTargetRef.current = clamp(target, 0, 1)
       animate(trap.progress, rollTargetRef.current, {
         type: 'spring',
