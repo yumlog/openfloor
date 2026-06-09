@@ -31,6 +31,7 @@ export const SLIDES: SlideDef[] = [
   { id: 'philosophy', label: 'Philosophy', theme: 'light' },
   { id: 'vision', label: 'Vision', theme: 'dark' },
   { id: 'portfolio', label: 'Portfolio', theme: 'light', bg: BG_PORTFOLIO },
+  { id: 'manifesto', label: 'Manifesto', theme: 'dark' },
   { id: 'contact', label: 'Contact', theme: 'dark' },
 ]
 

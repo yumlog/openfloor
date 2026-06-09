@@ -11,11 +11,27 @@ export interface SlideController {
   goTo: (next: number) => void
 }
 
+interface TrapOptions {
+  /** Slide index that "captures" the scroll. */
+  index: number
+  /** Number of notches a full gesture sweep moves the trapped progress over. */
+  steps: number
+  /** 0..1 progress the trapped slide drives (e.g. the manifesto drum roll). */
+  progress: MotionValue<number>
+}
+
 interface Options {
   /** Number of sections. */
   total: number
   /** Gate input handling (e.g. while a loading screen is up). */
   enabled?: boolean
+  /**
+   * Optional "scroll trap": while parked on `trap.index`, each gesture advances
+   * `trap.progress` by one notch (1/steps) instead of snapping to the next
+   * section. The gesture only escapes the slide once the progress has reached
+   * the matching end. Used by the Manifesto drum.
+   */
+  trap?: TrapOptions
 }
 
 const clamp = (v: number, min: number, max: number) =>
@@ -25,6 +41,8 @@ const clamp = (v: number, min: number, max: number) =>
 const WHEEL_THRESHOLD = 40
 const WHEEL_RESET_MS = 180
 const TOUCH_THRESHOLD = 50
+/* A single drum-roll notch is quicker than a full section snap. */
+const ROLL_DURATION = 0.5
 
 /**
  * One gesture = one section snap. Hijacks wheel / touch / keyboard, drives a
@@ -35,12 +53,16 @@ const TOUCH_THRESHOLD = 50
 export function useSlideController({
   total,
   enabled = true,
+  trap,
 }: Options): SlideController {
   const slide = useMotionValue(0)
   const [index, setIndex] = useState(0)
 
   const currentRef = useRef(0)
   const animatingRef = useRef(false)
+  // True while a single drum-roll notch is animating — blocks extra notches so
+  // one gesture moves the trapped progress exactly one step.
+  const rollAnimatingRef = useRef(false)
   // Direction (+1 / -1) of a gesture made mid-animation, replayed once it ends.
   const queuedDirRef = useRef(0)
   // Stable handle so the returned goTo identity never changes.
@@ -74,6 +96,13 @@ export function useSlideController({
     const goTo = (next: number) => {
       next = clamp(next, 0, total - 1)
       if (next === currentRef.current || animatingRef.current) return
+      const from = currentRef.current
+      // Entering the trapped slide: seat the drum at the matching end so it
+      // rolls forward from the top (entered going down) or backward from the
+      // bottom (entered coming back up).
+      if (trap && next === trap.index) {
+        trap.progress.set(next > from ? 0 : 1)
+      }
       currentRef.current = next
       animatingRef.current = true
       animate(slide, next, {
@@ -81,12 +110,13 @@ export function useSlideController({
         ease: SLIDE_EASE,
         onComplete: () => {
           animatingRef.current = false
-          // Replay a gesture that arrived mid-animation: step once more that way
-          // the instant the snap settles, so continuous scrolling never stalls.
+          // Replay a gesture that arrived mid-animation: step once more (via the
+          // gate, so a replay landing on the trapped slide rolls the drum rather
+          // than skipping it) the instant the snap settles.
           const dir = queuedDirRef.current
           if (dir !== 0) {
             queuedDirRef.current = 0
-            goTo(currentRef.current + dir)
+            step(dir)
           }
         },
       })
@@ -97,6 +127,40 @@ export function useSlideController({
     // the latest direction and let onComplete replay it. No post-snap dead time;
     // the wheel accumulator below is what keeps one gesture to one step.
     const step = (dir: number) => {
+      // Scroll-trap gate: while parked on the trapped slide, each gesture moves
+      // the drum one notch instead of snapping sections. Only when the drum is
+      // already at the matching end does the gesture fall through and advance
+      // out of the slide.
+      if (trap && !animatingRef.current && currentRef.current === trap.index) {
+        if (rollAnimatingRef.current) return // one gesture = one notch
+        const p = trap.progress.get()
+        const sz = 1 / trap.steps
+        const eps = 1e-3
+        if (dir > 0 && p < 1 - eps) {
+          rollAnimatingRef.current = true
+          animate(trap.progress, Math.min(1, p + sz), {
+            duration: ROLL_DURATION,
+            ease: SLIDE_EASE,
+            onComplete: () => {
+              rollAnimatingRef.current = false
+            },
+          })
+          return
+        }
+        if (dir < 0 && p > eps) {
+          rollAnimatingRef.current = true
+          animate(trap.progress, Math.max(0, p - sz), {
+            duration: ROLL_DURATION,
+            ease: SLIDE_EASE,
+            onComplete: () => {
+              rollAnimatingRef.current = false
+            },
+          })
+          return
+        }
+        // At an end — fall through to advance out of the trap.
+      }
+
       if (animatingRef.current) {
         queuedDirRef.current = dir
       } else {
@@ -167,7 +231,7 @@ export function useSlideController({
       window.removeEventListener('keydown', onKey)
       clearTimeout(wheelResetTimer)
     }
-  }, [enabled, total, slide])
+  }, [enabled, total, slide, trap])
 
   const goTo = useCallback((next: number) => goToRef.current(next), [])
 

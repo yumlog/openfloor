@@ -1,4 +1,5 @@
-import { useTransform } from 'motion/react'
+import { useMemo } from 'react'
+import { useMotionValue, useTransform } from 'motion/react'
 import { Frame } from '@/components/layout/Frame'
 import { Slides } from '@/components/layout/Slides'
 import { Header } from '@/components/layout/Header'
@@ -9,6 +10,10 @@ import { AboutSection } from '@/components/sections/AboutSection'
 import { PhilosophySection } from '@/components/sections/PhilosophySection'
 import { VisionSection } from '@/components/sections/VisionSection'
 import { PortfolioSection } from '@/components/sections/PortfolioSection'
+import {
+  ManifestoSection,
+  MANIFESTO_STEPS,
+} from '@/components/sections/ManifestoSection'
 import { ContactSection } from '@/components/sections/ContactSection'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { useSlideController } from '@/hooks/useSlideController'
@@ -21,7 +26,18 @@ import {
 
 export default function App() {
   const frame = useFrameSize()
-  const { slide, index, goTo } = useSlideController({ total: TOTAL_SLIDES })
+
+  // Manifesto drum roll: the scroll engine traps slide 5 and drives this 0..1
+  // value one notch per gesture; the section turns it into the cylinder roll.
+  const rollProgress = useMotionValue(0)
+  const trap = useMemo(
+    () => ({ index: 5, steps: MANIFESTO_STEPS, progress: rollProgress }),
+    [rollProgress]
+  )
+  const { slide, index, goTo } = useSlideController({
+    total: TOTAL_SLIDES,
+    trap,
+  })
 
   // Background crossfades light <-> dark across the slide config.
   const background = useTransform(slide, BG_STOPS, BG_COLORS)
@@ -72,6 +88,7 @@ export default function App() {
         <PhilosophySection active={index === 2} />
         <VisionSection />
         <PortfolioSection active={index === 4} />
+        <ManifestoSection active={index === 5} progress={rollProgress} />
         <ContactSection />
       </Slides>
 
