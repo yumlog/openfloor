@@ -41,8 +41,10 @@ const clamp = (v: number, min: number, max: number) =>
 const WHEEL_THRESHOLD = 40
 const WHEEL_RESET_MS = 180
 const TOUCH_THRESHOLD = 50
-/* A single drum-roll notch is quicker than a full section snap. */
-const ROLL_DURATION = 0.5
+/* A single drum-roll notch. Softer than the section-snap ease (SLIDE_EASE has a
+   hard slow-in that reads as a lurch); a gentle ease-out glides line to line. */
+const ROLL_DURATION = 0.55
+const ROLL_EASE = [0.22, 1, 0.36, 1] as const
 
 /**
  * One gesture = one section snap. Hijacks wheel / touch / keyboard, drives a
@@ -140,7 +142,7 @@ export function useSlideController({
           rollAnimatingRef.current = true
           animate(trap.progress, Math.min(1, p + sz), {
             duration: ROLL_DURATION,
-            ease: SLIDE_EASE,
+            ease: ROLL_EASE,
             onComplete: () => {
               rollAnimatingRef.current = false
             },
@@ -151,7 +153,7 @@ export function useSlideController({
           rollAnimatingRef.current = true
           animate(trap.progress, Math.max(0, p - sz), {
             duration: ROLL_DURATION,
-            ease: SLIDE_EASE,
+            ease: ROLL_EASE,
             onComplete: () => {
               rollAnimatingRef.current = false
             },
