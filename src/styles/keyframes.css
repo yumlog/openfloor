@@ -1,11 +1,11 @@
 /* ---------------------------------------------------------------------------
-   Standalone keyframe animations. Keep reveal-style / multi-step animations
-   here rather than forcing them into Tailwind utility chains. Section work in
-   later steps can add its own keyframes alongside these.
+   독립 keyframe 애니메이션. reveal류 / 다단계 애니메이션은 Tailwind 유틸리티
+   체인에 욱여넣지 말고 여기에 둔다. 이후 단계의 섹션 작업이 여기에 자체 keyframe을
+   추가할 수 있다.
 --------------------------------------------------------------------------- */
 
-/* Block reveal — wipes content in from the left. Placeholder for the
-   reveal interactions the sections will use later. */
+/* 블록 reveal — 콘텐츠를 왼쪽에서부터 닦아낸다. 섹션이 나중에 쓸 reveal
+   인터랙션의 플레이스홀더. */
 @keyframes block-reveal {
   from {
     clip-path: inset(0 100% 0 0);
@@ -20,36 +20,35 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Hero headline reveal — the effect lives ONLY on the moving boundary.
+   Hero 헤드라인 reveal — 효과는 움직이는 경계에만 존재한다.
 
-   A soft-edged boundary sweeps each line left -> right. Three zones:
-     left of edge   already revealed -> clean white, no blur / no chroma
-     the edge strip currently revealing -> soft blur + subtle cyan/red split
-     right of edge  not yet revealed -> hidden (dark page shows through)
+   부드러운 가장자리의 경계가 각 줄을 좌 -> 우로 쓸고 간다. 세 구간:
+     가장자리 왼쪽  이미 드러남 -> 깨끗한 흰색, blur / chroma 없음
+     가장자리 띠     지금 드러나는 중 -> 부드러운 blur + 은은한 청/적 분리
+     가장자리 오른쪽 아직 안 드러남 -> 숨김(어두운 페이지가 비침)
 
-   Two stacked copies of the line:
-     A (.hero-reveal-clean) clean white, opaque up to the edge.
-     B (.hero-reveal-edge)  blurred + chroma, windowed to a narrow strip that
-                            rides the edge, so a glyph only goes
-                            (blur + faint chroma) -> clean as the edge passes.
+   줄을 두 겹으로 쌓는다:
+     A (.hero-reveal-clean) 깨끗한 흰색, 가장자리까지 불투명.
+     B (.hero-reveal-edge)  blur + chroma, 가장자리를 타는 좁은 띠로 윈도잉되어,
+                            글리프는 가장자리가 지날 때만 (blur + 옅은 chroma)
+                            -> 깨끗함으로 바뀐다.
 
-   IMPLEMENTATION: each mask is a soft gradient 3x the line width, rasterized
-   once; the reveal animates ONLY mask-position (100% -> 0%), sliding that soft
-   edge across the line. We deliberately do NOT animate the gradient stops (e.g.
-   via an @property var), because that re-rasterizes the mask every frame and
-   stutters once staggered lines overlap. mask-position is cheap and stays
-   smooth. Widen / narrow the moving strip by moving the gradient stops below.
+   구현: 각 마스크는 줄 너비의 3배인 부드러운 그라디언트로 한 번만 래스터화된다;
+   reveal은 오직 mask-position(100% -> 0%)만 애니메이션해 그 부드러운 가장자리를
+   줄 위로 슬라이드한다. 그라디언트 정지점은 일부러 애니메이션하지 않는다(예:
+   @property 변수). 그러면 매 프레임 마스크가 재래스터화되어 stagger된 줄이 겹칠 때
+   끊긴다. mask-position은 가볍고 부드럽게 유지된다. 움직이는 띠의 폭은 아래
+   그라디언트 정지점으로 넓히거나 좁힌다.
 
-   Tunables (override per line on .hero-reveal-line):
-     --edge-blur       blur inside the strip
-     --chroma-offset   cyan/red split inside the strip (keep it subtle)
-     --reveal-duration per-line duration
-   Per-line top -> bottom stagger comes from inline --line-delay.
+   튜너블(.hero-reveal-line에서 줄별로 override):
+     --edge-blur       띠 안의 blur
+     --chroma-offset   띠 안의 청/적 분리(은은하게 유지)
+     --reveal-duration 줄별 지속 시간
+   줄별 위 -> 아래 stagger는 인라인 --line-delay에서 온다.
 
-   The default (not-playing) state is fully HIDDEN; the sweep is applied only
-   while the line carries .is-playing (toggled by RevealText from the section's
-   `active`). So an off-screen / inactive section holds the hidden state instead
-   of the finished white text — no flash of revealed text when re-entering.
+   기본(미재생) 상태는 완전히 숨김; sweep은 줄이 .is-playing을 가질 때만 적용된다
+   (RevealText가 섹션의 `active`로 토글). 그래서 화면 밖 / 비활성 섹션은 완성된
+   흰 텍스트가 아니라 숨김 상태를 유지한다 — 재진입 시 드러난 텍스트가 깜빡이지 않음.
 --------------------------------------------------------------------------- */
 .hero-reveal-line {
   --edge-blur: 4px;
@@ -57,17 +56,17 @@
   --reveal-duration: 1.5s;
 
   position: relative;
-  /* Shrink the line box to its text so BOTH layers below share the exact same
-     width. The masks are sized relative to their own box (mask-size: 300%); if
-     the clean (text-width) and edge (block-width) layers had different widths,
-     the same mask-position would travel at different speeds and the edge strip
-     would lag the text — worse on shorter lines. fit-content keeps them equal. */
+  /* 줄 박스를 텍스트 크기로 줄여 아래 두 레이어가 완전히 같은 너비를 공유하게
+     한다. 마스크는 자기 박스 기준으로 크기가 정해진다(mask-size: 300%); clean
+     (텍스트 너비)과 edge(블록 너비) 레이어 너비가 다르면 같은 mask-position이
+     서로 다른 속도로 이동해 edge 띠가 텍스트보다 뒤처진다 — 짧은 줄일수록 심함.
+     fit-content가 둘을 동일하게 유지. */
   display: block;
   width: fit-content;
 }
 
-/* A — clean white, opaque behind the edge. Block so it fills the (text-width)
-   line box and matches the absolutely-positioned edge layer exactly. */
+/* A — 깨끗한 흰색, 가장자리 뒤로 불투명. block이라 (텍스트 너비) 줄 박스를
+   채우고 절대 위치된 edge 레이어와 정확히 일치한다. */
 .hero-reveal-clean {
   position: relative;
   z-index: 0;
@@ -78,20 +77,20 @@
   mask-size: 300% 100%;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  /* Default: fully hidden (mask parked at the unrevealed end). */
+  /* 기본: 완전히 숨김(마스크를 미드러난 끝에 둠). */
   -webkit-mask-position: 100% 0;
   mask-position: 100% 0;
 }
 
-/* B — blurred + subtle cyan/red split, windowed to the moving edge strip. */
+/* B — blur + 은은한 청/적 분리, 움직이는 edge 띠로 윈도잉. */
 .hero-reveal-edge {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  /* Soft chromatic edge done entirely with text-shadow (a white halo to fake
-     the blur + offset cyan/red), so there is no per-frame filter:blur to
-     re-rasterize as the mask slides. */
+  /* 부드러운 색수차 가장자리를 전부 text-shadow로 구현(blur를 흉내내는 흰 halo +
+     오프셋된 청/적), 그래서 마스크가 슬라이드할 때 재래스터화할 프레임별
+     filter:blur가 없다. */
   text-shadow:
     0 0 var(--edge-blur) rgba(255, 255, 255, 0.5),
     calc(-1 * var(--chroma-offset)) 0 var(--edge-blur) #00ffff,
@@ -112,20 +111,20 @@
   mask-size: 300% 100%;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  /* Default: fully hidden (mask parked at the unrevealed end). */
+  /* 기본: 완전히 숨김(마스크를 미드러난 끝에 둠). */
   -webkit-mask-position: 100% 0;
   mask-position: 100% 0;
 }
 
-/* Play the sweep only while active — RevealText adds .is-playing on entry and
-   removes it when the section goes inactive (reverting to the hidden default). */
+/* active일 때만 sweep 재생 — RevealText가 진입 시 .is-playing을 더하고 섹션이
+   비활성되면 제거한다(숨김 기본값으로 복귀). */
 .hero-reveal-line.is-playing .hero-reveal-clean,
 .hero-reveal-line.is-playing .hero-reveal-edge {
   animation: hero-edge-sweep var(--reveal-duration) linear both;
   animation-delay: var(--line-delay, 0s);
 }
 
-/* Slide the soft mask from fully-hidden (right) to fully-revealed (left). */
+/* 부드러운 마스크를 완전 숨김(오른쪽)에서 완전 드러남(왼쪽)으로 슬라이드. */
 @keyframes hero-edge-sweep {
   from {
     -webkit-mask-position: 100% 0;
@@ -137,7 +136,7 @@
   }
 }
 
-/* Slow continuous rotation — Hero circular badge. */
+/* 느린 연속 회전 — Hero 원형 뱃지. */
 @keyframes spin-slow {
   to {
     transform: rotate(360deg);

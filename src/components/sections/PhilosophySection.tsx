@@ -9,26 +9,26 @@ import { PhilosophyMobile } from './philosophy/PhilosophyMobile'
 
 const def = SLIDES[2]
 
-// Headline pre-split so the reveal sweep is sized per line box (no wrapping).
+// reveal sweep이 줄 박스 단위로 크기를 갖도록 헤드라인을 미리 분할(wrap 없음).
 const HEADLINE_LINES = ['결과로 말하는 것이', '우리의 방식입니다.']
 
 const LABEL_DELAY = 0
 const HEADLINE_DELAY = 0.15
 
 interface PhilosophySectionProps {
-  /** True while Philosophy is the active slide — drives reveal + deck reset. */
+  /** Philosophy가 활성 슬라이드인 동안 true — reveal + 덱 리셋을 구동. */
   active: boolean
 }
 
 /**
- * Slide 2, light. Title (label + reveal headline) centered at the top; below it
- * the interactive card deck. The deck (PhilosophyDeck) is a fixed 1440-design
- * canvas scaled by `ratio` so it shrinks proportionally; mobile swaps to a
- * purpose-built vertical stack. Top margin 100px (nav included), bottom 126px.
+ * 슬라이드 2, 라이트. 타이틀(라벨 + reveal 헤드라인)은 상단 가운데; 그 아래에
+ * 인터랙티브 카드 덱. 덱(PhilosophyDeck)은 고정 1440 디자인 캔버스를 `ratio`로
+ * 스케일해 비례 축소된다; 모바일은 전용 세로 스택으로 교체. 상단 마진 100px
+ * (내비 포함), 하단 126px.
  *
- * The shared RevealText runs its "light variant" purely via the text color
- * (#111 here vs white on dark) — the white halo + cyan/red chroma live in CSS
- * and are colour-independent, so no keyframe change is needed.
+ * 공용 RevealText는 "라이트 변형"을 오로지 텍스트 색으로만 구현한다(여기선 #111
+ * 대 다크의 흰색) — 흰 halo + 청/적 색수차는 CSS에 있고 색에 독립적이라 keyframe
+ * 변경이 필요 없다.
  */
 export function PhilosophySection({ active }: PhilosophySectionProps) {
   const frame = useFrameSize()
@@ -60,8 +60,7 @@ export function PhilosophySection({ active }: PhilosophySectionProps) {
         />
       </Container>
 
-      {/* Card area, centered in the space between the title and the bottom
-          margin (126px). */}
+      {/* 카드 영역, 타이틀과 하단 마진(126px) 사이 공간에 가운데 정렬. */}
       <div className="flex flex-1 items-center justify-center pb-[clamp(73px,8.75vw,126px)] max-md:pb-[48px]">
         {isMobile ? (
           <PhilosophyMobile active={active} />

@@ -4,10 +4,10 @@ import { RISE, entryTransition } from '@/lib/motion'
 import { PHILOSOPHY_CARDS } from './cards'
 
 /* ---------------------------------------------------------------------------
-   Mobile (<768px) reflow. The 3D deck / 3-up doesn't fit a phone, so the three
-   cards become a simple vertical stack (image + name + body), all visible at
-   once, within one 100dvh screen. Purpose-built reflow — not the scaled
-   desktop. (Mobile polish is a separate later pass.)
+   모바일(<768px) reflow. 3D 덱 / 3-up은 폰에 맞지 않으므로, 세 카드를 단순
+   세로 스택(이미지 + 이름 + 본문)으로 만들어 한 100dvh 화면 안에 한꺼번에
+   보이게 한다. 스케일된 데스크탑이 아닌 전용 reflow. (모바일 다듬기는 나중에
+   별도로.)
 --------------------------------------------------------------------------- */
 
 export function PhilosophyMobile({ active }: { active: boolean }) {

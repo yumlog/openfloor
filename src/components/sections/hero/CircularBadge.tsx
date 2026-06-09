@@ -1,11 +1,10 @@
 import { ArrowDown } from 'lucide-react'
 
 /**
- * Hero circular badge — "SCROLL DOWN" set on a slowly-rotating ring with a
- * down arrow pinned at the center. 80px at the 1440 reference, scaled fluidly
- * with the frame (floor 48px). The ring text is an SVG <textPath>;
- * the spin lives in keyframes.css (animate-spin-slow). Hovering anywhere on the
- * badge fades both the ring text and the arrow to the accent color.
+ * Hero 원형 뱃지 — 천천히 회전하는 링에 "SCROLL DOWN"을 얹고 가운데에 아래
+ * 화살표를 고정. 1440 기준 80px, 프레임에 맞춰 유동 스케일(floor 48px). 링
+ * 텍스트는 SVG <textPath>; 회전은 keyframes.css에 있다(animate-spin-slow). 뱃지
+ * 어디든 호버하면 링 텍스트와 화살표가 모두 accent 색으로 페이드된다.
  */
 export function CircularBadge() {
   return (

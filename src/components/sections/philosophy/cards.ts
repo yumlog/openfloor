@@ -1,16 +1,16 @@
 /* ---------------------------------------------------------------------------
-   Philosophy card data. Left -> right order is the canonical order used by the
-   deck/expanded state machine (others fill the side slots preserving it).
+   Philosophy 카드 데이터. 좌 -> 우 순서가 덱/펼침 상태 머신이 쓰는 기준 순서
+   (나머지 카드는 그 순서를 유지하며 옆 슬롯을 채운다).
 --------------------------------------------------------------------------- */
 
 export interface PhilosophyCard {
-  /** stable id */
+  /** 안정적인 id */
   id: string
-  /** name shown below the card (expanded) / bottom-right (standing hover) */
+  /** 카드 아래(펼침) / 우하단(세움 호버)에 표시되는 이름 */
   name: string
-  /** body shown only when the card is the centered (selected) one */
+  /** 카드가 가운데(선택)일 때만 표시되는 본문 */
   body: string
-  /** placeholder image tone — distinguishes the cards until real art lands */
+  /** 플레이스홀더 이미지 톤 — 실제 아트가 들어오기 전까지 카드를 구분 */
   tint: string
 }
 

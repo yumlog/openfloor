@@ -5,29 +5,28 @@ import { Container } from './Container'
 import { NAV_ITEMS, SLIDES } from '@/config/slides'
 
 interface HeaderProps {
-  /** Active slide index (scroll-spy). */
+  /** 활성 슬라이드 인덱스(스크롤스파이). */
   index: number
-  /** Snap to a slide. */
+  /** 특정 슬라이드로 스냅. */
   goTo: (next: number) => void
 }
 
 /**
- * Fixed top navigation. Links jump to their section; the active section is
- * highlighted in the accent color. Text color adapts to the current slide's
- * background theme.
+ * 고정 상단 내비게이션. 링크는 해당 섹션으로 점프하고, 활성 섹션은 accent
+ * 색으로 강조된다. 텍스트 색은 현재 슬라이드의 배경 테마에 맞춰 바뀐다.
  *
- * Desktop (md+) shows the inline nav. Mobile (<768) collapses it behind a
- * hamburger that opens a full-screen overlay menu.
+ * 데스크탑(md+)은 인라인 내비를 보여준다. 모바일(<768)은 햄버거 뒤로 접고,
+ * 누르면 풀스크린 오버레이 메뉴가 열린다.
  */
 export function Header({ index, goTo }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
 
   const onDark = SLIDES[index]?.theme === 'dark'
-  // On dark slides the nav uses the muted nav grey; on light slides it falls
-  // back to the dark title color so it stays legible.
+  // 다크 슬라이드에선 내비가 차분한 nav 그레이를, 라이트 슬라이드에선 가독성을
+  // 위해 다크 타이틀 색으로 떨어진다.
   const baseText = onDark ? 'text-text-nav' : 'text-title-on-light'
 
-  // Snap, then close the mobile overlay.
+  // 스냅한 뒤 모바일 오버레이를 닫는다.
   const navigate = (next: number) => {
     goTo(next)
     setMenuOpen(false)
@@ -47,7 +46,7 @@ export function Header({ index, goTo }: HeaderProps) {
           OPENFLOOR
         </button>
 
-        {/* Desktop: inline nav. */}
+        {/* 데스크탑: 인라인 내비. */}
         <nav className="hidden items-center gap-8 md:flex">
           {NAV_ITEMS.map((item) => (
             <button
@@ -64,7 +63,7 @@ export function Header({ index, goTo }: HeaderProps) {
           ))}
         </nav>
 
-        {/* Mobile: hamburger toggles the overlay (icon color adapts to theme). */}
+        {/* 모바일: 햄버거가 오버레이를 토글(아이콘 색은 테마에 맞춤). */}
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
@@ -83,7 +82,7 @@ export function Header({ index, goTo }: HeaderProps) {
         </button>
       </Container>
 
-      {/* Mobile full-screen overlay menu. */}
+      {/* 모바일 풀스크린 오버레이 메뉴. */}
       {menuOpen && (
         <div className="bg-bg-dark fixed inset-0 z-40 flex flex-col md:hidden">
           <Container className="flex h-[65px] shrink-0 items-center justify-end">

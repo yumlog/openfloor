@@ -27,8 +27,8 @@ import {
 export default function App() {
   const frame = useFrameSize()
 
-  // Manifesto drum roll: the scroll engine traps slide 5 and drives this 0..1
-  // value one notch per gesture; the section turns it into the cylinder roll.
+  // Manifesto 드럼 롤: 스크롤 엔진이 슬라이드 5를 가두고 이 0..1 값을 제스처당
+  // 한 칸씩 구동한다; 섹션이 이를 원통 롤로 바꾼다.
   const rollProgress = useMotionValue(0)
   const trap = useMemo(
     () => ({ index: 5, steps: MANIFESTO_STEPS, progress: rollProgress }),
@@ -39,25 +39,24 @@ export default function App() {
     trap,
   })
 
-  // Background crossfades light <-> dark across the slide config.
+  // 배경은 슬라이드 설정에 따라 라이트 <-> 다크로 크로스페이드.
   const background = useTransform(slide, BG_STOPS, BG_COLORS)
 
-  // Track translate: one section per 100dvh.
+  // 트랙 translate: 100dvh당 한 섹션.
   const trackY = useTransform(slide, (v) => `${-v * 100}dvh`)
 
-  // Central video, slide 0 -> 1: shrink + move toward the upper-right, then
-  // fade out before the Philosophy slide so the deck has the stage alone.
+  // 중앙 비디오, 슬라이드 0 -> 1: 축소 + 우상단으로 이동, 그 뒤 Philosophy
+  // 슬라이드 전에 페이드 아웃해 덱이 무대를 독차지하게.
   //
-  // The whole composition is defined at the 1440 reference and scaled by
-  // `ratio` (frame.w / 1440) so it shrinks proportionally with the frame on
-  // narrower screens — base size, the about-state target size, and the
-  // about-state offsets (402 from the right, 301 from the top) all scale
-  // together, so the about state reads identically at every width.
-  // Slide 0: `videoSize` square centered. Slide 1: a 354/860 scale of it,
-  // centered at (frame.w - 402*ratio, 301*ratio). The x/y translate moves the
-  // centered box by an absolute px amount, so it's independent of the base
-  // size — only the scale (constant 354/860) shapes the about state.
-  // On mobile the slide-0 box is nudged down so it clears the stacked hero text.
+  // 전체 합성은 1440 기준으로 정의하고 `ratio`(frame.w / 1440)로 스케일해 좁은
+  // 화면에서 프레임에 비례해 줄어든다 — 기본 크기, about 상태 목표 크기,
+  // about 상태 오프셋(우측에서 402, 상단에서 301)이 함께 스케일되므로 about
+  // 상태가 모든 너비에서 동일하게 읽힌다.
+  // 슬라이드 0: `videoSize` 정사각 가운데. 슬라이드 1: 그 354/860 스케일을
+  // (frame.w - 402*ratio, 301*ratio)에 가운데 정렬. x/y translate는 가운데 박스를
+  // 절대 px만큼 옮기므로 기본 크기와 무관하다 — about 상태는 스케일(상수 354/860)만
+  // 결정한다.
+  // 모바일에선 슬라이드-0 박스를 아래로 살짝 내려 쌓인 hero 텍스트를 피한다.
   const ratio = frame.w / DESIGN_WIDTH
   const isMobile = frame.w < 768
   const videoSize = 860 * ratio

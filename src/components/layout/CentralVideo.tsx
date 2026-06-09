@@ -1,7 +1,7 @@
 import { motion, type MotionValue } from 'motion/react'
 
 interface CentralVideoProps {
-  /** Base (slide-0) box edge in px; scaled with the frame by App. */
+  /** 기본(slide-0) 박스 변의 px 길이; App이 프레임에 맞춰 스케일. */
   size: number
   scale: MotionValue<number>
   x: MotionValue<number>
@@ -10,15 +10,14 @@ interface CentralVideoProps {
 }
 
 /**
- * The hero -> about centerpiece clip. Base position is the frame center; the
- * scroll engine drives scale/x/y/opacity (see App).
+ * hero -> about 중심 클립. 기본 위치는 프레임 중앙; 스크롤 엔진이
+ * scale/x/y/opacity를 구동한다(App 참조).
  *
- * Source has no alpha — it's composited onto the slide background with
- * mix-blend-mode (CSS .central-video, toggled via body.is-dark). For the blend
- * to actually reach the Frame's painted background, the blend element must NOT
- * be walled off in its own stacking context: the wrapper has no z-index (so it
- * doesn't isolate), the scroll transform lives on a separate inner div, and the
- * blend element itself carries only opacity. Mirrors the old working structure.
+ * 소스에 알파가 없어 — 슬라이드 배경 위에 mix-blend-mode로 합성된다(CSS
+ * .central-video, body.is-dark로 토글). 블렌드가 실제로 Frame이 칠한 배경까지
+ * 닿으려면 블렌드 요소가 자체 스택 컨텍스트로 격리되면 안 된다: 래퍼는 z-index가
+ * 없고(격리 안 함), 스크롤 transform은 별도 내부 div에 두며, 블렌드 요소 자체는
+ * opacity만 갖는다. 예전의 동작하던 구조를 그대로 따른다.
  */
 export function CentralVideo({
   size,

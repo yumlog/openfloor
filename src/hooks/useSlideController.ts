@@ -3,34 +3,33 @@ import { animate, useMotionValue, type MotionValue } from 'motion/react'
 import { SLIDE_DURATION, SLIDE_EASE, SLIDES } from '@/config/slides'
 
 export interface SlideController {
-  /** Real-valued slide progress (0 = first section). Drives all animation. */
+  /** 실수값 슬라이드 진행도(0 = 첫 섹션). 모든 애니메이션을 구동. */
   slide: MotionValue<number>
-  /** Nearest integer slide — for scroll-spy / active nav state. */
+  /** 가장 가까운 정수 슬라이드 — 스크롤스파이 / 활성 내비 상태용. */
   index: number
-  /** Programmatically snap to a section (used by header nav). */
+  /** 프로그램으로 특정 섹션에 스냅(헤더 내비에서 사용). */
   goTo: (next: number) => void
 }
 
 interface TrapOptions {
-  /** Slide index that "captures" the scroll. */
+  /** 스크롤을 "가두는" 슬라이드 인덱스. */
   index: number
-  /** Number of notches a full gesture sweep moves the trapped progress over. */
+  /** 한 제스처 스윕이 가둔 progress를 몇 칸 움직이는지. */
   steps: number
-  /** 0..1 progress the trapped slide drives (e.g. the manifesto drum roll). */
+  /** 가둔 슬라이드가 구동하는 0..1 progress(예: manifesto 드럼 롤). */
   progress: MotionValue<number>
 }
 
 interface Options {
-  /** Number of sections. */
+  /** 섹션 수. */
   total: number
-  /** Gate input handling (e.g. while a loading screen is up). */
+  /** 입력 처리 게이트(예: 로딩 화면이 떠 있는 동안). */
   enabled?: boolean
   /**
-   * Optional "scroll trap": while parked on `trap.index`, input drives
-   * `trap.progress` (0..1) instead of snapping to the next section — wheel /
-   * touch roll it proportionally with spring inertia, keyboard moves one notch
-   * (1/steps). Input only escapes the slide once the progress is pinned at the
-   * matching end and keeps pushing. Used by the Manifesto drum.
+   * 선택적 "스크롤 트랩": `trap.index`에 머무는 동안 입력이 다음 섹션으로
+   * 스냅하는 대신 `trap.progress`(0..1)를 구동한다 — 휠 / 터치는 스프링 관성으로
+   * 비례 롤, 키보드는 한 칸(1/steps) 이동. progress가 해당 끝에 핀 채로 계속
+   * 밀어야만 슬라이드를 빠져나간다. Manifesto 드럼에서 사용.
    */
   trap?: TrapOptions
 }
@@ -38,26 +37,24 @@ interface Options {
 const clamp = (v: number, min: number, max: number) =>
   Math.max(min, Math.min(max, v))
 
-/* Gesture thresholds. */
+/* 제스처 임계값. */
 const WHEEL_THRESHOLD = 40
 const WHEEL_RESET_MS = 180
 const TOUCH_THRESHOLD = 50
-/* A single discrete drum-roll notch (keyboard / replayed gesture). Softer than
-   the section-snap ease (SLIDE_EASE has a hard slow-in that reads as a lurch); a
-   gentle ease-out glides line to line. */
+/* 단일 discrete 드럼 롤 노치(키보드 / 재생 제스처). 섹션 스냅 이징보다 부드럽다
+   (SLIDE_EASE는 급한 slow-in이라 덜컥거림); 완만한 ease-out이 줄에서 줄로 미끄러진다. */
 const ROLL_DURATION = 0.55
 const ROLL_EASE = [0.22, 1, 0.36, 1] as const
-/* Trapped-slide roll for wheel / touch: the input distance moves the target
-   proportionally (px * SENS) and a velocity-carrying spring chases it, so a hard
-   flick whooshes through lines and a small nudge inches one along. */
+/* 휠 / 터치의 가둔 슬라이드 롤: 입력 거리가 목표를 비례(px * SENS)로 움직이고
+   속도를 이어받는 스프링이 추종해, 세게 튕기면 줄을 휘리릭 넘기고 작은 너지는
+   한 칸씩 살살 움직인다. */
 const ROLL_SENSITIVITY = 0.0012
 const ROLL_EPS = 1e-3
 
 /**
- * One gesture = one section snap. Hijacks wheel / touch / keyboard, drives a
- * single `slide` motion value with a cooldown so fast scrolls don't skip
- * sections. Also owns body scroll lock and the `is-dark` class used by the
- * central video blend.
+ * 한 제스처 = 한 섹션 스냅. 휠 / 터치 / 키보드를 가로채 단일 `slide` motion
+ * value를 구동하며, 쿨다운을 둬서 빠른 스크롤이 섹션을 건너뛰지 않게 한다.
+ * body 스크롤 잠금과 중앙 비디오 블렌드에 쓰이는 `is-dark` 클래스도 소유.
  */
 export function useSlideController({
   total,
@@ -69,16 +66,16 @@ export function useSlideController({
 
   const currentRef = useRef(0)
   const animatingRef = useRef(false)
-  // True while a single discrete drum-roll notch is animating (keyboard) —
-  // blocks extra notches so one key press moves the trapped progress one step.
+  // 단일 discrete 드럼 롤 노치가 애니메이션 중일 때 true(키보드) — 추가 노치를
+  // 막아 한 번의 키 입력이 가둔 progress를 딱 한 칸 움직이게 한다.
   const rollAnimatingRef = useRef(false)
-  // Where the trapped roll is heading (0..1). Wheel/touch re-target this each
-  // event; kept in sync on seat + discrete notches so edge detection is exact.
+  // 가둔 롤이 향하는 목표(0..1). 휠/터치가 매 이벤트마다 재타깃하며, seat +
+  // discrete 노치에서 동기화해 경계 판정이 정확하다.
   const rollTargetRef = useRef(0)
-  // Stable handle so the returned goTo identity never changes.
+  // 반환되는 goTo의 정체성이 바뀌지 않도록 하는 안정적인 핸들.
   const goToRef = useRef<(next: number) => void>(() => {})
 
-  // Lock the page; the track translate is our only scroll.
+  // 페이지를 잠근다; 트랙 translate가 우리의 유일한 스크롤.
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => {
@@ -86,10 +83,9 @@ export function useSlideController({
     }
   }, [])
 
-  // Scroll-spy index + dark-mode toggle for the video blend. `is-dark` follows
-  // the current slide's configured theme (not an arbitrary progress threshold),
-  // so the dark-blend treatment holds for the whole time the video is on a dark
-  // slide (hero + about).
+  // 스크롤스파이 인덱스 + 비디오 블렌드용 다크모드 토글. `is-dark`는 임의의
+  // progress 임계가 아니라 현재 슬라이드의 설정 테마를 따르므로, 비디오가 다크
+  // 슬라이드(hero + about)에 있는 내내 다크 블렌드 처리가 유지된다.
   useEffect(() => {
     const apply = (v: number) => {
       const next = clamp(Math.round(v), 0, SLIDES.length - 1)
@@ -101,22 +97,21 @@ export function useSlideController({
     return () => unsub()
   }, [slide])
 
-  // Input handling.
+  // 입력 처리.
   useEffect(() => {
     const goTo = (next: number) => {
       next = clamp(next, 0, total - 1)
       if (next === currentRef.current || animatingRef.current) return
       const from = currentRef.current
-      // Entering the trapped slide: seat the drum at the matching end so it
-      // rolls forward from the top (entered going down) or backward from the
-      // bottom (entered coming back up).
+      // 가둔 슬라이드로 진입: 드럼을 해당 끝에 seat 해서 위(아래로 진입)에서
+      // 앞으로 굴리거나, 아래(위로 되돌아 진입)에서 거꾸로 굴리게 한다.
       if (trap && next === trap.index) {
         const seat = next > from ? 0 : 1
         trap.progress.set(seat)
         rollTargetRef.current = seat
-        // `.set()` here interrupts any in-flight notch animation, so its
-        // onComplete never runs — clear the lock manually or it stays stuck
-        // true and the step() gate below blocks every later roll AND the exit.
+        // 여기서 `.set()`이 진행 중인 노치 애니를 중단시켜 onComplete가 안 불리므로,
+        // 잠금을 수동으로 풀지 않으면 true로 박혀 아래 step() 게이트가 이후 모든
+        // 롤 AND 탈출을 막는다.
         rollAnimatingRef.current = false
       }
       currentRef.current = next
@@ -131,18 +126,17 @@ export function useSlideController({
     }
     goToRef.current = goTo
 
-    // One directional step. A snap (or trap exit) in flight ignores further
-    // input — one gesture moves one section; the wheel lock + quiet timer below
-    // keep continuous scrolls / inertia from advancing past it.
+    // 한 방향 step. 스냅(또는 트랩 탈출)이 진행 중이면 추가 입력을 무시한다 —
+    // 한 제스처가 한 섹션만 이동하며, 아래의 휠 잠금 + quiet 타이머가 연속
+    // 스크롤 / 관성이 그 너머로 advance하는 걸 막는다.
     const step = (dir: number) => {
-      // Scroll-trap gate (DISCRETE path — keyboard + replayed gestures): while
-      // parked on the trapped slide, a step moves the drum exactly one notch
-      // instead of snapping sections. Wheel / touch use the proportional path
-      // below; this keeps `rollTargetRef` in sync so both agree on the edges.
-      // Only when the drum is already at the matching end does the step fall
-      // through and advance out of the slide.
+      // 스크롤 트랩 게이트(DISCRETE 경로 — 키보드 + 재생 제스처): 가둔 슬라이드에
+      // 머무는 동안 step은 섹션 스냅 대신 드럼을 딱 한 칸 움직인다. 휠 / 터치는
+      // 아래의 비례 경로를 쓰며, 이 경로가 `rollTargetRef`를 동기화해 둘이 경계에서
+      // 일치한다. 드럼이 이미 해당 끝에 있을 때만 step이 통과해 슬라이드 밖으로
+      // advance 한다.
       if (trap && !animatingRef.current && currentRef.current === trap.index) {
-        if (rollAnimatingRef.current) return // one press = one notch
+        if (rollAnimatingRef.current) return // 한 키 = 한 칸
         const p = rollTargetRef.current
         const sz = 1 / trap.steps
         if (dir > 0 && p < 1 - ROLL_EPS) {
@@ -169,26 +163,24 @@ export function useSlideController({
           })
           return
         }
-        // At an end — fall through to advance out of the trap.
+        // 끝에 도달 — 통과해서 트랩 밖으로 advance.
       }
 
       if (animatingRef.current) return
       goTo(currentRef.current + dir)
     }
 
-    // Parked on the trapped slide, not mid section-snap?
+    // 가둔 슬라이드에 머무는 중이고, 섹션 스냅 중이 아닌가?
     const inTrap = () =>
       !!trap && !animatingRef.current && currentRef.current === trap.index
 
-    // Re-target the proportional drum roll. A velocity-carrying spring chases
-    // the target, so re-targeting mid-flick keeps the momentum (whoosh) while a
-    // single small nudge just eases a little.
+    // 비례 드럼 롤을 재타깃한다. 속도를 이어받는 스프링이 목표를 추종해, 튕기는
+    // 도중 재타깃해도 모멘텀이 유지되고(휘리릭) 작은 너지 하나는 살짝만 움직인다.
     const rollTo = (target: number) => {
       if (!trap) return
-      // A proportional roll supersedes any discrete notch; releasing the lock
-      // means that once the drum is wheeled/dragged to an end, step() can still
-      // fall through and advance out of the trap (it isn't blocked by a stale
-      // notch lock).
+      // 비례 롤은 어떤 discrete 노치도 대체한다; 잠금을 풀어 두면 드럼을 휠/드래그로
+      // 끝까지 굴린 뒤 step()이 (stale 노치 잠금에 막히지 않고) 통과해 트랩 밖으로
+      // advance 할 수 있다.
       rollAnimatingRef.current = false
       rollTargetRef.current = clamp(target, 0, 1)
       animate(trap.progress, rollTargetRef.current, {
@@ -200,14 +192,14 @@ export function useSlideController({
 
     if (!enabled) return
 
-    // Wheel: accumulate delta, fire once past threshold, reset between bursts.
+    // 휠: delta를 누적, 임계를 넘으면 한 번 발사, 버스트 사이에 리셋.
     let wheelAccum = 0
-    // Separate accumulator for "pushing past an end" while trapped, so the roll
-    // and the section-advance don't share state.
+    // 가둔 동안 "끝을 넘어 미는" 용도의 별도 누산기 — 롤과 섹션 advance가 상태를
+    // 공유하지 않게.
     let rollEdgeAccum = 0
-    // Set once a wheel burst has spent its one section advance; held while events
-    // keep arriving (continuous scroll / inertia) and cleared on quiet, so one
-    // uninterrupted gesture moves exactly one section.
+    // 한 휠 버스트가 한 섹션 advance를 소비하면 set; 이벤트가 계속 오는 동안
+    // (연속 스크롤 / 관성) 유지되고 멎으면 해제되어, 끊기지 않은 한 제스처가 딱
+    // 한 섹션만 이동하게 한다.
     let wheelLocked = false
     let wheelResetTimer: ReturnType<typeof setTimeout>
     const resetWheel = () => {
@@ -218,13 +210,12 @@ export function useSlideController({
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
 
-      // Trapped slide: roll the drum proportionally with inertia. Only once
-      // pinned at an end and still pushing does an accumulated burst advance out.
+      // 가둔 슬라이드: 드럼을 관성으로 비례 롤. 끝에 핀 채로 계속 밀 때만
+      // 누적 버스트가 밖으로 advance.
       if (inTrap()) {
         const t = rollTargetRef.current
         const pushingPastEnd =
-          (e.deltaY > 0 && t >= 1 - ROLL_EPS) ||
-          (e.deltaY < 0 && t <= ROLL_EPS)
+          (e.deltaY > 0 && t >= 1 - ROLL_EPS) || (e.deltaY < 0 && t <= ROLL_EPS)
         if (!pushingPastEnd) {
           resetWheel()
           rollTo(t + e.deltaY * ROLL_SENSITIVITY)
@@ -233,8 +224,8 @@ export function useSlideController({
         rollEdgeAccum += e.deltaY
         clearTimeout(wheelResetTimer)
         wheelResetTimer = setTimeout(resetWheel, WHEEL_RESET_MS)
-        // Lock (don't reset) so leftover inertia after escaping the trap can't
-        // carry on into the section past contact / portfolio.
+        // 리셋이 아니라 잠금 — 트랩을 빠져나온 뒤 남은 관성이 contact / portfolio를
+        // 지나 섹션까지 이어지지 않게.
         if (rollEdgeAccum > WHEEL_THRESHOLD) {
           rollEdgeAccum = 0
           wheelLocked = true
@@ -247,11 +238,11 @@ export function useSlideController({
         return
       }
 
-      // Refresh the quiet timer on every event (even while locked) so the lock
-      // only releases once the wheel actually stops for WHEEL_RESET_MS.
+      // 매 이벤트마다 quiet 타이머 갱신(잠겨 있어도) — 잠금은 휠이 실제로
+      // WHEEL_RESET_MS 동안 멎어야만 해제된다.
       clearTimeout(wheelResetTimer)
       wheelResetTimer = setTimeout(resetWheel, WHEEL_RESET_MS)
-      // Already spent this gesture's one advance — ignore until the wheel quiets.
+      // 이미 이번 제스처의 한 advance를 소비함 — 휠이 멎을 때까지 무시.
       if (wheelLocked) return
       wheelAccum += e.deltaY
       if (wheelAccum > WHEEL_THRESHOLD) {
@@ -265,8 +256,8 @@ export function useSlideController({
       }
     }
 
-    // Touch: while trapped the drum follows the finger proportionally; otherwise
-    // compare start/end Y and step on a decisive swipe.
+    // 터치: 가둔 동안 드럼이 손가락을 비례로 따라간다; 그 외에는 시작/끝 Y를
+    // 비교해 결정적 스와이프에 step.
     let touchStartY = 0
     let touchPrevY = 0
     const onTouchStart = (e: TouchEvent) => {
@@ -287,8 +278,8 @@ export function useSlideController({
     }
     const onTouchEnd = (e: TouchEvent) => {
       const delta = touchStartY - e.changedTouches[0].clientY
-      // Trapped: the finger already rolled the drum; only a decisive swipe while
-      // pinned at an end advances out of the slide.
+      // 가둔 동안: 손가락이 이미 드럼을 굴렸으니, 끝에 핀 상태에서의 결정적
+      // 스와이프만 밖으로 advance.
       if (inTrap()) {
         const t = rollTargetRef.current
         if (delta > TOUCH_THRESHOLD && t >= 1 - ROLL_EPS) step(1)
@@ -299,7 +290,7 @@ export function useSlideController({
       step(delta > 0 ? 1 : -1)
     }
 
-    // Keyboard.
+    // 키보드.
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault()

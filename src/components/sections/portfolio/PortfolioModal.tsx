@@ -4,17 +4,17 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Project } from './projects'
 
 /* ---------------------------------------------------------------------------
-   Portfolio detail modal (design-6.png). Dim backdrop + a centered rounded
-   frame; the frame holds the project's content slides (brand-color fill, a
-   readability scrim, and a top-left label/title), crossfading between them.
-   Prev/next arrows live OUT in the dim, 36px off the frame's edges.
+   Portfolio 상세 모달(design-6.png). 어두운 배경 + 가운데 둥근 프레임; 프레임은
+   프로젝트의 콘텐츠 슬라이드(브랜드 컬러 채움, 가독성 스크림, 좌상단 라벨/타이틀)를
+   담고 그 사이를 크로스페이드한다. 이전/다음 화살표는 프레임 가장자리에서 36px
+   떨어진 어두운 영역에 있다.
 
-   Rendered through a body portal by PortfolioSection because the slide track
-   is transformed — a `fixed` overlay nested under it would be trapped.
+   슬라이드 트랙이 transform 되어 있어, 그 아래 중첩된 `fixed` 오버레이는 갇히므로
+   PortfolioSection이 body 포털을 통해 렌더한다.
 --------------------------------------------------------------------------- */
 
-// At >=1440 the frame is a fixed 1024 wide; below it keeps a 208px dim gutter
-// each side. Height always leaves a 96px dim margin top and bottom.
+// ≥1440에선 프레임이 고정 1024 너비; 그 아래에선 양쪽에 208px 어두운 거터를
+// 유지. 높이는 항상 위/아래 96px 어두운 마진을 남긴다.
 const MODAL_W = 'min(calc(100vw - 416px), 1024px)'
 const MODAL_H = 'calc(100dvh - 192px)'
 
@@ -48,8 +48,8 @@ export function PortfolioModal({ project, onClose }: PortfolioModalProps) {
         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Solid white base so a slide crossfade (both layers <1 opacity) shows
-            white, not the dim behind — also a backstop once real images land. */}
+        {/* 흰색 베이스 — 슬라이드 크로스페이드(두 레이어 모두 opacity<1) 시 뒤의
+            어두움이 아니라 흰색이 보이게; 실제 이미지가 들어와도 backstop 역할. */}
         <div className="relative h-full w-full overflow-hidden rounded-[20px] bg-white">
           <AnimatePresence>
             <motion.div
@@ -61,7 +61,7 @@ export function PortfolioModal({ project, onClose }: PortfolioModalProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35, ease: 'easeOut' }}
             >
-              {/* Scrim for white-text legibility over the brand color. */}
+              {/* 브랜드 컬러 위 흰 텍스트 가독성용 스크림. */}
               <div className="absolute inset-0 bg-black/25" />
               <div className="absolute top-0 left-0 p-[clamp(36px,4.44vw,64px)]">
                 <p className="text-[clamp(14px,1.39vw,20px)] font-semibold tracking-[-0.02em] text-white/90">
@@ -75,7 +75,7 @@ export function PortfolioModal({ project, onClose }: PortfolioModalProps) {
           </AnimatePresence>
         </div>
 
-        {/* Arrows out in the dim, 36px off the frame edges (52px button = -88). */}
+        {/* 어두운 영역의 화살표, 프레임 가장자리에서 36px(52px 버튼 = -88). */}
         {!atFirst && (
           <button
             type="button"

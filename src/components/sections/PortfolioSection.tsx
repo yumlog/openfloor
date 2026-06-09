@@ -13,14 +13,14 @@ import { PortfolioMobile } from './portfolio/PortfolioMobile'
 
 const def = SLIDES[4]
 
-// Single line — the reveal sweep is sized per line box.
+// 한 줄 — reveal sweep이 줄 박스 단위로 크기를 갖는다.
 const HEADLINE_LINES = ['함께 만들어온 결과']
 
 const LABEL_DELAY = 0
 const HEADLINE_DELAY = 0.15
 
-/** Title block (label + reveal headline). Reused as an invisible spacer in the
- *  full-viewport carousel layer to reserve the same top space. */
+/** 타이틀 블록(라벨 + reveal 헤드라인). 풀뷰포트 캐러셀 레이어에서 같은 상단
+ *  공간을 확보하는 투명 스페이서로도 재사용. */
 function PortfolioTitle({ active }: { active: boolean }) {
   return (
     <Container className="pt-[clamp(58px,6.94vw,100px)] max-md:pt-[88px]">
@@ -46,20 +46,19 @@ function PortfolioTitle({ active }: { active: boolean }) {
 }
 
 interface PortfolioSectionProps {
-  /** True while Portfolio is the active slide — drives reveal + wheel replay. */
+  /** Portfolio가 활성 슬라이드인 동안 true — reveal + 휠 재생을 구동. */
   active: boolean
 }
 
 /**
- * Slide 4, light (#fafafa). The title stays inside the 1440 frame (it's narrow,
- * so the cap is fine). The arc-wheel carousel, however, must span the FULL
- * viewport — wider than 1440 — so it's rendered through a body portal into a
- * fixed full-viewport layer that escapes the frame's `overflow-hidden` cap (the
- * same reason the modal is portaled). The layer fades with `active` and stays
- * `pointer-events: none` at the root so it never blocks other slides / the nav;
- * only the wheel band re-enables events while active. An invisible title clone
- * in the layer reserves the top space so the wheel keeps its vertical position.
- * Mobile keeps the simple in-frame vertical list.
+ * 슬라이드 4, 라이트(#fafafa). 타이틀은 1440 프레임 안에 머문다(좁아서 cap이
+ * 무방). 하지만 아크 휠 캐러셀은 풀 뷰포트를 차지해야 하므로 — 1440보다 넓음 —
+ * body 포털을 통해 프레임의 `overflow-hidden` cap을 벗어나는 고정 풀뷰포트
+ * 레이어에 렌더된다(모달을 포털하는 것과 같은 이유). 레이어는 `active`로
+ * 페이드되고 루트는 `pointer-events: none`을 유지해 다른 슬라이드 / 내비를 절대
+ * 막지 않는다; active일 때만 휠 밴드가 이벤트를 다시 켠다. 레이어 안의 투명
+ * 타이틀 클론이 상단 공간을 확보해 휠이 세로 위치를 유지한다. 모바일은 단순한
+ * 프레임 내 세로 리스트를 유지.
  */
 export function PortfolioSection({ active }: PortfolioSectionProps) {
   const frame = useFrameSize()
@@ -76,7 +75,7 @@ export function PortfolioSection({ active }: PortfolioSectionProps) {
 
       {isMobile && <PortfolioMobile projects={PROJECTS} active={active} />}
 
-      {/* Full-viewport carousel layer (desktop) — portaled out of the frame. */}
+      {/* 풀뷰포트 캐러셀 레이어(데스크탑) — 프레임 밖으로 포털. */}
       {!isMobile &&
         createPortal(
           <motion.div
@@ -85,8 +84,8 @@ export function PortfolioSection({ active }: PortfolioSectionProps) {
             animate={{ opacity: active ? 1 : 0, y: active ? 0 : 16 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Invisible title clone — reserves the same top space so the wheel
-                holds its vertical position (the real title is in the frame). */}
+            {/* 투명 타이틀 클론 — 같은 상단 공간을 확보해 휠이 세로 위치를
+                유지하게(진짜 타이틀은 프레임 안에 있음). */}
             <div aria-hidden className="invisible shrink-0">
               <PortfolioTitle active={false} />
             </div>

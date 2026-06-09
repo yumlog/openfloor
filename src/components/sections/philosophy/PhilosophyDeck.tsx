@@ -4,51 +4,49 @@ import { cn } from '@/lib/cn'
 import { PHILOSOPHY_CARDS } from './cards'
 
 /* ---------------------------------------------------------------------------
-   Philosophy deck — the desktop state machine.
+   Philosophy 덱 — 데스크탑 상태 머신.
 
-   Two states driven by `selected` (the centered card index, or null):
-     standing   selected === null   3 identical cards stacked into a deck.
-     expanded   selected !== null   flat 3-up; selected card centered (body +
-                                     scrim + closing quote), the other two on
-                                     the sides (image + name only).
+   `selected`(가운데 카드 인덱스, 또는 null)가 구동하는 두 상태:
+     standing   selected === null   동일한 카드 3장을 덱으로 쌓음.
+     expanded   selected !== null   평면 3-up; 선택 카드는 가운데(본문 + 스크림 +
+                                     닫는 따옴표), 나머지 둘은 양옆(이미지 + 이름만).
 
-   Click rules: standing card -> expand it center. Side card -> slide it to
-   center. Centered card -> fold back to the deck.
+   클릭 규칙: 세움 카드 -> 가운데로 펼침. 옆 카드 -> 가운데로 이동. 가운데 카드 ->
+   덱으로 접힘.
 
-   STANDING is a 2D oblique stack (NOT 3D perspective): every card shares the
-   exact same size and skewY, stepped by a constant diagonal offset, so the
-   three read as tidy identical parallelograms (vertical edges stay vertical;
-   only top/bottom edges slope). This keeps hit-testing exact and the shapes
-   uniform — a real perspective deck gave each card a different angle.
+   STANDING은 2D 오블리크 스택(3D 원근 아님): 모든 카드가 완전히 같은 크기와
+   skewY를 공유하고 일정한 대각선 오프셋으로 stepped 되어, 셋이 가지런한 동일
+   평행사변형으로 읽힌다(세로 변은 수직 유지; 위/아래 변만 기울어짐). 이렇게 해야
+   히트 테스트가 정확하고 모양이 균일하다 — 진짜 원근 덱은 카드마다 각도가 달랐다.
 
-   EVERYTHING here is in design pixels (1440 reference). The whole stage is
-   transform:scale(ratio)'d by the parent so these literals shrink fluidly with
-   the frame — no per-value clamp needed inside the scaled canvas.
+   여기 모든 값은 design px(1440 기준)다. 전체 스테이지는 부모가
+   transform:scale(ratio)하므로 이 리터럴들이 프레임에 맞춰 유동 축소된다 —
+   스케일된 캔버스 안에선 값별 clamp가 필요 없다.
 --------------------------------------------------------------------------- */
 
 const CANVAS_W = 1440
 const CANVAS_H = 600
 
-// Expanded sizes (design-philosophy.png).
+// 펼침 크기(design-philosophy.png).
 const CENTER = 500
 const SIDE = 380
 const CARD_GAP = 40
-// Distance from stage center to a side-card center.
+// 스테이지 중심에서 옆 카드 중심까지의 거리.
 const SLOT_X = CENTER / 2 + CARD_GAP + SIDE / 2 // 480
 
-// Standing deck (philosophy-standing-name.png): identical portrait cards
-// (W:H ≈ 0.7), one shared skew, constant diagonal step. Front (index 0) sits
-// on top; the back card steps over and underneath.
+// 세움 덱(philosophy-standing-name.png): 동일한 세로형 카드(W:H ≈ 0.7), 공유
+// skew 하나, 일정 대각선 step. 앞(인덱스 0)이 맨 위; 뒤 카드가 그 위를 넘어
+// 아래로 들어간다.
 const DECK_W = 280
-const DECK_H = 380 // ≈ DECK_W / 0.7 -> portrait like the reference
-const SKEW = 30 // skewY, deg — "\" lean (left edge high); vertical edges stay vertical
+const DECK_H = 380 // ≈ DECK_W / 0.7 -> 레퍼런스처럼 세로형
+const SKEW = 30 // skewY, 도 — "\" 기울기(왼쪽 변이 높음); 세로 변은 수직 유지
 const STEP_X = 120
 const STEP_Y = 0
 const HOVER_LIFT = 30
 
-// Underdamped spring so cards overshoot and settle with a little "boing" as
-// they move/resize between states (the x travel also reads as a side wobble).
-// zIndex must NOT animate — it's overridden to snap instantly per use.
+// 언더댐핑 스프링이라 카드가 상태 간 이동/리사이즈 시 살짝 오버슈트하며 "보잉"
+// 하고 안착한다(x 이동도 옆 흔들림처럼 읽힌다). zIndex는 절대 애니메이션 X —
+// 사용처마다 즉시 스냅하도록 덮어쓴다.
 const TRANSITION: Transition = {
   type: 'spring',
   bounce: 0.3,
@@ -56,24 +54,24 @@ const TRANSITION: Transition = {
 }
 const FADE: Transition = { duration: 0.3, ease: 'easeOut' }
 
-// Entry: each card pops up from below with a bouncy stagger ("통통통") when the
-// section becomes active; replayed on every false -> true (re-entry). Lives on
-// an OUTER wrapper so it stays independent of the inner layout state machine.
+// 진입: 섹션이 활성화되면 각 카드가 통통 튀는 stagger("통통통")로 아래에서
+// 솟아오른다; false -> true(재진입)마다 다시 재생. 안쪽 레이아웃 상태 머신과
+// 독립되도록 바깥 래퍼에 둔다.
 const ENTRY_BASE = 0.15
 const ENTRY_STAGGER = 0.1
 const CARD_COUNT = PHILOSOPHY_CARDS.length
 
 /**
- * Target transform for card `index` given the current `selected` card and the
- * hovered card. Cards are anchored top-left at the stage center, so x/y carry a
- * -w/2 / -h/2 offset to position by the card's own center.
+ * 현재 `selected` 카드와 hover된 카드를 기준으로 한 카드 `index`의 목표
+ * transform. 카드는 스테이지 중심에 top-left로 앵커되므로, x/y가 -w/2 / -h/2
+ * 오프셋을 실어 카드 자신의 중심으로 위치시킨다.
  */
 function targetFor(
   index: number,
   selected: number | null,
   hovered: number | null
 ): TargetAndTransition {
-  // standing — identical skewed cards on a constant diagonal step.
+  // standing — 일정 대각선 step 위의 동일한 skew 카드들.
   if (selected === null) {
     const cx = (index - 1) * STEP_X
     const cy = (1 - index) * STEP_Y - (hovered === index ? HOVER_LIFT : 0)
@@ -87,7 +85,7 @@ function targetFor(
     }
   }
 
-  // expanded — centered card.
+  // expanded — 가운데 카드.
   if (index === selected) {
     return {
       width: CENTER,
@@ -99,7 +97,7 @@ function targetFor(
     }
   }
 
-  // expanded — side cards, preserving canonical left -> right order.
+  // expanded — 옆 카드들, 기준 좌 -> 우 순서 유지.
   const others = [0, 1, 2].filter((i) => i !== selected)
   const cx = others[0] === index ? -SLOT_X : SLOT_X
   return {
@@ -113,9 +111,9 @@ function targetFor(
 }
 
 interface PhilosophyDeckProps {
-  /** True while Philosophy is the active slide — resets to the deck on exit. */
+  /** Philosophy가 활성 슬라이드인 동안 true — 나갈 때 덱으로 리셋. */
   active: boolean
-  /** frame.w / 1440 (<=1) — scales the whole design canvas fluidly. */
+  /** frame.w / 1440 (<=1) — 전체 디자인 캔버스를 유동 스케일. */
   ratio: number
 }
 
@@ -123,7 +121,7 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
   const [selected, setSelected] = useState<number | null>(null)
   const [hovered, setHovered] = useState<number | null>(null)
 
-  // Leaving the section folds the deck back so re-entry starts at standing.
+  // 섹션을 떠나면 덱을 다시 접어, 재진입 시 standing에서 시작하게 한다.
   useEffect(() => {
     if (!active) {
       setSelected(null)
@@ -147,20 +145,19 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
     >
       {PHILOSOPHY_CARDS.map((card, i) => {
         const t = targetFor(i, selected, hovered)
-        // z-index belongs on the OUTER wrapper: the wrapper's opacity/transform
-        // creates a stacking context, so an inner z-index can't order siblings.
+        // z-index는 바깥 래퍼에 둔다: 래퍼의 opacity/transform이 stacking
+        // context를 만들어, 안쪽 z-index로는 형제 순서를 정할 수 없다.
         const { zIndex, ...layout } = t
         const isSelected = selected === i
-        // Body/scrim fade. On expand, wait until the size spring has nearly
-        // reached the final width so the reveal happens at the final line-wrap
-        // (no mid-resize reflow flicker). On collapse, vanish fast — before the
-        // shrink can reflow the visible text.
+        // 본문/스크림 페이드. 펼칠 땐 사이즈 스프링이 최종 너비에 거의 도달할
+        // 때까지 기다려 최종 줄바꿈에서 등장하게 한다(리사이즈 중 reflow 깜빡임
+        // 없음). 접을 땐 빠르게 사라진다 — 축소가 보이는 텍스트를 reflow 하기 전에.
         const bodyFade: Transition = isSelected
           ? { duration: 0.25, delay: 0.3, ease: 'easeOut' }
           : { duration: 0.12, ease: 'easeOut' }
         return (
-          // Outer = entry anchor: pops the card up from below (staggered) on
-          // section entry, independent of the inner layout/state machine.
+          // 바깥 = 진입 앵커: 섹션 진입 시 카드를 아래에서 솟아오르게(stagger),
+          // 안쪽 레이아웃/상태 머신과 독립적으로.
           <motion.div
             key={card.id}
             className="absolute top-1/2 left-1/2"
@@ -177,17 +174,17 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
                     type: 'spring',
                     bounce: 0.45,
                     duration: 0.55,
-                    // Reverse order: back card (index 2) pops first, front
-                    // (index 0) last — so each new card lands on top.
+                    // 역순: 뒤 카드(인덱스 2)가 먼저, 앞(인덱스 0)이 마지막 —
+                    // 그래서 새 카드가 항상 위에 얹힌다.
                     delay: ENTRY_BASE + (CARD_COUNT - 1 - i) * ENTRY_STAGGER,
                   }
                 : { duration: 0.2 }),
-              // Stacking must snap instantly, never animate.
+              // 쌓임은 즉시 스냅해야 하며, 절대 애니메이션 X.
               zIndex: { duration: 0 },
             }}
           >
-            {/* Inner = layout state machine (standing/expanded/hover). Anchored
-                at the outer origin (stage center); t's x/y translate from there. */}
+            {/* 안쪽 = 레이아웃 상태 머신(standing/expanded/hover). 바깥 원점
+                (스테이지 중심)에 앵커; t의 x/y가 거기서부터 translate. */}
             <motion.div
               className="absolute cursor-pointer select-none"
               animate={layout}
@@ -196,20 +193,20 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
               onHoverStart={() => setHovered(i)}
               onHoverEnd={() => setHovered((h) => (h === i ? null : h))}
             >
-              {/* Image placeholder — clips the scrim + body to the rounded card. */}
+              {/* 이미지 플레이스홀더 — 스크림 + 본문을 둥근 카드로 클립. */}
               <div
                 className={cn(
                   'absolute inset-0 overflow-hidden rounded-[20px]',
                   card.tint
                 )}
               >
-                {/* Scrim for white-text legibility — only on the centered card. */}
+                {/* 흰 텍스트 가독성용 스크림 — 가운데 카드에만. */}
                 <motion.div
                   className="pointer-events-none absolute inset-0 bg-black/35"
                   animate={{ opacity: isSelected ? 1 : 0 }}
                   transition={bodyFade}
                 />
-                {/* Body + closing quote — only on the centered card. */}
+                {/* 본문 + 닫는 따옴표 — 가운데 카드에만. */}
                 <motion.div
                   className="pointer-events-none absolute inset-0 px-[48px] py-[60px]"
                   animate={{ opacity: isSelected ? 1 : 0 }}
@@ -225,11 +222,10 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
                 </motion.div>
               </div>
 
-              {/* Name below the card. Single label for both states (they're
-                mutually exclusive): expanded shows every card's name centered;
-                standing shows only the hovered card's name right-aligned. Lives
-                inside the card group, so it inherits the card's skew and tracks
-                the hovered card (reference "MILLA"). */}
+              {/* 카드 아래 이름. 두 상태 공용 라벨 하나(상호 배타적): 펼침은
+                모든 카드 이름을 가운데 표시; 세움은 호버한 카드 이름만 우측
+                정렬로 표시. 카드 그룹 안에 있어 카드의 skew를 물려받고 호버한
+                카드를 따라간다(레퍼런스 "MILLA"). */}
               <motion.p
                 className={cn(
                   'text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-[20px] leading-[1.4] font-bold tracking-[-0.04em]',

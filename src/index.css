@@ -2,41 +2,41 @@
 @import './styles/keyframes.css';
 
 /* ---------------------------------------------------------------------------
-   Design tokens. Everything (colors, fonts, frame width) lives here so
-   components never hardcode raw values — use the generated utilities instead
-   (e.g. text-title-on-dark, bg-bg-dark, max-w-frame).
+   디자인 토큰. 모든 것(색, 폰트, 프레임 너비)이 여기 있어 컴포넌트가 raw 값을
+   하드코딩하지 않게 한다 — 대신 생성된 유틸리티를 쓴다
+   (예: text-title-on-dark, bg-bg-dark, max-w-frame).
 --------------------------------------------------------------------------- */
 @theme {
-  /* Backgrounds */
+  /* 배경 */
   --color-bg-dark: #171717;
   --color-bg-light: #ffffff;
 
-  /* Accent */
+  /* 액센트 */
   --color-accent: #fb3640;
 
-  /* Text on dark backgrounds */
+  /* 다크 배경 위 텍스트 */
   --color-title-on-dark: #ffffff;
   --color-text-on-dark: #a3a3a3;
 
-  /* Nav / logo text (header) */
+  /* 내비 / 로고 텍스트(헤더) */
   --color-text-nav: #d4d4d4;
 
-  /* Oversized ghost background text on dark slides */
+  /* 다크 슬라이드의 큼직한 고스트 배경 텍스트 */
   --color-ghost-on-dark: #262626;
 
-  /* Text on light backgrounds */
+  /* 라이트 배경 위 텍스트 */
   --color-title-on-light: #111111;
   --color-text-on-light: #666666;
-  /* Card name labels (Philosophy deck) */
+  /* 카드 이름 라벨(Philosophy 덱) */
   --color-card-name: #333333;
 
-  /* Type: Latin first, then Korean fallback */
+  /* 글꼴: Latin 먼저, 그다음 한글 폴백 */
   --font-sans: 'Montserrat', 'Pretendard', sans-serif;
 
-  /* Numeric display (About stats) — Pretendard for the oversized figures */
+  /* 숫자 표시(About 통계) — 큼직한 수치는 Pretendard */
   --font-num: 'Pretendard', sans-serif;
 
-  /* Design frame width — drives the max-w-frame utility */
+  /* 디자인 프레임 너비 — max-w-frame 유틸리티를 구동 */
   --container-frame: 1440px;
 }
 
@@ -49,7 +49,7 @@
 
   body {
     font-family: var(--font-sans);
-    /* Initial paint matches the Hero slide so there's no white flash on load */
+    /* 첫 페인트를 Hero 슬라이드와 맞춰 로드 시 하얀 플래시가 없게 */
     background-color: var(--color-bg-dark);
   }
 
@@ -60,12 +60,11 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Central video blend. Multiply lets the (alpha-less) clip sit on light
-   backdrops. On dark slides, invert the source so its white background becomes
-   black and the dark glass becomes bright, then composite with lighten —
-   black-on-near-black disappears, leaving the bright object visible.
-   hue-rotate(180deg) after invert cancels the complementary-color shift so the
-   glass tone stays neutral instead of leaning yellow.
+   중앙 비디오 블렌드. multiply는 (알파 없는) 클립이 라이트 배경 위에 놓이게
+   한다. 다크 슬라이드에선 소스를 invert 해 흰 배경은 검게, 어두운 유리는 밝게
+   만든 뒤 lighten으로 합성한다 — 검정-위-거의검정은 사라지고 밝은 오브젝트만
+   남는다. invert 뒤 hue-rotate(180deg)가 보색 이동을 상쇄해 유리 톤이 누렇게
+   기울지 않고 중립을 유지한다.
 --------------------------------------------------------------------------- */
 .central-video {
   mix-blend-mode: multiply;

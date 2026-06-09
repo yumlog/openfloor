@@ -2,14 +2,14 @@ import type { ReactNode } from 'react'
 import { motion, type MotionValue } from 'motion/react'
 
 interface SlidesProps {
-  /** Track translateY, e.g. `-slide * 100dvh`. */
+  /** 트랙 translateY, 예: `-slide * 100dvh`. */
   trackY: MotionValue<string>
   children: ReactNode
 }
 
 /**
- * Vertical slide track. Sections are stacked and the whole track is moved with
- * a single transform; each child section is one viewport tall (100dvh).
+ * 세로 슬라이드 트랙. 섹션을 쌓아 두고 전체 트랙을 단일 transform으로 이동한다;
+ * 각 자식 섹션은 뷰포트 높이 한 칸(100dvh)이다.
  */
 export function Slides({ trackY, children }: SlidesProps) {
   return (

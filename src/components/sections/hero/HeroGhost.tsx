@@ -2,21 +2,21 @@ import { motion, useTransform, type MotionValue } from 'motion/react'
 import { Container } from '@/components/layout/Container'
 
 interface HeroGhostProps {
-  /** The scroll-engine motion value — keeps this in lockstep with the hero. */
+  /** 스크롤 엔진 motion value — 이것을 hero와 정확히 같이 움직이게 한다. */
   slide: MotionValue<number>
-  /** True while the hero is active — replays the ghost fade-in on re-entry. */
+  /** hero가 활성인 동안 true — 재진입 시 고스트 페이드인을 다시 재생. */
   active: boolean
 }
 
 /**
- * Oversized "UNDERSTAND DEEPER / BUILD TO LAST" ghost text. It lives in the
- * Frame layer BETWEEN the background and the CentralVideo (rendered before the
- * video, no z-index) so the video's lighten blend paints over it — the glass
- * object reads as occluding the text, matching the comp's depth.
+ * 큼직한 "UNDERSTAND DEEPER / BUILD TO LAST" 고스트 텍스트. 배경과 CentralVideo
+ * 사이의 Frame 레이어에 있다(비디오보다 먼저 렌더, z-index 없음). 그래서 비디오의
+ * lighten 블렌드가 그 위로 칠해진다 — 유리 오브젝트가 텍스트를 가리는 것처럼
+ * 읽혀 시안의 깊이감과 맞는다.
  *
- * It is not inside the Slides track, so we reproduce the hero's motion here:
- * translate with the track (-slide * 100dvh) and fade out leaving slide 0, so it
- * behaves exactly like the rest of the hero content.
+ * Slides 트랙 안에 있지 않으므로, 여기서 hero의 모션을 재현한다: 트랙과 함께
+ * translate(-slide * 100dvh)하고 슬라이드 0을 떠날 때 페이드 아웃해, 나머지
+ * hero 콘텐츠와 정확히 똑같이 동작한다.
  */
 export function HeroGhost({ slide, active }: HeroGhostProps) {
   const y = useTransform(slide, (v) => `${-v * 100}dvh`)

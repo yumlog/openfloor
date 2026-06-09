@@ -7,9 +7,9 @@ export interface FrameSize {
 }
 
 /**
- * Tracks the design frame size. Width is capped at DESIGN_WIDTH so that on
- * wider viewports the layout (and the scroll-driven video position) behaves as
- * if the screen were 1440px wide, with the remainder showing as side margins.
+ * 디자인 프레임 크기를 추적한다. 너비는 DESIGN_WIDTH로 제한되어, 더 넓은
+ * 뷰포트에서도 레이아웃(과 스크롤 구동 비디오 위치)이 화면이 1440px인 것처럼
+ * 동작하고 나머지는 좌우 여백으로 보인다.
  */
 export function useFrameSize(): FrameSize {
   const [size, setSize] = useState<FrameSize>(() => ({

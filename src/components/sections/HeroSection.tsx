@@ -15,24 +15,23 @@ const INTRO =
   '오픈플로어는 AI 워크플로우를 기반으로\n기업의 주요 시스템과 디지털 서비스를\n기획부터 운영까지 함께 수행하는\n개발 파트너입니다.'
 
 interface HeroSectionProps {
-  /** The single scroll-engine motion value, for the leave-slide-0 fade. */
+  /** 단일 스크롤 엔진 motion value, 슬라이드-0 이탈 페이드용. */
   slide: MotionValue<number>
-  /** True while the hero is the active slide — drives entry-animation replay. */
+  /** hero가 활성 슬라이드인 동안 true — 진입 애니메이션 재생을 구동. */
   active: boolean
-  /** Snap to a slide — wires the CONTACT CTA. */
+  /** 특정 슬라이드로 스냅 — CONTACT CTA에 연결. */
   goTo: (next: number) => void
 }
 
 /**
- * Slide 0, dark. The central video is rendered by App and shows through this
- * (transparent) section; content is laid out to sit clear of it. Top row pins
- * the headline left / intro right; the bottom row anchors the oversized ghost
- * text and the rotating badge. All entry animations replay on re-entry via
- * `active` (the headline reveal through the shared RevealText, the rest through
- * the RISE / FADE variants).
+ * 슬라이드 0, 다크. 중앙 비디오는 App이 렌더해 이 (투명) 섹션 위로 비친다;
+ * 콘텐츠는 그것을 피하도록 배치한다. 상단 행은 헤드라인 좌 / 소개문 우로 고정;
+ * 하단 행은 큼직한 고스트 텍스트와 회전 뱃지를 앵커한다. 모든 진입 애니메이션은
+ * `active`로 재진입 시 다시 재생된다(헤드라인 reveal은 공용 RevealText로,
+ * 나머지는 RISE / FADE variants로).
  */
 export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
-  // Content fades out as we scroll away from the hero.
+  // hero에서 스크롤로 멀어질수록 콘텐츠가 페이드 아웃.
   const opacity = useTransform(slide, [0, 0.5], [1, 0])
 
   return (
@@ -44,8 +43,8 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
         style={{ opacity }}
         className="flex h-full flex-col justify-between"
       >
-        {/* Top: headline + CTA (left), intro (right). pt reserves the header.
-            Mobile (<768): stack vertically — headline → CONTACT → intro. */}
+        {/* 상단: 헤드라인 + CTA(좌), 소개문(우). pt가 헤더 공간을 확보.
+            모바일(<768): 세로로 쌓음 — 헤드라인 → CONTACT → 소개문. */}
         <Container className="flex justify-between pt-[65px] max-md:flex-col max-md:gap-6 max-md:pt-[76px]">
           <div className="mt-[clamp(82px,9.86vw,142px)] max-md:mt-0">
             <RevealText
@@ -87,8 +86,8 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
           </motion.p>
         </Container>
 
-        {/* Bottom: rotating badge (right). The oversized ghost text behind it
-            lives in the Frame layer (HeroGhost) so the video can blend over it. */}
+        {/* 하단: 회전 뱃지(우). 그 뒤의 큼직한 고스트 텍스트는 Frame 레이어
+            (HeroGhost)에 있어 비디오가 그 위로 블렌드할 수 있다. */}
         <Container className="relative mb-[clamp(58px,6.94vw,100px)] max-md:mb-8">
           <motion.div
             variants={FADE}

@@ -8,22 +8,22 @@ import { SLIDES } from '@/config/slides'
 
 const def = SLIDES[1]
 
-/* Entry-animation timing. The top block leads; the stat row cascades the three
-   columns left -> right, and inside each column label -> number -> caption. */
+/* 진입 애니메이션 타이밍. 상단 블록이 먼저; 통계 행은 세 컬럼을 좌 -> 우로
+   캐스케이드하고, 각 컬럼 안에선 라벨 -> 숫자 -> 캡션 순. */
 const INTRO_DELAY = 0.5
 const STATS_BASE_DELAY = 0.35
 const STATS_STAGGER = 0.12
-/** Start delay for stat column `i` (left -> right cascade). */
+/** 통계 컬럼 `i`의 시작 지연(좌 -> 우 캐스케이드). */
 const columnDelay = (i: number) => STATS_BASE_DELAY + i * STATS_STAGGER
 
-/** Divider grows in (scaleY) outward from its center alongside its column. */
+/** 구분선이 컬럼과 함께 중심에서 바깥으로 자란다(scaleY). */
 const GROW: Variants = {
   hidden: { scaleY: 0, opacity: 0 },
   show: { scaleY: 1, opacity: 1 },
 }
 
-// Headline — pre-split so the reveal sweep stays even (each line must fit on
-// one line; the mask is sized per line box).
+// 헤드라인 — reveal sweep이 고르도록 미리 분할(각 줄은 한 줄에 들어가야 함;
+// 마스크는 줄 박스 단위로 크기가 정해진다).
 const HEADLINE_LINES = [
   '닫힌 공간에서는 만들어질 수 없는 것이',
   '있는데, 그것이 바로 시너지입니다.',
@@ -56,16 +56,15 @@ const STATS: StatDef[] = [
 ]
 
 interface AboutSectionProps {
-  /** True while About is the active slide — drives reveal + count-up replay. */
+  /** About이 활성 슬라이드인 동안 true — reveal + 카운트업 재생을 구동. */
   active: boolean
 }
 
 /**
- * Slide 1, dark. The central video's about-state sits in the upper-right
- * (background layer), so the left-aligned, pre-broken content clears it without
- * needing a width cap. Top block sits 124px from the slide top (nav included);
- * the three-up stat row sits 124px from the bottom. Reveal + count-up replay on
- * every entry via `active`.
+ * 슬라이드 1, 다크. 중앙 비디오의 about 상태가 우상단(배경 레이어)에 있어,
+ * 좌측 정렬·미리 줄바꿈된 콘텐츠가 너비 제한 없이 그것을 피한다. 상단 블록은
+ * 슬라이드 위에서 124px(내비 포함); 3열 통계 행은 아래에서 124px. reveal +
+ * 카운트업은 `active`로 진입할 때마다 다시 재생된다.
  */
 export function AboutSection({ active }: AboutSectionProps) {
   return (
@@ -73,8 +72,8 @@ export function AboutSection({ active }: AboutSectionProps) {
       id={def.id}
       className="relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden"
     >
-      {/* Top block (left). 124px from the slide top, including the nav.
-          Label leads, headline reveals, intro follows. */}
+      {/* 상단 블록(좌). 내비 포함 슬라이드 위에서 124px.
+          라벨이 먼저, 헤드라인 reveal, 소개문이 뒤따른다. */}
       <Container className="pt-[clamp(71px,8.61vw,124px)] max-md:pt-[88px]">
         <motion.p
           variants={RISE}
@@ -104,10 +103,9 @@ export function AboutSection({ active }: AboutSectionProps) {
         </motion.p>
       </Container>
 
-      {/* Stat row (bottom). 124px from the slide bottom; three equal-width
-          (flex-1) left-aligned columns spanning the full frame, separated by 1px
-          verticals with 130px clearance each side. Mobile: stack vertically,
-          drop the verticals. */}
+      {/* 통계 행(하단). 슬라이드 아래에서 124px; 전체 프레임을 차지하는 동일
+          너비(flex-1) 좌측 정렬 3컬럼, 양쪽 130px 간격의 1px 세로선으로 구분.
+          모바일: 세로로 쌓고 세로선 제거. */}
       <Container className="pb-[clamp(71px,8.61vw,124px)] max-md:pb-[48px]">
         <div className="flex items-start gap-[clamp(74px,9.03vw,130px)] max-md:flex-col max-md:gap-6">
           {STATS.map((stat, i) => (
@@ -134,13 +132,13 @@ export function AboutSection({ active }: AboutSectionProps) {
 interface StatItemProps {
   stat: StatDef
   active: boolean
-  /** Column position — drives the left -> right cascade delay. */
+  /** 컬럼 위치 — 좌 -> 우 캐스케이드 지연을 구동. */
   index: number
 }
 
 function StatItem({ stat, active, index }: StatItemProps) {
   const base = columnDelay(index)
-  // Number falls in line with its column; label leads it, caption trails.
+  // 숫자는 컬럼에 맞춰 등장; 라벨이 먼저, 캡션이 뒤따른다.
   const value = useCountUp(stat.target, active, base + 0.05)
 
   return (

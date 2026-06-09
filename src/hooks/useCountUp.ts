@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react'
 import { animate } from 'motion/react'
 
 /**
- * Counts from 0 up to `target` (ease-out) whenever `active` is true, and resets
- * to 0 when it isn't — so the count-up replays each time the owning section is
- * (re)entered. `delay` holds at 0 before counting (used to fall in line with a
- * column cascade). Returns the current rounded value; callers append any suffix
- * ("+", "%") themselves.
+ * `active`가 true일 때 0에서 `target`까지 세고(ease-out), 아니면 0으로 리셋한다
+ * — 그래서 소속 섹션에 (재)진입할 때마다 카운트업이 다시 재생된다. `delay`는
+ * 세기 전 0에서 대기(컬럼 캐스케이드에 맞추는 용도). 현재 반올림 값을 반환하며,
+ * 접미사("+", "%")는 호출 측이 직접 붙인다.
  */
 export function useCountUp(
   target: number,

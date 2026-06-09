@@ -17,23 +17,23 @@ import { cn } from '@/lib/cn'
 import type { Project } from './projects'
 
 /* ---------------------------------------------------------------------------
-   Portfolio carousel — an arc "wheel" of identical cards.
+   Portfolio 캐러셀 — 동일한 카드들의 아크 "휠".
 
-   ONE continuous motion value, `rotation`, drives everything. For card i the
-   center-relative offset is the SHORTEST wrapped distance p = wrap(i - rotation)
-   over the ring of N cards, so the wheel loops infinitely in both directions.
-   Each card is then placed on a circle of radius R, stepping ANG° per slot:
+   하나의 연속 motion value `rotation`이 전부를 구동한다. 카드 i의 중심 기준
+   오프셋은 N개 카드 링 위에서의 최단 wrap 거리 p = wrap(i - rotation)이라, 휠이
+   양방향으로 무한 루프한다. 그 다음 각 카드를 반지름 R의 원에 슬롯당 ANG°씩
+   stepping 하며 배치한다:
 
-       x      = R · sin(p·ANG)        (fan out left/right)
-       y      = R · (1 − cos(p·ANG))  (sides dip below the upright center card)
-       rotate = p·ANG                 (tilt only — every card keeps its size)
-       zIndex = 100 − |p|·10          (center on top)
+       x      = R · sin(p·ANG)        (좌/우로 부채꼴)
+       y      = R · (1 − cos(p·ANG))  (옆 카드는 똑바로 선 가운데 카드보다 내려감)
+       rotate = p·ANG                 (기울기만 — 모든 카드는 크기 유지)
+       zIndex = 100 − |p|·10          (가운데가 맨 위)
 
-   With R≈1280 / ANG≈14° the center card stands upright, ±1 sit beside it, and
-   ±2 peek in clipped at the frame edges (5 visible); |p| past ~2.4 fades out.
+   R≈1280 / ANG≈14°에선 가운데 카드가 똑바로 서고 ±1이 옆에, ±2가 프레임
+   가장자리에 클립되어 살짝 보인다(5장 가시); |p|가 ~2.4를 넘으면 페이드 아웃.
 
-   Everything is authored in 1440-design px on a fixed canvas that the parent
-   transform:scale(ratio)'s — same approach as the Philosophy deck.
+   모든 값은 1440-디자인 px로, 부모가 transform:scale(ratio)하는 고정 캔버스에
+   작성된다 — Philosophy 덱과 같은 방식.
 --------------------------------------------------------------------------- */
 
 const CANVAS_W = 1440
@@ -41,27 +41,27 @@ const CANVAS_H = 600
 const CARD_W = 320
 const CARD_H = 420
 
-// R sets the inter-card spacing (≈ R·sin(ANG) between adjacent centers); at the
-// original 1280 that was ~310px < the 320 card width, so neighbors overlapped.
-// 1680 → ~406px spacing, a comfortable gap between cards (see 5.png).
+// R이 카드 간 간격을 정한다(인접 중심 사이 ≈ R·sin(ANG)); 원래 1280에선
+// ~310px < 320 카드 너비라 이웃이 겹쳤다. 1680 → ~406px 간격, 카드 사이가
+// 넉넉히 벌어진다(5.png 참조).
 const R = 1680
-const ANG = 14 // degrees per slot
+const ANG = 14 // 슬롯당 각도
 const ANG_RAD = (ANG * Math.PI) / 180
 
-const PX_PER_STEP = 320 // screen px dragged ≈ one card step
-const CLICK_SLOP = 8 // movement under this (px) counts as a click, not a drag
-const AUTO_MS = 2000 // auto-advance interval
+const PX_PER_STEP = 320 // 드래그한 화면 px ≈ 카드 한 칸
+const CLICK_SLOP = 8 // 이(px) 미만 이동은 드래그가 아니라 클릭으로 침
+const AUTO_MS = 2000 // 자동 넘김 간격
 
 const SPRING = { type: 'spring', stiffness: 140, damping: 22 } as const
 const AUTO_TWEEN = { duration: 0.9, ease: [0.22, 1, 0.36, 1] } as const
 
-/** Shortest signed distance of `d` on a ring of size `n` → (-n/2, n/2]. */
+/** 크기 `n`의 링 위에서 `d`의 최단 부호 거리 → (-n/2, n/2]. */
 function wrap(d: number, n: number) {
   const m = ((d % n) + n) % n
   return m > n / 2 ? m - n : m
 }
 
-/** Perceived-luminance test so card text contrasts the brand fill. */
+/** 카드 텍스트가 브랜드 배경과 대비되도록 하는 체감 휘도 판정. */
 function isLightColor(hex: string) {
   const h = hex.replace('#', '')
   const r = parseInt(h.slice(0, 2), 16)
@@ -78,7 +78,7 @@ interface PortfolioCardProps {
   onPointerDownCard: (e: ReactPointerEvent, index: number) => void
 }
 
-/** One card, positioned on the arc purely from the shared `rotation` value. */
+/** 카드 한 장, 공유 `rotation` 값만으로 아크 위에 위치. */
 function PortfolioCard({
   project,
   index,
@@ -91,9 +91,9 @@ function PortfolioCard({
   const y = useTransform(p, (v) => R * (1 - Math.cos(v * ANG_RAD)))
   const rotate = useTransform(p, (v) => v * ANG)
   const zIndex = useTransform(p, (v) => Math.round(100 - Math.abs(v) * 10))
-  // Fade the cards that swing past the visible arc; also drop their pointer
-  // events so an invisible card can't intercept a click. Visible cards INHERIT
-  // (so the parent's active-gating decides whether the wheel is interactive).
+  // 가시 아크를 벗어나 도는 카드를 페이드; 안 보이는 카드가 클릭을 가로채지
+  // 못하도록 pointer 이벤트도 끈다. 보이는 카드는 INHERIT(부모의 active 게이팅이
+  // 휠 상호작용 여부를 결정).
   const opacity = useTransform(p, [-2.6, -2.2, 2.2, 2.6], [0, 1, 1, 0])
   const pointerEvents = useTransform(opacity, (o) =>
     o < 0.05 ? 'none' : 'inherit'
@@ -117,7 +117,7 @@ function PortfolioCard({
       }}
       onPointerDown={(e) => onPointerDownCard(e, index)}
     >
-      {/* Flat brand-color placeholder (real artwork replaces this later). */}
+      {/* 평면 브랜드 컬러 플레이스홀더(실제 아트가 나중에 대체). */}
       <div
         className="flex h-full w-full items-center justify-center rounded-[16px] shadow-[0_24px_60px_-18px_rgba(0,0,0,0.35)]"
         style={{ backgroundColor: project.color }}
@@ -137,13 +137,13 @@ function PortfolioCard({
 
 interface PortfolioCarouselProps {
   projects: Project[]
-  /** True while Portfolio is the active slide — gates auto-rotate + interactivity. */
+  /** Portfolio가 활성 슬라이드인 동안 true — 자동 회전 + 상호작용을 게이트. */
   active: boolean
-  /** True while the detail modal is open — freezes the wheel on the open card. */
+  /** 상세 모달이 열린 동안 true — 열린 카드에서 휠을 고정. */
   modalOpen: boolean
-  /** frame.w / 1440 (<=1) — scales the whole design canvas fluidly. */
+  /** frame.w / 1440 (<=1) — 전체 디자인 캔버스를 유동 스케일. */
   ratio: number
-  /** Open the detail modal for `index` (the card clicked / centered). */
+  /** `index`(클릭/가운데 카드)의 상세 모달을 연다. */
   onOpen: (index: number) => void
 }
 
@@ -167,16 +167,16 @@ export function PortfolioCarousel({
     moved: number
   } | null>(null)
 
-  // Auto-rotate is paused while interacting, modal-open, or off-screen.
+  // 상호작용 중 / 모달 열림 / 화면 밖일 땐 자동 회전 일시정지.
   const paused = hovered || dragging || modalOpen || !active
 
-  // Track the rounded centered card (for the brand name below the wheel).
+  // 반올림된 가운데 카드를 추적(휠 아래 브랜드 이름용).
   useMotionValueEvent(rotation, 'change', (v) => {
     const idx = ((Math.round(v) % count) + count) % count
     setCenterIndex((prev) => (prev === idx ? prev : idx))
   })
 
-  // Snap the given card to center, then open its modal.
+  // 해당 카드를 가운데로 스냅한 뒤 모달을 연다.
   const focusAndOpen = (index: number) => {
     const base = rotation.get()
     controls.current?.stop()
@@ -188,8 +188,8 @@ export function PortfolioCarousel({
     onOpen(index)
   }
 
-  // Stable window listeners (added on pointer-down, removed on up). Refs hold
-  // the latest closure so the listener identity stays constant for removal.
+  // 안정적인 window 리스너(pointer-down에 추가, up에 제거). ref가 최신 클로저를
+  // 들고 있어 리스너 정체성이 제거를 위해 일정하게 유지된다.
   const moveRef = useRef<(e: PointerEvent) => void>(() => {})
   const upRef = useRef<(e: PointerEvent) => void>(() => {})
   const moveListener = useRef((e: PointerEvent) => moveRef.current(e)).current
@@ -212,10 +212,10 @@ export function PortfolioCarousel({
     setDragging(false)
     if (!d) return
     if (d.moved <= CLICK_SLOP) {
-      // A click (no real drag) → center that card and open it.
+      // 클릭(실제 드래그 없음) → 그 카드를 가운데로 두고 연다.
       focusAndOpen(d.index)
     } else {
-      // A drag → settle on the nearest card.
+      // 드래그 → 가장 가까운 카드에 안착.
       controls.current?.stop()
       controls.current = animate(rotation, Math.round(rotation.get()), SPRING)
     }
@@ -233,7 +233,7 @@ export function PortfolioCarousel({
     window.addEventListener('pointerup', upListener)
   }
 
-  // Auto-advance one card every AUTO_MS while running.
+  // 동작 중엔 AUTO_MS마다 카드 한 장씩 자동 넘김.
   useEffect(() => {
     if (paused) return
     const id = setInterval(() => {
@@ -247,7 +247,7 @@ export function PortfolioCarousel({
     return () => clearInterval(id)
   }, [paused, rotation])
 
-  // Clean up dangling window listeners on unmount.
+  // 언마운트 시 남은 window 리스너 정리.
   useEffect(
     () => () => {
       window.removeEventListener('pointermove', moveListener)
@@ -258,20 +258,19 @@ export function PortfolioCarousel({
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col">
-      {/* Wheel band — the interactive surface (hover-to-pause + card pointer
-          events flow from here). It sits BELOW the title spacer, so enabling
-          pointer events while active never covers the header/nav above it; the
-          whole layer's opacity fade lives on the portal root in the section. */}
+      {/* 휠 밴드 — 상호작용 표면(호버-일시정지 + 카드 pointer 이벤트가 여기서
+          흐른다). 타이틀 스페이서 아래에 있어, active일 때 pointer 이벤트를 켜도
+          위의 헤더/내비를 덮지 않는다; 레이어 전체의 opacity 페이드는 섹션의 포털
+          루트에 있다. */}
       <div
         className="relative flex min-h-0 flex-1 items-center justify-center"
         style={{ pointerEvents: active ? 'auto' : 'none' }}
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
       >
-        {/* Stage: cards are placed on a fixed-px arc around viewport center and
-            only scaled DOWN on narrow screens (ratio<=1). The portal layer is
-            full-viewport with overflow hidden, so the outer cards clip at the
-            real screen edges rather than the 1440 frame. */}
+        {/* 스테이지: 카드는 뷰포트 중심 둘레의 고정-px 아크에 놓이고 좁은
+            화면(ratio<=1)에서만 축소된다. 포털 레이어는 overflow hidden인
+            풀뷰포트라, 바깥 카드가 1440 프레임이 아니라 실제 화면 끝에서 클립된다. */}
         <div
           className="relative shrink-0"
           style={{
@@ -294,9 +293,9 @@ export function PortfolioCarousel({
         </div>
       </div>
 
-      {/* Centered brand name — separate from the wheel. Crosses over (old up /
-          new in from below) as the centered card changes. Its bottom sits the
-          section's bottom margin (100px) above the slide edge. */}
+      {/* 가운데 브랜드 이름 — 휠과 분리. 가운데 카드가 바뀌면 교차된다(옛 것은
+          위로 / 새 것은 아래에서). 아래쪽이 슬라이드 끝에서 섹션 하단 마진
+          (100px) 위에 놓인다. */}
       <div className="pointer-events-none relative flex min-h-[clamp(28px,2.78vw,40px)] shrink-0 items-start justify-center pb-[clamp(58px,6.94vw,100px)]">
         <AnimatePresence>
           <motion.p

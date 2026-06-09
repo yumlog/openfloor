@@ -3,10 +3,9 @@ import { RISE, entryTransition } from '@/lib/motion'
 import type { Project } from './projects'
 
 /* ---------------------------------------------------------------------------
-   Mobile (<768px) reflow. The arc wheel doesn't fit a phone, so the projects
-   become a simple centered vertical list (color chip + brand name) within one
-   100dvh screen. Purpose-built stand-in — the full mobile carousel is a later
-   pass.
+   모바일(<768px) reflow. 아크 휠은 폰에 맞지 않으므로, 프로젝트를 한 100dvh
+   화면 안의 단순 가운데 세로 리스트(컬러 칩 + 브랜드 이름)로 만든다. 전용
+   대체물 — 완전한 모바일 캐러셀은 나중에.
 --------------------------------------------------------------------------- */
 
 export function PortfolioMobile({

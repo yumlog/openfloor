@@ -4,18 +4,16 @@ import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
 
 /* ---------------------------------------------------------------------------
-   Manifesto — slide 5, dark (#171717). The nine lines are wrapped around a 3D
-   cylinder ("drum"); scrolling rolls them upward. The scroll engine "traps"
-   this slide (see useSlideController's `trap`), feeding a 0..1 `progress` motion
-   value that this section converts to a roll position; only once the drum
-   reaches an end does a further gesture leave the slide.
+   Manifesto — 슬라이드 5, 다크(#171717). 아홉 줄을 3D 원통("드럼")에 감아 두고,
+   스크롤하면 위로 굴러간다. 스크롤 엔진이 이 슬라이드를 "가두며"(useSlide
+   controller의 `trap` 참조), 0..1 `progress` motion value를 먹여 이 섹션이 롤
+   위치로 변환한다; 드럼이 끝에 닿아야만 추가 제스처가 슬라이드를 떠난다.
 
-   Two scales coexist: the TYPE is width-driven (88px at ≥1440, shrinking only on
-   narrower frames, via the `ratio`-scaled canvas like Philosophy / Portfolio);
-   the DRUM (radius + angular step) is HEIGHT-driven and computed at runtime to
-   fill the band the drum rolls in. Lines sit on the cylinder via translate3d +
-   rotateX with NO manual scale — PERSPECTIVE does the foreshortening, so the
-   bulge reads naturally and the front line stays at exactly 88px.
+   두 스케일이 공존한다: 글자(TYPE)는 너비 기준(≥1440에서 88px, 좁은 프레임에서만
+   축소, Philosophy / Portfolio처럼 `ratio`로 스케일된 캔버스 사용); 드럼(DRUM,
+   반지름 + 각도 스텝)은 곡률 우선이고 고정 라인 높이에서 도출된다. 줄은 수동
+   scale 없이 translate3d + rotateX로 원통에 놓이고 — PERSPECTIVE가 포어쇼트닝을
+   처리해 볼록감이 자연스럽고 앞줄은 정확히 88px을 유지한다.
 --------------------------------------------------------------------------- */
 
 const def = SLIDES[5]
@@ -34,87 +32,83 @@ const LINES = [
 
 const DEG = Math.PI / 180
 
-// Type stays width-driven: 88px at ≥1440, shrinking only on narrower frames. The
-// drum is CURVATURE-FIRST: a fixed angular step (STEP_ANG) and a low perspective
-// set how convex it reads, and RADIUS follows from the FIXED line height so the
-// front line stays exact 88px. Geometry is viewport-independent — the band just
-// clips it — so the bulge holds at every height.
+// 글자는 너비 기준 유지: ≥1440에서 88px, 좁은 프레임에서만 축소. 드럼은 곡률
+// 우선(CURVATURE-FIRST): 고정 각도 스텝(STEP_ANG)과 낮은 perspective가 볼록함을
+// 결정하고, RADIUS는 고정 라인 높이에서 따라 나와 앞줄이 정확히 88px을 유지한다.
+// 기하는 뷰포트 독립 — 밴드는 클립만 한다 — 그래서 볼록감이 모든 높이에서 유지된다.
 const FONT_PX = 88
-const LINE_H = FONT_PX * 1.4 // ≈ 123 — fixed design-px gap between adjacent lines
+const LINE_H = FONT_PX * 1.4 // ≈ 123 — 인접 줄 사이 고정 design-px 간격
 
 const CANVAS_W = DESIGN_WIDTH
-// Horizontal breathing room (design px each side) — the longest line is kept
-// this far from the canvas edges before the width cap kicks in.
+// 좌우 여유 공간(각 변 design px) — 너비 cap이 걸리기 전까지 가장 긴 줄을 캔버스
+// 가장자리에서 이만큼 떨어뜨려 둔다.
 const SIDE_PAD = 90
-// Perspective applied to the drum window (design px). Lower = more convex bulge
-// / stronger foreshortening; tune together with STEP_ANG.
+// 드럼 창에 적용하는 perspective(design px). 낮을수록 더 볼록 / 포어쇼트닝 강함;
+// STEP_ANG와 함께 튜닝.
 const PERSPECTIVE = 800
-// Top/bottom margin (design px) — the drum rolls inside the band between them,
-// vertically centred, leaving these as empty margins.
+// 위/아래 마진(design px) — 드럼은 그 사이 밴드 안에서 세로 가운데로 굴러가고,
+// 마진은 빈 여백으로 남는다.
 const MARGIN = 100
 
-// Degrees of tilt between adjacent lines — the primary curvature knob. Bigger =
-// lines wrap around the cylinder faster = more convex (and fewer lines visible).
+// 인접 줄 사이 기울기 각도 — 주요 곡률 노브. 클수록 줄이 원통을 더 빨리 감아
+// 더 볼록하다(그리고 보이는 줄은 적어진다).
 const STEP_ANG = 24
-// Radius that makes adjacent lines sit one line-height apart head-on. The front
-// line is pulled to z=0, so changing the radius never resizes it (stays 88px).
+// 인접 줄이 정면에서 라인 높이만큼 떨어지게 하는 반지름. 앞줄은 z=0으로 당겨지므로
+// 반지름을 바꿔도 크기는 절대 변하지 않는다(88px 유지).
 const RADIUS = LINE_H / (2 * Math.sin((STEP_ANG / 2) * DEG))
-// Angle from the front face at which a line reaches the edge of the band — the
-// "how many lines / how big" dial. LOWER = fewer, bigger lines (the drum is then
-// scaled up more to fill the band).
-const FADE_LIMIT = 50 // degrees
+// 줄이 밴드 가장자리에 닿는, 정면으로부터의 각도 — "줄 수 / 크기" 다이얼. 낮을수록
+// 줄이 적고 크다(그만큼 드럼이 더 확대되어 밴드를 채운다).
+const FADE_LIMIT = 50 // 도
 const COS_FADE = Math.cos(FADE_LIMIT * DEG)
 
-// Projected half-height (design px, at base scale) of a line sitting at
-// FADE_LIMIT: with the front line pulled to z=0 it lands at y=R·sinθ,
-// z=-R·(1-cosθ), so its on-screen y is R·sinθ·P / (P + R·(1-cosθ)). The drum is
-// scaled at runtime so this extent fills the band (see `fillScale`).
+// FADE_LIMIT에 놓인 줄의 투영 반높이(design px, base 스케일): 앞줄이 z=0으로
+// 당겨진 상태에서 줄은 y=R·sinθ, z=-R·(1-cosθ)에 놓이므로 화면상 y는
+// R·sinθ·P / (P + R·(1-cosθ))이다. 드럼은 런타임에 이 범위가 밴드를 채우도록
+// 스케일된다(`fillScale` 참조).
 const NATURAL_HALF_H =
   (RADIUS * Math.sin(FADE_LIMIT * DEG) * PERSPECTIVE) /
   (PERSPECTIVE + RADIUS * (1 - COS_FADE))
 const NATURAL_H = 2 * NATURAL_HALF_H
 
 const LAST_INDEX = LINES.length - 1
-// Roll span (in line-steps). progress 0 seats the first line on the bottom fade
-// edge, progress 1 the last line on the top edge. W is that edge in line-steps.
+// 롤 범위(라인 스텝 단위). progress 0은 첫 줄을 아래 페이드 가장자리에, progress
+// 1은 마지막 줄을 위 가장자리에 seat 한다. W는 그 가장자리를 라인 스텝으로 표현.
 const W = FADE_LIMIT / STEP_ANG
 const START_OFFSET = -W
 const TRAVEL = LAST_INDEX + 2 * W
 
-// Gestures to traverse the drum. FIXED (not tied to the dynamic geometry) so the
-// number of scrolls to pass the section never changes with viewport size. Higher
-// = smaller roll per gesture = smoother (at the cost of more scrolls to pass).
+// 드럼을 통과하는 제스처 수. 고정(동적 기하에 묶이지 않음)이라 섹션을 지나는 데
+// 필요한 스크롤 수가 뷰포트 크기에 따라 변하지 않는다. 클수록 = 제스처당 롤이
+// 작아 = 더 부드럽다(통과 스크롤이 늘어나는 대가).
 export const MANIFESTO_STEPS = 14
 
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v))
 
 interface DrumLineProps {
-  /** Line position currently on the front face (can run negative / past the
-   *  last line so the drum starts and ends blank). */
+  /** 현재 정면에 있는 줄 위치(드럼 시작/끝이 비도록 음수 / 마지막 줄 너머까지
+   *  갈 수 있음). */
   rollPos: MotionValue<number>
   index: number
   text: string
 }
 
 /**
- * A single line glued to the cylinder. Its angle is its offset from the front
- * face; it fades as it rotates away and is hidden once it passes ±90° (the back
- * of the drum). The line is content-sized (not a full-stage box) and placed
- * directly on the cylinder surface with translate3d + rotateX — there is no
- * manual scale, so PERSPECTIVE alone does the sizing: the front line (angle 0)
- * lands at y=z=0 (exact 88px) and lines turning away move back (z<0) and shrink
- * by perspective for a natural convex bulge.
+ * 원통에 붙은 한 줄. 각도는 정면으로부터의 오프셋이며, 회전해 멀어질수록 페이드되고
+ * ±90°(드럼의 뒤편)를 지나면 숨겨진다. 줄은 콘텐츠 크기(풀 스테이지 박스가 아님)로,
+ * translate3d + rotateX로 원통 표면에 직접 놓인다 — 수동 scale이 없어 PERSPECTIVE만
+ * 크기를 정한다: 앞줄(각도 0)은 y=z=0(정확히 88px)에 놓이고, 멀어지는 줄은
+ * 뒤로(z<0) 가며 perspective로 작아져 자연스러운 볼록감을 만든다.
  */
 function DrumLine({ rollPos, index, text }: DrumLineProps) {
-  // (rollPos - index): as rollPos grows (scroll down) a line's angle increases,
-  // so it rotates up and over the front face and the next line rises from below.
+  // (rollPos - index): rollPos가 커질수록(스크롤 다운) 줄의 각도가 증가해, 정면
+  // 위로 회전해 넘어가고 다음 줄이 아래에서 올라온다.
   const angle = useTransform(rollPos, (rp) => (rp - index) * STEP_ANG)
-  // Remap cos so the centre stays solid but the line reaches 0 exactly at the
-  // band edge (FADE_LIMIT) — no faint half-visible lines past the margin.
+  // cos를 remap 해서 중앙은 진하게 유지하되 줄이 밴드 가장자리(FADE_LIMIT)에서
+  // 정확히 0이 되게 한다 — 마진 너머로 반쯤 보이는 흐린 줄이 없도록.
   const opacity = useTransform(angle, (a) =>
     clamp01((Math.cos(a * DEG) - COS_FADE) / (1 - COS_FADE))
   )
-  // Skip painting lines turned past the side of the drum (already opacity 0).
+  // 드럼 옆면을 지나 돌아간 줄은 페인트 스킵(이미 opacity 0).
   const visibility = useTransform(angle, (a) =>
     Math.abs(a) < 90 ? 'visible' : 'hidden'
   )
@@ -137,26 +131,26 @@ function DrumLine({ rollPos, index, text }: DrumLineProps) {
 }
 
 interface ManifestoSectionProps {
-  /** True while Manifesto is the active slide. */
+  /** Manifesto가 활성 슬라이드인 동안 true. */
   active: boolean
-  /** 0..1 roll progress driven by the scroll-trap in useSlideController. */
+  /** useSlideController의 스크롤 트랩이 구동하는 0..1 롤 progress. */
   progress: MotionValue<number>
 }
 
 export function ManifestoSection({ progress }: ManifestoSectionProps) {
   const frame = useFrameSize()
-  // Font stays width-driven (88px at ≥1440).
+  // 글자는 너비 기준 유지(≥1440에서 88px).
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
 
-  // The canvas is scaled by `ratio`, so a canvas this tall renders to exactly
-  // 100dvh — H is the viewport height expressed in design px.
+  // 캔버스는 `ratio`로 스케일되므로, 이 높이의 캔버스는 정확히 100dvh로 렌더된다 —
+  // H는 design px로 표현한 뷰포트 높이.
   const H = frame.h / ratio
-  // The drum rolls inside the band left after the top/bottom margins.
+  // 드럼은 위/아래 마진을 뺀 밴드 안에서 굴러간다.
   const hBand = H - 2 * MARGIN
 
-  // Measure the widest line at base 88px (design px) so the fill can be capped
-  // by available width — otherwise narrow/tall viewports inflate fillScale past
-  // the 1440 canvas and clip the text sideways. Re-measured after fonts load.
+  // 가장 긴 줄을 base 88px(design px)로 측정해 fill을 가용 너비로 제한한다 —
+  // 안 그러면 좁고/긴 뷰포트에서 fillScale이 1440 캔버스를 넘게 부풀어 글자가
+  // 양옆으로 잘린다. 폰트 로드 후 재측정.
   const measureRef = useRef<HTMLDivElement>(null)
   const [maxLineW, setMaxLineW] = useState(0)
   useLayoutEffect(() => {
@@ -173,14 +167,14 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
     document.fonts?.ready.then(measure)
   }, [])
 
-  // Zoom the (curvature-fixed) drum so its ±FADE_LIMIT extent fills the band —
-  // big, solid lines — but never wider than the canvas can hold sideways.
+  // (곡률 고정) 드럼을 줌해 ±FADE_LIMIT 범위가 밴드를 채우게 한다 — 크고 진한
+  // 줄로 — 단 캔버스가 가로로 담을 수 있는 것보다 넓어지지는 않게.
   const widthCap =
     maxLineW > 0 ? (CANVAS_W - 2 * SIDE_PAD) / maxLineW : Infinity
   const fillScale = Math.min(hBand / NATURAL_H, widthCap)
 
-  // 0..1 progress → front-face line position. Starts on the bottom fade edge
-  // (first line about to rise in) and ends on the top edge (last line just gone).
+  // 0..1 progress → 정면 줄 위치. 아래 페이드 가장자리(첫 줄이 막 올라오기 직전)에서
+  // 시작해 위 가장자리(마지막 줄이 막 사라짐)에서 끝난다.
   const rollPos = useTransform(progress, (p) => p * TRAVEL + START_OFFSET)
 
   return (
@@ -188,12 +182,12 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
       id={def.id}
       className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden"
     >
-      {/* Hidden width probe — each line at base 88px, unscaled (outside the
-          canvas), so offsetWidth is the true design-px line width. */}
+      {/* 숨겨진 너비 프로브 — 각 줄을 base 88px로, 스케일 없이(캔버스 바깥) 둬서
+          offsetWidth가 진짜 design-px 줄 너비가 되게 한다. */}
       <div
         ref={measureRef}
         aria-hidden
-        className="invisible absolute -left-[99999px] top-0"
+        className="invisible absolute top-0 -left-[99999px]"
       >
         {LINES.map((line, i) => (
           <span
@@ -205,8 +199,8 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
         ))}
       </div>
 
-      {/* Scaled design-px canvas — height set so it renders to 100dvh; width
-          stays 1440 as the coordinate system (horizontal overflow is clipped). */}
+      {/* 스케일된 design-px 캔버스 — 높이를 100dvh로 렌더되게 설정; 너비는 좌표계로
+          1440 유지(가로 넘침은 클립). */}
       <div
         className="relative shrink-0"
         style={{
@@ -215,15 +209,15 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
           transform: `scale(${ratio})`,
         }}
       >
-        {/* Band: the clip window between the top/bottom margins. Flat (no
-            transform / perspective) so its overflow clip stays valid. */}
+        {/* 밴드: 위/아래 마진 사이의 클립 창. 평면(transform / perspective 없음)
+            이라 overflow 클립이 유효하다. */}
         <div
           className="absolute right-0 left-0 overflow-hidden"
           style={{ top: MARGIN, bottom: MARGIN }}
         >
-          {/* Scaler: holds the perspective and zooms the whole projected drum by
-              `fillScale` so the ±FADE_LIMIT extent fills the band. Scaling lives
-              OUTSIDE the clip (on this inner layer) so the band size is fixed. */}
+          {/* 스케일러: perspective를 갖고 투영된 드럼 전체를 `fillScale`로 줌해
+              ±FADE_LIMIT 범위가 밴드를 채우게 한다. 스케일이 클립 바깥(이 안쪽
+              레이어)에 있어 밴드 크기는 고정된다. */}
           <div
             className="absolute inset-0"
             style={{
@@ -231,7 +225,7 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
               transform: `scale(${fillScale})`,
             }}
           >
-            {/* 3D stage holding the cylinder faces. */}
+            {/* 원통 면을 담는 3D 스테이지. */}
             <div
               className="absolute inset-0"
               style={{ transformStyle: 'preserve-3d' }}

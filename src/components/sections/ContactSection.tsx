@@ -3,7 +3,7 @@ import { SLIDES } from '@/config/slides'
 
 const def = SLIDES[6]
 
-// Placeholder for Contact + Footer — real content added later.
+// Contact + Footer 플레이스홀더 — 실제 콘텐츠는 나중에 추가.
 export function ContactSection() {
   return <PlaceholderSection id={def.id} label={def.label} theme={def.theme} />
 }

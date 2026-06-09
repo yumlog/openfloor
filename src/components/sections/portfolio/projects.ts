@@ -1,34 +1,33 @@
 /* ---------------------------------------------------------------------------
-   Portfolio project data. Order and brand colors are fixed; each project has
-   three placeholder content slides (shown in the modal). Real cover/detail
-   imagery replaces the flat color fills in a later pass — until then a card is
-   just its brand color + name.
+   Portfolio 프로젝트 데이터. 순서와 브랜드 컬러는 고정; 각 프로젝트는 세 개의
+   플레이스홀더 콘텐츠 슬라이드를 갖는다(모달에 표시). 실제 커버/상세 이미지가
+   나중에 평면 컬러 채움을 대체한다 — 그전까지 카드는 브랜드 컬러 + 이름뿐이다.
 --------------------------------------------------------------------------- */
 
 export interface ProjectSlide {
-  /** Small label over the slide — the project (brand) name. */
+  /** 슬라이드 위 작은 라벨 — 프로젝트(브랜드) 이름. */
   label: string
-  /** Slide headline (placeholder until real copy lands). */
+  /** 슬라이드 헤드라인(실제 카피 전까지 플레이스홀더). */
   title: string
-  /** Supporting copy (placeholder; not yet shown in the modal). */
+  /** 보조 카피(플레이스홀더; 아직 모달에 표시 안 함). */
   body: string
 }
 
 export interface Project {
-  /** stable id, also the card key */
+  /** 안정적인 id, 카드 key로도 사용 */
   id: string
-  /** brand name shown below the carousel + as the modal slide label */
+  /** 캐러셀 아래 + 모달 슬라이드 라벨로 표시되는 브랜드 이름 */
   name: string
-  /** brand color — the card fill and modal slide background */
+  /** 브랜드 컬러 — 카드 채움과 모달 슬라이드 배경 */
   color: string
-  /** modal content slides (3 placeholders each) */
+  /** 모달 콘텐츠 슬라이드(각 3개 플레이스홀더) */
   slides: ProjectSlide[]
 }
 
 const BODY =
   '프로젝트에 대한 설명이 들어갈 자리입니다. 추후 실제 콘텐츠로 교체됩니다.'
 
-/** Three placeholder slides for a brand. */
+/** 한 브랜드의 플레이스홀더 슬라이드 3개. */
 function placeholderSlides(name: string): ProjectSlide[] {
   return [1, 2, 3].map((n) => ({
     label: name,
@@ -43,7 +42,7 @@ interface Brand {
   color: string
 }
 
-// Fixed order + colors (see spec). Slides are generated placeholders.
+// 고정 순서 + 컬러(스펙 참조). 슬라이드는 생성된 플레이스홀더.
 const BRANDS: Brand[] = [
   { id: 'oliveyoung', name: '올리브영', color: '#D2F096' },
   { id: 'kb', name: 'KB금융지주', color: '#FFD745' },
