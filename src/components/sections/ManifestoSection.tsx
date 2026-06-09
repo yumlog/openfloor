@@ -33,29 +33,49 @@ const LINES = [
 
 const DEG = Math.PI / 180
 
-// Type stays width-driven: 88px at ≥1440, shrinking only on narrower frames.
-// The drum's RADIUS / STEP_ANG, by contrast, are derived at runtime from the
-// height of the band the drum rolls in (viewport minus top/bottom margins) — the
-// line box height below is held fixed, so a taller band just flattens the curve
-// and shows more lines.
+// Type stays width-driven: 88px at ≥1440, shrinking only on narrower frames. The
+// drum is CURVATURE-FIRST: a fixed angular step (STEP_ANG) and a low perspective
+// set how convex it reads, and RADIUS follows from the FIXED line height so the
+// front line stays exact 88px. Geometry is viewport-independent — the band just
+// clips it — so the bulge holds at every height.
 const FONT_PX = 88
 const LINE_H = FONT_PX * 1.4 // ≈ 123 — fixed design-px gap between adjacent lines
 
 const CANVAS_W = DESIGN_WIDTH
-// Perspective applied to the drum window (design px). Used both in the geometry
-// (radius solve) and on the element itself, so they always agree. Lower = more
-// convex bulge / stronger foreshortening; tune from here.
+// Perspective applied to the drum window (design px). Lower = more convex bulge
+// / stronger foreshortening; tune together with STEP_ANG.
 const PERSPECTIVE = 800
 // Top/bottom margin (design px) — the drum rolls inside the band between them,
 // vertically centred, leaving these as empty margins.
 const MARGIN = 100
 
-// The angle (from the front face) at which a line sits on the top/bottom edge of
-// the band — i.e. the edge of the visible window. RADIUS is sized so this angle
-// maps to band/2. Tune for curvature + where lines fade in/out.
-const FADE_LIMIT = 72 // degrees
+// Degrees of tilt between adjacent lines — the primary curvature knob. Bigger =
+// lines wrap around the cylinder faster = more convex (and fewer lines visible).
+const STEP_ANG = 24
+// Radius that makes adjacent lines sit one line-height apart head-on. The front
+// line is pulled to z=0, so changing the radius never resizes it (stays 88px).
+const RADIUS = LINE_H / (2 * Math.sin((STEP_ANG / 2) * DEG))
+// Angle from the front face at which a line reaches the edge of the band — the
+// "how many lines / how big" dial. LOWER = fewer, bigger lines (the drum is then
+// scaled up more to fill the band).
+const FADE_LIMIT = 50 // degrees
+const COS_FADE = Math.cos(FADE_LIMIT * DEG)
+
+// Projected half-height (design px, at base scale) of a line sitting at
+// FADE_LIMIT: with the front line pulled to z=0 it lands at y=R·sinθ,
+// z=-R·(1-cosθ), so its on-screen y is R·sinθ·P / (P + R·(1-cosθ)). The drum is
+// scaled at runtime so this extent fills the band (see `fillScale`).
+const NATURAL_HALF_H =
+  (RADIUS * Math.sin(FADE_LIMIT * DEG) * PERSPECTIVE) /
+  (PERSPECTIVE + RADIUS * (1 - COS_FADE))
+const NATURAL_H = 2 * NATURAL_HALF_H
 
 const LAST_INDEX = LINES.length - 1
+// Roll span (in line-steps). progress 0 seats the first line on the bottom fade
+// edge, progress 1 the last line on the top edge. W is that edge in line-steps.
+const W = FADE_LIMIT / STEP_ANG
+const START_OFFSET = -W
+const TRAVEL = LAST_INDEX + 2 * W
 
 // Gestures to traverse the drum. FIXED (not tied to the dynamic geometry) so the
 // number of scrolls to pass the section never changes with viewport size. Higher
@@ -70,10 +90,6 @@ interface DrumLineProps {
   rollPos: MotionValue<number>
   index: number
   text: string
-  /** Degrees between adjacent lines (derived from viewport height). */
-  stepAng: number
-  /** Cylinder radius in design px (derived from viewport height). */
-  radius: number
 }
 
 /**
@@ -85,18 +101,22 @@ interface DrumLineProps {
  * lands at y=z=0 (exact 88px) and lines turning away move back (z<0) and shrink
  * by perspective for a natural convex bulge.
  */
-function DrumLine({ rollPos, index, text, stepAng, radius }: DrumLineProps) {
+function DrumLine({ rollPos, index, text }: DrumLineProps) {
   // (rollPos - index): as rollPos grows (scroll down) a line's angle increases,
   // so it rotates up and over the front face and the next line rises from below.
-  const angle = useTransform(rollPos, (rp) => (rp - index) * stepAng)
-  const opacity = useTransform(angle, (a) => clamp01(Math.cos(a * DEG)))
+  const angle = useTransform(rollPos, (rp) => (rp - index) * STEP_ANG)
+  // Remap cos so the centre stays solid but the line reaches 0 exactly at the
+  // band edge (FADE_LIMIT) — no faint half-visible lines past the margin.
+  const opacity = useTransform(angle, (a) =>
+    clamp01((Math.cos(a * DEG) - COS_FADE) / (1 - COS_FADE))
+  )
   // Skip painting lines turned past the side of the drum (already opacity 0).
   const visibility = useTransform(angle, (a) =>
     Math.abs(a) < 90 ? 'visible' : 'hidden'
   )
   const transform = useTransform(angle, (a) => {
-    const y = -radius * Math.sin(a * DEG)
-    const z = radius * (Math.cos(a * DEG) - 1)
+    const y = -RADIUS * Math.sin(a * DEG)
+    const z = RADIUS * (Math.cos(a * DEG) - 1)
     return `translate(-50%, -50%) translate3d(0px, ${y}px, ${z}px) rotateX(${a}deg)`
   })
 
@@ -129,24 +149,13 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
   const H = frame.h / ratio
   // The drum rolls inside the band left after the top/bottom margins.
   const hBand = H - 2 * MARGIN
+  // Zoom the (curvature-fixed) drum so its ±FADE_LIMIT extent fills the band —
+  // big, solid lines instead of a small drum floating in the band.
+  const fillScale = hBand / NATURAL_H
 
-  // Height-driven drum geometry. RADIUS puts a line at FADE_LIMIT on the band
-  // edge, accounting for perspective: with the front line pulled to z=0, a line
-  // at angle θ sits at y = R·sinθ, z = -R·(1-cosθ), so its on-screen y is
-  // R·sinθ·P / (P + R·(1-cosθ)). Setting that to hBand/2 at θ=FADE_LIMIT and
-  // solving for R gives the formula below. STEP_ANG then follows from the FIXED
-  // line height — a shorter band sharpens the curve and shows fewer lines.
-  const a = Math.sin(FADE_LIMIT * DEG)
-  const b = 1 - Math.cos(FADE_LIMIT * DEG)
-  const radius = ((hBand / 2) * PERSPECTIVE) / (a * PERSPECTIVE - b * (hBand / 2))
-  const stepAng = (2 * Math.asin(LINE_H / (2 * radius))) / DEG
-  const w = FADE_LIMIT / stepAng
-  const startOffset = -w
-  const travel = LAST_INDEX + 2 * w
-
-  // 0..1 progress → front-face line position. Starts on the bottom band edge
+  // 0..1 progress → front-face line position. Starts on the bottom fade edge
   // (first line about to rise in) and ends on the top edge (last line just gone).
-  const rollPos = useTransform(progress, (p) => p * travel + startOffset)
+  const rollPos = useTransform(progress, (p) => p * TRAVEL + START_OFFSET)
 
   return (
     <section
@@ -163,32 +172,31 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
           transform: `scale(${ratio})`,
         }}
       >
-        {/* Drum window: the band between the top/bottom margins. Provides the
-            perspective and clips lines rolling past the band edges. Kept flat
-            (no preserve-3d) so the clip is valid. */}
+        {/* Band: the clip window between the top/bottom margins. Flat (no
+            transform / perspective) so its overflow clip stays valid. */}
         <div
           className="absolute right-0 left-0 overflow-hidden"
-          style={{
-            top: MARGIN,
-            bottom: MARGIN,
-            perspective: `${PERSPECTIVE}px`,
-          }}
+          style={{ top: MARGIN, bottom: MARGIN }}
         >
-          {/* 3D stage holding the cylinder faces. */}
+          {/* Scaler: holds the perspective and zooms the whole projected drum by
+              `fillScale` so the ±FADE_LIMIT extent fills the band. Scaling lives
+              OUTSIDE the clip (on this inner layer) so the band size is fixed. */}
           <div
             className="absolute inset-0"
-            style={{ transformStyle: 'preserve-3d' }}
+            style={{
+              perspective: `${PERSPECTIVE}px`,
+              transform: `scale(${fillScale})`,
+            }}
           >
-            {LINES.map((line, i) => (
-              <DrumLine
-                key={i}
-                rollPos={rollPos}
-                index={i}
-                text={line}
-                stepAng={stepAng}
-                radius={radius}
-              />
-            ))}
+            {/* 3D stage holding the cylinder faces. */}
+            <div
+              className="absolute inset-0"
+              style={{ transformStyle: 'preserve-3d' }}
+            >
+              {LINES.map((line, i) => (
+                <DrumLine key={i} rollPos={rollPos} index={i} text={line} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
