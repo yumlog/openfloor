@@ -26,10 +26,11 @@ interface Options {
   /** Gate input handling (e.g. while a loading screen is up). */
   enabled?: boolean
   /**
-   * Optional "scroll trap": while parked on `trap.index`, each gesture advances
-   * `trap.progress` by one notch (1/steps) instead of snapping to the next
-   * section. The gesture only escapes the slide once the progress has reached
-   * the matching end. Used by the Manifesto drum.
+   * Optional "scroll trap": while parked on `trap.index`, input drives
+   * `trap.progress` (0..1) instead of snapping to the next section — wheel /
+   * touch roll it proportionally with spring inertia, keyboard moves one notch
+   * (1/steps). Input only escapes the slide once the progress is pinned at the
+   * matching end and keeps pushing. Used by the Manifesto drum.
    */
   trap?: TrapOptions
 }
@@ -41,10 +42,16 @@ const clamp = (v: number, min: number, max: number) =>
 const WHEEL_THRESHOLD = 40
 const WHEEL_RESET_MS = 180
 const TOUCH_THRESHOLD = 50
-/* A single drum-roll notch. Softer than the section-snap ease (SLIDE_EASE has a
-   hard slow-in that reads as a lurch); a gentle ease-out glides line to line. */
+/* A single discrete drum-roll notch (keyboard / replayed gesture). Softer than
+   the section-snap ease (SLIDE_EASE has a hard slow-in that reads as a lurch); a
+   gentle ease-out glides line to line. */
 const ROLL_DURATION = 0.55
 const ROLL_EASE = [0.22, 1, 0.36, 1] as const
+/* Trapped-slide roll for wheel / touch: the input distance moves the target
+   proportionally (px * SENS) and a velocity-carrying spring chases it, so a hard
+   flick whooshes through lines and a small nudge inches one along. */
+const ROLL_SENSITIVITY = 0.0012
+const ROLL_EPS = 1e-3
 
 /**
  * One gesture = one section snap. Hijacks wheel / touch / keyboard, drives a
@@ -62,9 +69,12 @@ export function useSlideController({
 
   const currentRef = useRef(0)
   const animatingRef = useRef(false)
-  // True while a single drum-roll notch is animating — blocks extra notches so
-  // one gesture moves the trapped progress exactly one step.
+  // True while a single discrete drum-roll notch is animating (keyboard) —
+  // blocks extra notches so one key press moves the trapped progress one step.
   const rollAnimatingRef = useRef(false)
+  // Where the trapped roll is heading (0..1). Wheel/touch re-target this each
+  // event; kept in sync on seat + discrete notches so edge detection is exact.
+  const rollTargetRef = useRef(0)
   // Direction (+1 / -1) of a gesture made mid-animation, replayed once it ends.
   const queuedDirRef = useRef(0)
   // Stable handle so the returned goTo identity never changes.
@@ -103,7 +113,9 @@ export function useSlideController({
       // rolls forward from the top (entered going down) or backward from the
       // bottom (entered coming back up).
       if (trap && next === trap.index) {
-        trap.progress.set(next > from ? 0 : 1)
+        const seat = next > from ? 0 : 1
+        trap.progress.set(seat)
+        rollTargetRef.current = seat
       }
       currentRef.current = next
       animatingRef.current = true
@@ -129,18 +141,20 @@ export function useSlideController({
     // the latest direction and let onComplete replay it. No post-snap dead time;
     // the wheel accumulator below is what keeps one gesture to one step.
     const step = (dir: number) => {
-      // Scroll-trap gate: while parked on the trapped slide, each gesture moves
-      // the drum one notch instead of snapping sections. Only when the drum is
-      // already at the matching end does the gesture fall through and advance
-      // out of the slide.
+      // Scroll-trap gate (DISCRETE path — keyboard + replayed gestures): while
+      // parked on the trapped slide, a step moves the drum exactly one notch
+      // instead of snapping sections. Wheel / touch use the proportional path
+      // below; this keeps `rollTargetRef` in sync so both agree on the edges.
+      // Only when the drum is already at the matching end does the step fall
+      // through and advance out of the slide.
       if (trap && !animatingRef.current && currentRef.current === trap.index) {
-        if (rollAnimatingRef.current) return // one gesture = one notch
-        const p = trap.progress.get()
+        if (rollAnimatingRef.current) return // one press = one notch
+        const p = rollTargetRef.current
         const sz = 1 / trap.steps
-        const eps = 1e-3
-        if (dir > 0 && p < 1 - eps) {
+        if (dir > 0 && p < 1 - ROLL_EPS) {
           rollAnimatingRef.current = true
-          animate(trap.progress, Math.min(1, p + sz), {
+          rollTargetRef.current = Math.min(1, p + sz)
+          animate(trap.progress, rollTargetRef.current, {
             duration: ROLL_DURATION,
             ease: ROLL_EASE,
             onComplete: () => {
@@ -149,9 +163,10 @@ export function useSlideController({
           })
           return
         }
-        if (dir < 0 && p > eps) {
+        if (dir < 0 && p > ROLL_EPS) {
           rollAnimatingRef.current = true
-          animate(trap.progress, Math.max(0, p - sz), {
+          rollTargetRef.current = Math.max(0, p - sz)
+          animate(trap.progress, rollTargetRef.current, {
             duration: ROLL_DURATION,
             ease: ROLL_EASE,
             onComplete: () => {
@@ -170,35 +185,105 @@ export function useSlideController({
       }
     }
 
+    // Parked on the trapped slide, not mid section-snap?
+    const inTrap = () =>
+      !!trap && !animatingRef.current && currentRef.current === trap.index
+
+    // Re-target the proportional drum roll. A velocity-carrying spring chases
+    // the target, so re-targeting mid-flick keeps the momentum (whoosh) while a
+    // single small nudge just eases a little.
+    const rollTo = (target: number) => {
+      if (!trap) return
+      rollTargetRef.current = clamp(target, 0, 1)
+      animate(trap.progress, rollTargetRef.current, {
+        type: 'spring',
+        stiffness: 120,
+        damping: 24,
+      })
+    }
+
     if (!enabled) return
 
     // Wheel: accumulate delta, fire once past threshold, reset between bursts.
     let wheelAccum = 0
+    // Separate accumulator for "pushing past an end" while trapped, so the roll
+    // and the section-advance don't share state.
+    let rollEdgeAccum = 0
     let wheelResetTimer: ReturnType<typeof setTimeout>
+    const resetWheel = () => {
+      wheelAccum = 0
+      rollEdgeAccum = 0
+    }
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
+
+      // Trapped slide: roll the drum proportionally with inertia. Only once
+      // pinned at an end and still pushing does an accumulated burst advance out.
+      if (inTrap()) {
+        const t = rollTargetRef.current
+        const pushingPastEnd =
+          (e.deltaY > 0 && t >= 1 - ROLL_EPS) ||
+          (e.deltaY < 0 && t <= ROLL_EPS)
+        if (!pushingPastEnd) {
+          resetWheel()
+          rollTo(t + e.deltaY * ROLL_SENSITIVITY)
+          return
+        }
+        rollEdgeAccum += e.deltaY
+        clearTimeout(wheelResetTimer)
+        wheelResetTimer = setTimeout(resetWheel, WHEEL_RESET_MS)
+        if (rollEdgeAccum > WHEEL_THRESHOLD) {
+          resetWheel()
+          step(1)
+        } else if (rollEdgeAccum < -WHEEL_THRESHOLD) {
+          resetWheel()
+          step(-1)
+        }
+        return
+      }
+
       wheelAccum += e.deltaY
       clearTimeout(wheelResetTimer)
-      wheelResetTimer = setTimeout(() => (wheelAccum = 0), WHEEL_RESET_MS)
+      wheelResetTimer = setTimeout(resetWheel, WHEEL_RESET_MS)
       if (wheelAccum > WHEEL_THRESHOLD) {
-        wheelAccum = 0
+        resetWheel()
         step(1)
       } else if (wheelAccum < -WHEEL_THRESHOLD) {
-        wheelAccum = 0
+        resetWheel()
         step(-1)
       }
     }
 
-    // Touch: compare start/end Y, ignore small swipes.
+    // Touch: while trapped the drum follows the finger proportionally; otherwise
+    // compare start/end Y and step on a decisive swipe.
     let touchStartY = 0
+    let touchPrevY = 0
     const onTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0].clientY
+      touchPrevY = touchStartY
     }
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault()
+      const y = e.touches[0].clientY
+      const dy = touchPrevY - y
+      touchPrevY = y
+      if (inTrap()) {
+        const t = rollTargetRef.current
+        const pushingPastEnd =
+          (dy > 0 && t >= 1 - ROLL_EPS) || (dy < 0 && t <= ROLL_EPS)
+        if (!pushingPastEnd) rollTo(t + dy * ROLL_SENSITIVITY)
+      }
     }
     const onTouchEnd = (e: TouchEvent) => {
       const delta = touchStartY - e.changedTouches[0].clientY
+      // Trapped: the finger already rolled the drum; only a decisive swipe while
+      // pinned at an end advances out of the slide.
+      if (inTrap()) {
+        const t = rollTargetRef.current
+        if (delta > TOUCH_THRESHOLD && t >= 1 - ROLL_EPS) step(1)
+        else if (delta < -TOUCH_THRESHOLD && t <= ROLL_EPS) step(-1)
+        return
+      }
       if (Math.abs(delta) < TOUCH_THRESHOLD) return
       step(delta > 0 ? 1 : -1)
     }
