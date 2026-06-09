@@ -75,8 +75,6 @@ export function useSlideController({
   // Where the trapped roll is heading (0..1). Wheel/touch re-target this each
   // event; kept in sync on seat + discrete notches so edge detection is exact.
   const rollTargetRef = useRef(0)
-  // Direction (+1 / -1) of a gesture made mid-animation, replayed once it ends.
-  const queuedDirRef = useRef(0)
   // Stable handle so the returned goTo identity never changes.
   const goToRef = useRef<(next: number) => void>(() => {})
 
@@ -128,22 +126,14 @@ export function useSlideController({
         ease: SLIDE_EASE,
         onComplete: () => {
           animatingRef.current = false
-          // Replay a gesture that arrived mid-animation: step once more (via the
-          // gate, so a replay landing on the trapped slide rolls the drum rather
-          // than skipping it) the instant the snap settles.
-          const dir = queuedDirRef.current
-          if (dir !== 0) {
-            queuedDirRef.current = 0
-            step(dir)
-          }
         },
       })
     }
     goToRef.current = goTo
 
-    // One directional step. If a snap is in flight, don't drop the input — keep
-    // the latest direction and let onComplete replay it. No post-snap dead time;
-    // the wheel accumulator below is what keeps one gesture to one step.
+    // One directional step. A snap (or trap exit) in flight ignores further
+    // input — one gesture moves one section; the wheel lock + quiet timer below
+    // keep continuous scrolls / inertia from advancing past it.
     const step = (dir: number) => {
       // Scroll-trap gate (DISCRETE path — keyboard + replayed gestures): while
       // parked on the trapped slide, a step moves the drum exactly one notch
@@ -182,11 +172,8 @@ export function useSlideController({
         // At an end — fall through to advance out of the trap.
       }
 
-      if (animatingRef.current) {
-        queuedDirRef.current = dir
-      } else {
-        goTo(currentRef.current + dir)
-      }
+      if (animatingRef.current) return
+      goTo(currentRef.current + dir)
     }
 
     // Parked on the trapped slide, not mid section-snap?
@@ -218,10 +205,15 @@ export function useSlideController({
     // Separate accumulator for "pushing past an end" while trapped, so the roll
     // and the section-advance don't share state.
     let rollEdgeAccum = 0
+    // Set once a wheel burst has spent its one section advance; held while events
+    // keep arriving (continuous scroll / inertia) and cleared on quiet, so one
+    // uninterrupted gesture moves exactly one section.
+    let wheelLocked = false
     let wheelResetTimer: ReturnType<typeof setTimeout>
     const resetWheel = () => {
       wheelAccum = 0
       rollEdgeAccum = 0
+      wheelLocked = false
     }
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
@@ -241,24 +233,34 @@ export function useSlideController({
         rollEdgeAccum += e.deltaY
         clearTimeout(wheelResetTimer)
         wheelResetTimer = setTimeout(resetWheel, WHEEL_RESET_MS)
+        // Lock (don't reset) so leftover inertia after escaping the trap can't
+        // carry on into the section past contact / portfolio.
         if (rollEdgeAccum > WHEEL_THRESHOLD) {
-          resetWheel()
+          rollEdgeAccum = 0
+          wheelLocked = true
           step(1)
         } else if (rollEdgeAccum < -WHEEL_THRESHOLD) {
-          resetWheel()
+          rollEdgeAccum = 0
+          wheelLocked = true
           step(-1)
         }
         return
       }
 
-      wheelAccum += e.deltaY
+      // Refresh the quiet timer on every event (even while locked) so the lock
+      // only releases once the wheel actually stops for WHEEL_RESET_MS.
       clearTimeout(wheelResetTimer)
       wheelResetTimer = setTimeout(resetWheel, WHEEL_RESET_MS)
+      // Already spent this gesture's one advance — ignore until the wheel quiets.
+      if (wheelLocked) return
+      wheelAccum += e.deltaY
       if (wheelAccum > WHEEL_THRESHOLD) {
-        resetWheel()
+        wheelAccum = 0
+        wheelLocked = true
         step(1)
       } else if (wheelAccum < -WHEEL_THRESHOLD) {
-        resetWheel()
+        wheelAccum = 0
+        wheelLocked = true
         step(-1)
       }
     }
