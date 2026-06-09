@@ -1,81 +1,86 @@
-# OPENFLOOR — Project Guide
+# OPENFLOOR — 프로젝트 가이드
 
-Company site. Single-page, full-screen scroll-snap experience driven by one
-motion value. This file documents the conventions; follow them when filling in
-sections.
+회사 사이트. 단일 motion value로 구동되는 싱글 페이지·풀스크린 스크롤 스냅
+경험. 이 파일은 컨벤션을 문서화한다; 섹션을 채울 때 이를 따른다.
 
-## Status
+## 상태
 
-Step 1 (engine + skeleton + placeholder sections) is done. Each section is a
-labelled placeholder (`PlaceholderSection`); real content/interactions are added
-one section at a time in later steps. **Don't build section content unless asked.**
+1단계(엔진 + 스켈레톤 + 플레이스홀더 섹션)는 완료. 각 섹션은 라벨이 붙은
+플레이스홀더(`PlaceholderSection`)이며, 실제 콘텐츠/인터랙션은 이후 단계에서
+한 섹션씩 추가한다. **요청받지 않으면 섹션 콘텐츠를 만들지 말 것.**
 
-## Stack
+## 스택
 
-- **Package manager: yarn** (`yarn add`, `yarn.lock`). Do not use npm.
+- **패키지 매니저: yarn** (`yarn add`, `yarn.lock`). npm 사용 금지.
 - **Vite + React + TypeScript**
-- **Tailwind CSS v4** via `@tailwindcss/vite`. Config is CSS-first:
-  `@import "tailwindcss"` + `@theme { … }` in `src/index.css`. **No
-  `tailwind.config.js`.**
-- **motion** (the framer-motion successor) — import from `'motion/react'`.
-- **lucide-react** for icons.
-- **clsx + tailwind-merge** → `cn()` helper in `src/lib/cn.ts`.
-- **Prettier + prettier-plugin-tailwindcss** (`.prettierrc`). Run `yarn format`.
+- **Tailwind CSS v4** — `@tailwindcss/vite` 사용. 설정은 CSS 우선:
+  `src/index.css`의 `@import "tailwindcss"` + `@theme { … }`. **`tailwind.config.js`
+  없음.**
+- **motion** (framer-motion 후속) — `'motion/react'`에서 import.
+- 아이콘은 **lucide-react**.
+- **clsx + tailwind-merge** → `src/lib/cn.ts`의 `cn()` 헬퍼.
+- **Prettier + prettier-plugin-tailwindcss** (`.prettierrc`). `yarn format` 실행.
 
-Scripts: `yarn dev`, `yarn build` (tsc -b + vite build), `yarn preview`,
+스크립트: `yarn dev`, `yarn build` (tsc -b + vite build), `yarn preview`,
 `yarn format`.
 
-## Commands
+## 명령어
 
-- `yarn dev` — dev server
-- `yarn build` — typecheck + production build (run before considering work done)
+- `yarn dev` — 개발 서버
+- `yarn build` — 타입체크 + 프로덕션 빌드 (작업 완료로 보기 전에 실행)
 - `yarn format` — Prettier
 
-## Layout rules
+## 언어 (한글)
 
-- **Design frame** is `max-width: 1440px`, centered. Wider viewports get equal
-  side margins, and that margin **bleeds the current slide's background color**.
-- **Full-bleed elements** (section backgrounds, the bg crossfade) must NOT be
-  capped at 1440. Only _content_ lives inside the frame. Use `<Container>` for
-  content; keep backgrounds outside it.
-- **Each section is exactly one screen tall.** Use `100dvh` / `svh` (mobile
-  address-bar safe), never `vh`.
-- **Tokens only.** Colors, spacing, fonts come from `@theme` tokens / Tailwind
-  utilities — no hardcoded hex/px in components. (Raw color/width constants that
-  the JS engine needs are mirrored in `src/config/slides.ts`; keep them in sync
-  with the tokens.)
-- **Extract long Tailwind class clusters** into components.
-- **Keyframe animations** (block reveal, etc.) go in `src/styles/keyframes.css`,
-  not crammed into Tailwind utility chains.
+- **커밋 메시지는 한글로 작성**하고, Conventional-Commit 접두사를 붙인다:
+  `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, `style:` … 예:
+  `feat: Manifesto 섹션 추가`.
+- **코드 주석은 한글로 작성한다.** (식별자·타입·문자열 리터럴은 원래 언어를
+  유지 — 주석과 커밋 본문만 한글.)
+- 이 파일(CLAUDE.md)도 한글로 작성한다.
 
-## Responsive
+## 레이아웃 규칙
 
-Strategy is **fluid scale (A)**: the 1440 design is fixed at ≥1440px and shrinks
-_proportionally_ with the frame width below that, down to a floor. Mobile
-(`<768px`) is a separate, purpose-built reflow — not the scaled desktop.
+- **디자인 프레임**은 `max-width: 1440px`, 가운데 정렬. 더 넓은 뷰포트는 좌우
+  동일 마진을 갖고, 그 마진은 **현재 슬라이드의 배경색으로 번진다(bleed).**
+- **풀블리드 요소**(섹션 배경, bg 크로스페이드)는 1440으로 제한하면 **안 된다.**
+  _콘텐츠_만 프레임 안에 둔다. 콘텐츠에는 `<Container>`를 쓰고, 배경은 그 바깥에
+  둔다.
+- **각 섹션은 정확히 한 화면 높이.** `100dvh` / `svh`(모바일 주소창 안전)를 쓰고,
+  절대 `vh`를 쓰지 않는다.
+- **토큰만 사용.** 색·간격·폰트는 `@theme` 토큰 / Tailwind 유틸리티에서 온다 —
+  컴포넌트에 hex/px 하드코딩 금지. (JS 엔진이 필요로 하는 raw 색/너비 상수는
+  `src/config/slides.ts`에 미러링되어 있으니 토큰과 동기화할 것.)
+- **긴 Tailwind 클래스 묶음은 컴포넌트로 추출.**
+- **Keyframe 애니메이션**(블록 reveal 등)은 Tailwind 유틸리티 체인에 욱여넣지 말고
+  `src/styles/keyframes.css`에 둔다.
 
-- **Design reference width is 1440px.** At ≥1440 use the design value verbatim;
-  below, scale it.
-- **Fixed px → fluid:** a 1440-design value of `N`px becomes
-  `clamp(FLOOR, (N/14.4)vw, Npx)`. The `vw` term is `N/14.4` because `N` is
-  `N/1440` of the frame and `1vw = 1440/100` at the reference width.
-  Examples: `60px → clamp(36px, 4.17vw, 60px)`,
+## 반응형
+
+전략은 **유동 스케일 (A)**: 1440 디자인은 ≥1440px에서 고정이고, 그 아래에선
+프레임 너비에 _비례해_ floor까지 축소된다. 모바일(`<768px`)은 스케일된 데스크탑이
+아니라 별도의 전용 reflow다.
+
+- **디자인 기준 너비는 1440px.** ≥1440에선 디자인 값을 그대로 쓰고, 그 아래에선
+  스케일한다.
+- **고정 px → 유동:** 1440-디자인 값 `N`px은 `clamp(FLOOR, (N/14.4)vw, Npx)`이
+  된다. `vw` 항이 `N/14.4`인 이유는 `N`이 프레임의 `N/1440`이고 기준 너비에서
+  `1vw = 1440/100`이기 때문. 예: `60px → clamp(36px, 4.17vw, 60px)`,
   `16px → clamp(12px, 1.11vw, 16px)`, `115px → clamp(46px, 8vw, 115px)`.
-- **FLOOR** is ~55–60% of the design value (decorative elements may go lower).
-  Apply to **all** fixed px: type, spacing, max-widths, icons, ghost text,
-  badges — not just fonts.
-- **Mobile (`<768px`)** uses its own layout via `max-md:` overrides instead of
-  the scale (the desktop clamp would either overflow or read too large). Reflow,
-  re-stack, and re-size for the small screen explicitly.
-- **Every section must fit one screen (`100dvh`) at every width**, mobile
-  included — the scroll engine snaps one section per gesture on mobile too.
-- **The central video** (`App.tsx`) scales with `frame.w / 1440` (via
-  `useFrameSize`) so its hero→about composition keeps the same proportions at
-  every width; on mobile it also shifts clear of the stacked text.
+- **FLOOR**는 디자인 값의 ~55–60%(장식 요소는 더 낮아도 됨). 폰트뿐 아니라
+  **모든** 고정 px에 적용: 타입·간격·max-width·아이콘·고스트 텍스트·뱃지.
+- **모바일(`<768px`)**은 스케일 대신 `max-md:` override로 자체 레이아웃을 쓴다
+  (데스크탑 clamp는 넘치거나 너무 크게 읽힘). 작은 화면에 맞게 명시적으로 reflow·
+  재배치·재크기 조정한다.
+- **모든 섹션은 모든 너비에서 한 화면(`100dvh`)에 맞아야 한다** — 모바일에서도
+  스크롤 엔진이 제스처당 한 섹션씩 스냅한다.
+- **중앙 비디오**(`App.tsx`)는 `frame.w / 1440`(`useFrameSize` 경유)로 스케일되어
+  hero→about 합성이 모든 너비에서 같은 비율을 유지한다; 모바일에선 쌓인 텍스트를
+  피해 위치도 옮긴다.
 
-## Design tokens (`@theme` in `src/index.css`)
+## 디자인 토큰 (`src/index.css`의 `@theme`)
 
-| Token                    | Value                   | Utility example       |
+| 토큰                     | 값                      | 유틸리티 예시         |
 | ------------------------ | ----------------------- | --------------------- |
 | `--color-bg-dark`        | `#171717`               | `bg-bg-dark`          |
 | `--color-bg-light`       | `#ffffff`               | `bg-bg-light`         |
@@ -87,71 +92,72 @@ _proportionally_ with the frame width below that, down to a floor. Mobile
 | `--font-sans`            | Montserrat → Pretendard | `font-sans`           |
 | `--container-frame`      | `1440px`                | `max-w-frame`         |
 
-- **Fonts:** Montserrat (Google Fonts) for Latin, Pretendard (jsDelivr CDN) for
-  Korean. Both linked in `index.html`. Default stack is Montserrat → Pretendard.
-- `::selection` uses the accent color.
+- **폰트:** Latin은 Montserrat(Google Fonts), 한글은 Pretendard(jsDelivr CDN).
+  둘 다 `index.html`에 링크. 기본 스택은 Montserrat → Pretendard.
+- `::selection`은 accent 색을 쓴다.
 
-## Scroll engine
+## 스크롤 엔진
 
-The single source of truth is one `slide` motion value (`0, 1, 2 …`); every
-animation derives from it via `useTransform`.
+단일 진실 공급원은 하나의 `slide` motion value(`0, 1, 2 …`); 모든 애니메이션은
+`useTransform`으로 여기서 파생된다.
 
-- **`useSlideController`** (`src/hooks/useSlideController.ts`) owns it. It hijacks
-  wheel / touch / keyboard and snaps **one gesture = one section** (with a
-  cooldown so fast scrolls don't skip), keeps both desktop and mobile snapping,
-  locks body scroll, and toggles `body.is-dark` (for the video blend). It returns
-  `{ slide, index, goTo }`. `index` is the rounded slide for scroll-spy; `goTo`
-  is used by the header nav.
-- **Track:** vertical stack, `transform: translateY(-slide * 100dvh)` (`Slides`).
-- **Background crossfade:** `slide` → light/dark via `useTransform`. The
-  light/dark sequence is config-driven (`BG_STOPS` / `BG_COLORS` derived from
-  `SLIDES`), so adding sections extends it automatically.
+- **`useSlideController`**(`src/hooks/useSlideController.ts`)가 이를 소유한다.
+  휠 / 터치 / 키보드를 가로채 **한 제스처 = 한 섹션**으로 스냅하고(쿨다운을 둬
+  빠른 스크롤이 건너뛰지 않게), 데스크탑·모바일 모두 스냅을 유지하며, body 스크롤을
+  잠그고 `body.is-dark`(비디오 블렌드용)를 토글한다. `{ slide, index, goTo }`를
+  반환한다. `index`는 스크롤스파이용 반올림 슬라이드, `goTo`는 헤더 내비가 쓴다.
+- **트랙:** 세로 스택, `transform: translateY(-slide * 100dvh)`(`Slides`).
+- **배경 크로스페이드:** `slide` → 라이트/다크를 `useTransform`으로. 라이트/다크
+  시퀀스는 설정 기반(`SLIDES`에서 파생한 `BG_STOPS` / `BG_COLORS`)이라, 섹션을
+  추가하면 자동으로 확장된다.
 
-### Adding / reordering sections
+### 섹션 추가 / 순서 변경
 
-Edit `SLIDES` in `src/config/slides.ts` (id, label, `theme: 'dark' | 'light'`).
-That array drives the background crossfade, scroll-spy, and section order. Update
-`NAV_ITEMS` if the new section belongs in the header. Then add the section
-component to the track in `src/App.tsx`.
+`src/config/slides.ts`의 `SLIDES`를 편집한다(id, label, `theme: 'dark' | 'light'`).
+이 배열이 배경 크로스페이드·스크롤스파이·섹션 순서를 구동한다. 새 섹션이 헤더에
+속하면 `NAV_ITEMS`도 갱신한다. 그다음 `src/App.tsx`의 트랙에 섹션 컴포넌트를
+추가한다.
 
-## Central video (hero → about)
+## 중앙 비디오 (hero → about)
 
-- Source `public/bg.mp4`, `<video autoplay muted loop playsinline>`. **No alpha.**
-- It's composited onto dark slides with `mix-blend-mode`. Because the clip has no
-  alpha, **both** the full-bleed bg layer and the 1440 frame layer paint the same
-  background color (in `Frame`) so the blend resolves in one stacking context —
-  this is what prevents a white flash when the blend mode swaps.
-- `body.is-dark` (toggled when `slide > 0.55`) switches the blend mode
-  (`.central-video` rules in `index.css`).
-- Slide 0 → 1: the video shrinks + moves toward the upper-right, then fades out
-  just before the Philosophy slide (`useTransform` mappings in `App.tsx`).
+- 소스 `public/bg.mp4`, `<video autoplay muted loop playsinline>`. **알파 없음.**
+- 다크 슬라이드 위에 `mix-blend-mode`로 합성된다. 클립에 알파가 없으므로
+  풀블리드 bg 레이어와 1440 프레임 레이어 **둘 다** 같은 배경색을 칠해(`Frame`에서)
+  블렌드가 하나의 스택 컨텍스트에서 해결된다 — 이게 블렌드 모드가 바뀔 때 하얀
+  플래시를 막아준다.
+- `body.is-dark`(`slide > 0.55`일 때 토글)가 블렌드 모드를 전환한다(`index.css`의
+  `.central-video` 규칙).
+- 슬라이드 0 → 1: 비디오가 축소되며 우상단으로 이동한 뒤 Philosophy 슬라이드
+  직전에 페이드 아웃한다(`App.tsx`의 `useTransform` 매핑).
 
-## Header / nav
+## 헤더 / 내비
 
-- Logo `OPENFLOOR` + links: **About Us, Philosophy, Vision, Portfolio** (no Team,
-  no Work).
-- Clicking a link snaps to that slide (`goTo`); the active slide's link shows in
-  the accent color (scroll-spy via `index`). Text color adapts to the current
-  slide theme.
+- 로고 `OPENFLOOR` + 링크: **About Us, Philosophy, Vision, Portfolio** (Team·Work
+  없음).
+- 링크 클릭 시 해당 슬라이드로 스냅(`goTo`); 활성 슬라이드의 링크는 accent 색으로
+  표시된다(`index` 기반 스크롤스파이). 텍스트 색은 현재 슬라이드 테마에 맞춰
+  바뀐다.
 
-## Sections (order)
+## 섹션 (순서)
 
-6 slides: **Hero, About, Philosophy, Vision, Portfolio, Contact (+ Footer)**.
-Currently placeholders showing only the section name.
+7개 슬라이드: **Hero, About, Philosophy, Vision, Portfolio, Manifesto, Contact
+(+ Footer)**. Hero·About·Philosophy·Portfolio·Manifesto는 구현됨; Vision·Contact는
+아직 섹션 이름만 보여주는 플레이스홀더. (Manifesto는 내비에 없는 스크롤 트랩
+3D 드럼 섹션이다.)
 
-## Folder structure
+## 폴더 구조
 
 ```
 src/
   components/
     layout/    Frame, Slides, Container, Header, CentralVideo
-    sections/  Hero, About, Philosophy, Vision, Portfolio, Contact
-    ui/        shared UI (PlaceholderSection)
-  hooks/       useSlideController, useFrameSize
-  lib/         cn.ts
-  config/      slides.ts (slide order, themes, nav, engine timing)
-  styles/      keyframes.css (tokens live in index.css @theme)
-  index.css    Tailwind import + @theme tokens + base
+    sections/  Hero, About, Philosophy, Vision, Portfolio, Manifesto, Contact
+    ui/        공용 UI (PlaceholderSection, RevealText)
+  hooks/       useSlideController, useFrameSize, useCountUp
+  lib/         cn.ts, motion.ts
+  config/      slides.ts (슬라이드 순서, 테마, 내비, 엔진 타이밍)
+  styles/      keyframes.css (토큰은 index.css @theme에 있음)
+  index.css    Tailwind import + @theme 토큰 + base
 ```
 
-Path alias: `@/` → `src/`.
+경로 별칭: `@/` → `src/`.
