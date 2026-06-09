@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from 'react'
 import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
@@ -42,6 +43,9 @@ const FONT_PX = 88
 const LINE_H = FONT_PX * 1.4 // ≈ 123 — fixed design-px gap between adjacent lines
 
 const CANVAS_W = DESIGN_WIDTH
+// Horizontal breathing room (design px each side) — the longest line is kept
+// this far from the canvas edges before the width cap kicks in.
+const SIDE_PAD = 90
 // Perspective applied to the drum window (design px). Lower = more convex bulge
 // / stronger foreshortening; tune together with STEP_ANG.
 const PERSPECTIVE = 800
@@ -149,9 +153,31 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
   const H = frame.h / ratio
   // The drum rolls inside the band left after the top/bottom margins.
   const hBand = H - 2 * MARGIN
+
+  // Measure the widest line at base 88px (design px) so the fill can be capped
+  // by available width — otherwise narrow/tall viewports inflate fillScale past
+  // the 1440 canvas and clip the text sideways. Re-measured after fonts load.
+  const measureRef = useRef<HTMLDivElement>(null)
+  const [maxLineW, setMaxLineW] = useState(0)
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = measureRef.current
+      if (!el) return
+      let w = 0
+      for (const child of Array.from(el.children)) {
+        w = Math.max(w, (child as HTMLElement).offsetWidth)
+      }
+      if (w > 0) setMaxLineW(w)
+    }
+    measure()
+    document.fonts?.ready.then(measure)
+  }, [])
+
   // Zoom the (curvature-fixed) drum so its ±FADE_LIMIT extent fills the band —
-  // big, solid lines instead of a small drum floating in the band.
-  const fillScale = hBand / NATURAL_H
+  // big, solid lines — but never wider than the canvas can hold sideways.
+  const widthCap =
+    maxLineW > 0 ? (CANVAS_W - 2 * SIDE_PAD) / maxLineW : Infinity
+  const fillScale = Math.min(hBand / NATURAL_H, widthCap)
 
   // 0..1 progress → front-face line position. Starts on the bottom fade edge
   // (first line about to rise in) and ends on the top edge (last line just gone).
@@ -162,6 +188,23 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
       id={def.id}
       className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden"
     >
+      {/* Hidden width probe — each line at base 88px, unscaled (outside the
+          canvas), so offsetWidth is the true design-px line width. */}
+      <div
+        ref={measureRef}
+        aria-hidden
+        className="invisible absolute -left-[99999px] top-0"
+      >
+        {LINES.map((line, i) => (
+          <span
+            key={i}
+            className="block text-[88px] leading-[1.4] font-bold tracking-normal whitespace-nowrap"
+          >
+            {line}
+          </span>
+        ))}
+      </div>
+
       {/* Scaled design-px canvas — height set so it renders to 100dvh; width
           stays 1440 as the coordinate system (horizontal overflow is clipped). */}
       <div
