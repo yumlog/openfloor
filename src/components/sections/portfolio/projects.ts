@@ -16,10 +16,16 @@ export interface ProjectSlide {
 export interface Project {
   /** 안정적인 id, 카드 key로도 사용 */
   id: string
-  /** 캐러셀 아래 + 모달 슬라이드 라벨로 표시되는 브랜드 이름 */
+  /** 호버 1번째 줄(브랜드명) */
   name: string
-  /** 브랜드 컬러 — 카드 채움과 모달 슬라이드 배경 */
+  /** 호버 2번째 줄(프로젝트명, placeholder) */
+  project: string
+  /** 브랜드 컬러 — 모달 슬라이드 배경에 계속 사용 */
   color: string
+  /** 카드 이미지(public) */
+  image: string
+  /** 카드 아래 로고(public) */
+  logo: string
   /** 모달 콘텐츠 슬라이드(각 3개 플레이스홀더) */
   slides: ProjectSlide[]
 }
@@ -39,19 +45,22 @@ function placeholderSlides(name: string): ProjectSlide[] {
 interface Brand {
   id: string
   name: string
+  project: string
   color: string
+  image: string
+  logo: string
 }
 
 // 고정 순서 + 컬러(스펙 참조). 슬라이드는 생성된 플레이스홀더.
 const BRANDS: Brand[] = [
-  { id: 'oliveyoung', name: '올리브영', color: '#D2F096' },
-  { id: 'kb', name: 'KB금융지주', color: '#FFD745' },
-  { id: 'samsung', name: '삼성', color: '#1428A0' },
-  { id: 'lg', name: 'LG', color: '#C30036' },
-  { id: 'shinhyup', name: '신협', color: '#08529B' },
-  { id: 'dancesnap', name: '댄스냅', color: '#999999' },
-  { id: 'kit', name: 'KIT', color: '#E11737' },
-  { id: 'bizplay', name: '비즈플레이', color: '#0037FF' },
+  { id: 'oliveyoung', name: '올리브영', project: '프로젝트명 placeholder', color: '#D2F096', image: '/oliveyoung.png', logo: '/logo-oliveyoung.svg' },
+  { id: 'kb', name: '국민은행', project: '프로젝트명 placeholder', color: '#FFD745', image: '/kb.png', logo: '/logo-kb.svg' },
+  { id: 'samsung', name: '삼성', project: '프로젝트명 placeholder', color: '#1428A0', image: '/samsung.png', logo: '/logo-samsung.svg' },
+  { id: 'lg', name: '엘지', project: '프로젝트명 placeholder', color: '#C30036', image: '/lg.png', logo: '/logo-lg.svg' },
+  { id: 'shinhyup', name: '신협', project: '프로젝트명 placeholder', color: '#08529B', image: '/shinhyeob.svg.png', logo: '/logo-shinhyeob.svg' },
+  { id: 'dancesnap', name: '댄스냅', project: '프로젝트명 placeholder', color: '#999999', image: '/dansnap.png', logo: '/logo-dansnap.svg' },
+  { id: 'kit', name: '경남대', project: '프로젝트명 placeholder', color: '#E11737', image: '/kit.png', logo: '/logo-kit.svg' },
+  { id: 'bizplay', name: '비즈플레이', project: '토탈 솔루션 개발 및 운영', color: '#0037FF', image: '/bizplay.png', logo: '/logo-bizplay.png' },
 ]
 
 export const PROJECTS: Project[] = BRANDS.map((b) => ({

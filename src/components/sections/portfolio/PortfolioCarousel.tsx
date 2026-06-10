@@ -13,7 +13,6 @@ import {
   useTransform,
   type MotionValue,
 } from 'motion/react'
-import { cn } from '@/lib/cn'
 import type { Project } from './projects'
 
 /* ---------------------------------------------------------------------------
@@ -61,15 +60,6 @@ function wrap(d: number, n: number) {
   return m > n / 2 ? m - n : m
 }
 
-/** 카드 텍스트가 브랜드 배경과 대비되도록 하는 체감 휘도 판정. */
-function isLightColor(hex: string) {
-  const h = hex.replace('#', '')
-  const r = parseInt(h.slice(0, 2), 16)
-  const g = parseInt(h.slice(2, 4), 16)
-  const b = parseInt(h.slice(4, 6), 16)
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6
-}
-
 interface PortfolioCardProps {
   project: Project
   index: number
@@ -98,7 +88,6 @@ function PortfolioCard({
   const pointerEvents = useTransform(opacity, (o) =>
     o < 0.05 ? 'none' : 'inherit'
   )
-  const light = isLightColor(project.color)
 
   return (
     <motion.div
@@ -117,19 +106,22 @@ function PortfolioCard({
       }}
       onPointerDown={(e) => onPointerDownCard(e, index)}
     >
-      {/* 평면 브랜드 컬러 플레이스홀더(실제 아트가 나중에 대체). */}
-      <div
-        className="flex h-full w-full items-center justify-center rounded-[16px] shadow-[0_24px_60px_-18px_rgba(0,0,0,0.35)]"
-        style={{ backgroundColor: project.color }}
-      >
-        <span
-          className={cn(
-            'text-[22px] font-bold tracking-[-0.04em]',
-            light ? 'text-black/55' : 'text-white/85'
-          )}
-        >
-          {project.name}
-        </span>
+      {/* 카드 = 프로젝트 이미지 + 호버 dim/텍스트 */}
+      <div className="group relative h-full w-full overflow-hidden rounded-[16px] shadow-[0_0_25px_-4px_rgba(0,0,0,0.1)]">
+        <img
+          src={project.image}
+          alt={project.name}
+          draggable={false}
+          className="h-full w-full object-cover"
+        />
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-[4px] bg-black/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <p className="text-[20px] leading-[1.4] font-normal text-white">
+            {project.name}
+          </p>
+          <p className="text-[24px] leading-[1.4] font-bold text-white">
+            {project.project}
+          </p>
+        </div>
       </div>
     </motion.div>
   )
@@ -298,16 +290,17 @@ export function PortfolioCarousel({
           (100px) 위에 놓인다. */}
       <div className="pointer-events-none relative flex min-h-[clamp(28px,2.78vw,40px)] shrink-0 items-start justify-center pb-[clamp(58px,6.94vw,100px)]">
         <AnimatePresence>
-          <motion.p
+          <motion.img
             key={centerIndex}
+            src={projects[centerIndex].logo}
+            alt={projects[centerIndex].name}
+            draggable={false}
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -18 }}
             transition={{ duration: 0.32, ease: 'easeOut' }}
-            className="text-card-name absolute inset-x-0 text-center text-[clamp(13px,1.39vw,20px)] leading-[1.4] font-bold tracking-[-0.04em]"
-          >
-            {projects[centerIndex].name}
-          </motion.p>
+            className="absolute left-1/2 h-[36px] w-auto -translate-x-1/2"
+          />
         </AnimatePresence>
       </div>
     </div>

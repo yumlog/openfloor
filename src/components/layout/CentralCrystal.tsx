@@ -291,7 +291,10 @@ export function CentralCrystal({
   return (
     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
       <motion.div style={{ opacity, width: size, height: size }}>
-        <motion.div className="h-full w-full" style={{ scale, x, y }}>
+        <motion.div
+          className="h-full w-full mix-blend-plus-lighter"
+          style={{ scale, x, y }}
+        >
           <Canvas
             className="h-full w-full"
             resize={{ offsetSize: true }}
