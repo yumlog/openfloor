@@ -106,15 +106,21 @@ export function ContactSection({ active }: ContactSectionProps) {
                 <p className="text-[16px] leading-[1] font-bold tracking-normal text-white">
                   {field.label}
                 </p>
-                <p
-                  className={
-                    field.multiline
-                      ? 'text-text-on-dark mt-2 text-[15px] leading-[1.5] font-normal tracking-normal whitespace-pre-line'
-                      : 'text-text-on-dark mt-2 text-[15px] leading-[1] font-normal tracking-normal'
-                  }
-                >
-                  {field.value}
-                </p>
+                {field.multiline ? (
+                  <textarea
+                    aria-label={field.label}
+                    placeholder={field.value}
+                    rows={2}
+                    className="placeholder:text-text-on-dark mt-2 w-full resize-none border-none bg-transparent p-0 text-[15px] leading-[1.5] font-normal tracking-normal text-white outline-none"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    aria-label={field.label}
+                    placeholder={field.value}
+                    className="placeholder:text-text-on-dark mt-2 w-full border-none bg-transparent p-0 text-[15px] leading-[1] font-normal tracking-normal text-white outline-none"
+                  />
+                )}
                 <div className="bg-text-on-dark/[0.32] mt-3 h-px w-full" />
               </motion.div>
             ))}
@@ -145,9 +151,11 @@ export function ContactSection({ active }: ContactSectionProps) {
               {FOOTER_ROWS.map((row) => (
                 <div
                   key={row.label}
-                  className="flex gap-[16px] text-[16px] leading-[1] font-normal tracking-[-0.04em] text-text-on-dark"
+                  className="text-text-on-dark flex gap-[16px] text-[16px] leading-[1] font-normal tracking-[-0.04em]"
                 >
-                  <span className="font-montserrat w-[80px] shrink-0">{row.label}</span>
+                  <span className="font-montserrat w-[80px] shrink-0">
+                    {row.label}
+                  </span>
                   <span className="font-pretendard">{row.value}</span>
                 </div>
               ))}
@@ -222,15 +230,21 @@ export function ContactSection({ active }: ContactSectionProps) {
               <p className="text-[18px] leading-[1] font-bold tracking-normal text-white">
                 {field.label}
               </p>
-              <p
-                className={
-                  field.multiline
-                    ? 'text-text-on-dark mt-3 text-[16px] leading-[1.5] font-normal tracking-normal whitespace-pre-line'
-                    : 'text-text-on-dark mt-3 text-[16px] leading-[1] font-normal tracking-normal'
-                }
-              >
-                {field.value}
-              </p>
+              {field.multiline ? (
+                <textarea
+                  aria-label={field.label}
+                  placeholder={field.value}
+                  rows={2}
+                  className="placeholder:text-text-on-dark mt-3 w-full resize-none border-none bg-transparent p-0 text-[16px] leading-[1.5] font-normal tracking-normal text-white outline-none"
+                />
+              ) : (
+                <input
+                  type="text"
+                  aria-label={field.label}
+                  placeholder={field.value}
+                  className="placeholder:text-text-on-dark mt-3 w-full border-none bg-transparent p-0 text-[16px] leading-[1] font-normal tracking-normal text-white outline-none"
+                />
+              )}
               <div className="bg-text-on-dark/[0.32] mt-6 h-px w-full" />
             </motion.div>
           ))}
@@ -261,7 +275,7 @@ export function ContactSection({ active }: ContactSectionProps) {
           {FOOTER_ROWS.map((row) => (
             <div
               key={row.label}
-              className="flex gap-[16px] text-[16px] leading-[1] font-normal tracking-[-0.04em] text-text-on-dark"
+              className="text-text-on-dark flex gap-[16px] text-[16px] leading-[1] font-normal tracking-[-0.04em]"
             >
               <span className="font-montserrat shrink-0" style={{ width: 80 }}>
                 {row.label}
