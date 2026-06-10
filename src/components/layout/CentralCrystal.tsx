@@ -1,6 +1,6 @@
 import { Fragment, memo, Suspense, useMemo, useRef } from 'react'
 import { motion, type MotionValue } from 'motion/react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import {
   Environment,
   Lightformer,
@@ -22,9 +22,6 @@ interface CentralCrystalProps {
   visible: boolean
 }
 
-const clamp = (v: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, v))
-
 /* 프레넬 림: 시선과 면이 스칠수록 밝아지는 가산 발광 셸. */
 const fresnelVertex = `
   varying vec3 vNormal; varying vec3 vView;
@@ -39,8 +36,7 @@ const fresnelFragment = `
 
 function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
   const { scene } = useGLTF('/crystal.glb')
-  const size = useThree((s) => s.size)
-  // 외곽 그룹: 부유(y) + 미세 기울임(x/z) + 반응형 스케일.
+  // 외곽 그룹: 부유(y) + 정규화 스케일.
   const groupRef = useRef<THREE.Group>(null)
   // 내부 그룹: y축 자동 회전(원점 정렬된 지오메트리를 중심으로 돈다).
   const spinRef = useRef<THREE.Group>(null)
@@ -72,12 +68,12 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
     box.getCenter(center)
     box.getSize(dim)
     const maxDim = Math.max(dim.x, dim.y, dim.z) || 1
-    // 알 수 없는 GLB 크기를 일정한 화면 크기로 정규화한다.
-    return { offset: center, baseScale: 3.4 / maxDim }
+    // 알 수 없는 GLB 크기를 일정한 화면 크기로 정규화한다(크기 다이얼).
+    return { offset: center, baseScale: 2.7 / maxDim }
   }, [geometries])
 
-  // 반응형 스케일: 좁은 화면에서 비례 축소(floor 0.6, ceil 1.1).
-  const responsiveScale = baseScale * clamp(size.width / 1440, 0.6, 1.1)
+  // 박스(videoSize)만으로 크기가 정해지도록 캔버스 폭 기반 추가 축소는 제거.
+  const responsiveScale = baseScale
 
   // 저사양은 samples/resolution만 낮춘다.
   const crystalProps = useMemo(
@@ -298,6 +294,7 @@ export function CentralCrystal({
         <motion.div className="h-full w-full" style={{ scale, x, y }}>
           <Canvas
             className="h-full w-full"
+            resize={{ offsetSize: true }}
             gl={{ alpha: true, antialias: true }}
             camera={{ position: [0, 0, 6], fov: 35 }}
             dpr={lowSpec ? [1, 1] : [1, 1.25]}
