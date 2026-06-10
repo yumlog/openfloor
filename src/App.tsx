@@ -88,7 +88,7 @@ export default function App() {
         <VisionSection />
         <PortfolioSection active={index === 4} />
         <ManifestoSection active={index === 5} progress={rollProgress} />
-        <ContactSection />
+        <ContactSection active={index === 6} />
       </Slides>
 
       <Header index={index} goTo={goTo} />
