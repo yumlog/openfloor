@@ -153,7 +153,7 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
         // 본문/스크림 페이드. 펼칠 땐 사이즈 스프링이 최종 너비에 거의 도달할
         // 때까지 기다려 최종 줄바꿈에서 등장하게 한다(리사이즈 중 reflow 깜빡임
         // 없음). 접을 땐 빠르게 사라진다 — 축소가 보이는 텍스트를 reflow 하기 전에.
-        const bodyFade: Transition = isSelected
+        const bodyFade: Transition = !standing
           ? { duration: 0.25, delay: 0.3, ease: 'easeOut' }
           : { duration: 0.12, ease: 'easeOut' }
         return (
@@ -201,14 +201,24 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
                   isCenter ? 'bg-[#FB3640]' : 'bg-[#E4E4E7]'
                 )}
               >
-                {/* 본문 — 가운데 카드에만. */}
+                {/* 본문 — 펼침 상태의 모든 카드(가운데/양옆 크기·색 분기). */}
                 <motion.div
-                  className="pointer-events-none absolute inset-0 px-[44px] py-[48px]"
-                  animate={{ opacity: isSelected ? 1 : 0 }}
+                  className={cn(
+                    'pointer-events-none absolute inset-0',
+                    isCenter ? 'px-[44px] py-[48px]' : 'px-[32px] py-[40px]'
+                  )}
+                  animate={{ opacity: standing ? 0 : 1 }}
                   transition={bodyFade}
-                  aria-hidden={!isSelected}
+                  aria-hidden={standing}
                 >
-                  <p className="text-title-on-dark text-[24px] leading-[1.4] font-medium tracking-[-0.05em]">
+                  <p
+                    className={cn(
+                      'break-keep text-balance leading-[1.4] font-medium tracking-[-0.05em]',
+                      isCenter
+                        ? 'text-title-on-dark text-[24px]'
+                        : 'text-[#666] text-[16px]'
+                    )}
+                  >
                     {card.body}
                   </p>
                 </motion.div>
