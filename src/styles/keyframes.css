@@ -116,6 +116,11 @@
   mask-position: 100% 0;
 }
 
+/* 라이트 배경: 청·적 색수차만 제거하고 흰 halo/blur는 유지. */
+.hero-reveal-line.reveal-no-chroma .hero-reveal-edge {
+  text-shadow: 0 0 var(--edge-blur) rgba(255, 255, 255, 0.5);
+}
+
 /* active일 때만 sweep 재생 — RevealText가 진입 시 .is-playing을 더하고 섹션이
    비활성되면 제거한다(숨김 기본값으로 복귀). */
 .hero-reveal-line.is-playing .hero-reveal-clean,

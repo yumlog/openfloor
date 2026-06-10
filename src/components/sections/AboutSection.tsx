@@ -167,7 +167,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
         initial="hidden"
         animate={active ? 'show' : 'hidden'}
         transition={entryTransition(base)}
-        className="text-accent/80 text-[clamp(12px,1.11vw,16px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[14px]"
+        className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[14px]"
       >
         {stat.label}
       </motion.span>

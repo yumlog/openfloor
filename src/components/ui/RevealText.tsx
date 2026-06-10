@@ -24,6 +24,8 @@ interface RevealTextProps {
   stagger?: number
   /** 첫 줄 전 지연, 초. */
   baseDelay?: number
+  /** light 배경 변형: 청·적 색수차만 끔(흰 halo/blur·sweep은 유지). */
+  noChroma?: boolean
 }
 
 /**
@@ -43,6 +45,7 @@ export function RevealText({
   className,
   stagger = 0.27,
   baseDelay = 0,
+  noChroma = false,
 }: RevealTextProps) {
   // false -> true 활성화마다 run id를 올린다; 줄 key로 써서 React가 span을
   // remount 하고 CSS sweep이 깔끔히 다시 시작되게 한다. 비활성일 땐 줄에서
@@ -69,7 +72,11 @@ export function RevealText({
           key={`${runId}-${i}`}
           // .is-playing이 sweep을 게이트한다 — 없으면 줄이 숨김 기본값을 유지해,
           // 비활성 섹션이 드러난 텍스트를 깜빡 비추는 일이 없다.
-          className={cn('hero-reveal-line', active && 'is-playing')}
+          className={cn(
+            'hero-reveal-line',
+            active && 'is-playing',
+            noChroma && 'reveal-no-chroma'
+          )}
           style={
             { '--line-delay': `${baseDelay + i * stagger}s` } as CSSProperties
           }

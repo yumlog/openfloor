@@ -39,6 +39,7 @@ function PortfolioTitle({ active }: { active: boolean }) {
         active={active}
         lines={HEADLINE_LINES}
         baseDelay={HEADLINE_DELAY}
+        noChroma
         className="text-title-on-light mt-[clamp(7px,0.83vw,12px)] flex flex-col items-center text-[clamp(26px,3.06vw,44px)] leading-[1.4] font-bold tracking-normal max-md:text-[24px]"
       />
     </Container>

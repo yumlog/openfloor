@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
-import { cn } from '@/lib/cn'
 import { Container } from './Container'
-import { NAV_ITEMS, SLIDES } from '@/config/slides'
+import { NAV_ITEMS } from '@/config/slides'
 
 interface HeaderProps {
   /** 활성 슬라이드 인덱스(스크롤스파이). */
@@ -18,13 +17,8 @@ interface HeaderProps {
  * 데스크탑(md+)은 인라인 내비를 보여준다. 모바일(<768)은 햄버거 뒤로 접고,
  * 누르면 풀스크린 오버레이 메뉴가 열린다.
  */
-export function Header({ index, goTo }: HeaderProps) {
+export function Header({ goTo }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
-
-  const onDark = SLIDES[index]?.theme === 'dark'
-  // 다크 슬라이드에선 내비가 차분한 nav 그레이를, 라이트 슬라이드에선 가독성을
-  // 위해 다크 타이틀 색으로 떨어진다.
-  const baseText = onDark ? 'text-text-nav' : 'text-title-on-light'
 
   // 스냅한 뒤 모바일 오버레이를 닫는다.
   const navigate = (next: number) => {
@@ -38,10 +32,7 @@ export function Header({ index, goTo }: HeaderProps) {
         <button
           type="button"
           onClick={() => navigate(0)}
-          className={cn(
-            'text-[20px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors',
-            index === 0 ? 'text-accent' : baseText
-          )}
+          className="text-text-nav text-[20px] leading-[1.2] font-bold tracking-[-0.04em]"
         >
           OPENFLOOR
         </button>
@@ -53,10 +44,7 @@ export function Header({ index, goTo }: HeaderProps) {
               key={item.label}
               type="button"
               onClick={() => navigate(item.index)}
-              className={cn(
-                'hover:text-accent text-[18px] leading-[1.4] font-medium tracking-[-0.04em] transition-colors',
-                index === item.index ? 'text-accent' : baseText
-              )}
+              className="text-text-nav hover:text-accent text-[18px] leading-[1.4] font-medium tracking-[-0.04em] transition-colors"
             >
               {item.label}
             </button>
@@ -69,10 +57,7 @@ export function Header({ index, goTo }: HeaderProps) {
           onClick={() => setMenuOpen((open) => !open)}
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
-          className={cn(
-            'hover:text-accent transition-colors md:hidden',
-            baseText
-          )}
+          className="text-text-nav hover:text-accent transition-colors md:hidden"
         >
           {menuOpen ? (
             <X size={28} strokeWidth={2} />
@@ -102,10 +87,7 @@ export function Header({ index, goTo }: HeaderProps) {
                 key={item.label}
                 type="button"
                 onClick={() => navigate(item.index)}
-                className={cn(
-                  'hover:text-accent text-[32px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors',
-                  index === item.index ? 'text-accent' : 'text-text-nav'
-                )}
+                className="text-text-nav hover:text-accent text-[32px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors"
               >
                 {item.label}
               </button>
