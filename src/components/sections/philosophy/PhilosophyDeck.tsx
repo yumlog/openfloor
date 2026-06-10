@@ -153,9 +153,11 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
         // 본문/스크림 페이드. 펼칠 땐 사이즈 스프링이 최종 너비에 거의 도달할
         // 때까지 기다려 최종 줄바꿈에서 등장하게 한다(리사이즈 중 reflow 깜빡임
         // 없음). 접을 땐 빠르게 사라진다 — 축소가 보이는 텍스트를 reflow 하기 전에.
-        const bodyFade: Transition = !standing
-          ? { duration: 0.25, delay: 0.35, ease: 'easeOut' }
-          : { duration: 0.12, ease: 'easeOut' }
+        const bodyFade: Transition = {
+          duration: 0.25,
+          delay: 0.4,
+          ease: 'easeOut',
+        }
         return (
           // 바깥 = 진입 앵커: 섹션 진입 시 카드를 아래에서 솟아오르게(stagger),
           // 안쪽 레이아웃/상태 머신과 독립적으로.
@@ -203,27 +205,47 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
               >
                 {/* 본문 — 펼침 상태의 모든 카드(가운데/양옆 크기·색 분기). */}
                 <motion.div
-                  key={isCenter ? 'center' : 'side'}
+                  key={standing ? 'standing' : isCenter ? 'center' : 'side'}
                   className={cn(
                     'pointer-events-none absolute inset-0',
-                    isCenter ? 'px-[44px] py-[48px]' : 'px-[32px] py-[40px]'
+                    standing
+                      ? 'px-[32px] py-[40px]'
+                      : isCenter
+                        ? 'px-[44px] py-[48px]'
+                        : 'px-[32px] py-[40px]'
                   )}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: standing ? 0 : 1 }}
+                  animate={{ opacity: 1 }}
                   transition={bodyFade}
-                  aria-hidden={standing}
                 >
                   <p
                     className={cn(
                       'leading-[1.4] font-medium tracking-[-0.05em] text-pretty break-keep',
-                      isCenter
-                        ? 'text-title-on-dark text-[24px]'
-                        : 'text-[16px] text-[#666]'
+                      isCenter ? 'text-title-on-dark' : 'text-[#999]',
+                      standing
+                        ? 'text-[16px]'
+                        : isCenter
+                          ? 'text-[24px]'
+                          : 'text-[20px]'
                     )}
                   >
                     {card.body}
                   </p>
                 </motion.div>
+
+                {/* 우하단 쌍따옴표 — 가운데 128×88 / 양옆 88×60. */}
+                <motion.img
+                  src="/card.svg"
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  className="pointer-events-none absolute right-[40px] bottom-[44px]"
+                  animate={{
+                    width: standing ? 88 : isCenter ? 128 : 88,
+                    height: standing ? 60 : isCenter ? 88 : 60,
+                  }}
+                  transition={TRANSITION}
+                />
               </div>
 
               {/* 카드 아래 이름. 두 상태 공용 라벨 하나(상호 배타적): 펼침은

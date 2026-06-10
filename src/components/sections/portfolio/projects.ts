@@ -54,12 +54,12 @@ interface Brand {
 // 고정 순서 + 컬러(스펙 참조). 슬라이드는 생성된 플레이스홀더.
 const BRANDS: Brand[] = [
   { id: 'oliveyoung', name: '올리브영', project: '프로젝트명 placeholder', color: '#D2F096', image: '/oliveyoung.png', logo: '/logo-oliveyoung.svg' },
-  { id: 'kb', name: '국민은행', project: '프로젝트명 placeholder', color: '#FFD745', image: '/kb.png', logo: '/logo-kb.svg' },
-  { id: 'samsung', name: '삼성', project: '프로젝트명 placeholder', color: '#1428A0', image: '/samsung.png', logo: '/logo-samsung.svg' },
-  { id: 'lg', name: '엘지', project: '프로젝트명 placeholder', color: '#C30036', image: '/lg.png', logo: '/logo-lg.svg' },
-  { id: 'shinhyup', name: '신협', project: '프로젝트명 placeholder', color: '#08529B', image: '/shinhyeob.svg.png', logo: '/logo-shinhyeob.svg' },
-  { id: 'dancesnap', name: '댄스냅', project: '프로젝트명 placeholder', color: '#999999', image: '/dansnap.png', logo: '/logo-dansnap.svg' },
-  { id: 'kit', name: '경남대', project: '프로젝트명 placeholder', color: '#E11737', image: '/kit.png', logo: '/logo-kit.svg' },
+  { id: 'kb', name: 'KB 금융지주', project: 'IR 활동 기반\n인사이트 분석 시스템', color: '#FFD745', image: '/kb.png', logo: '/logo-kb.svg' },
+  { id: 'samsung', name: '삼성전자', project: 'SEO 고도화', color: '#1428A0', image: '/samsung.png', logo: '/logo-samsung.svg' },
+  { id: 'lg', name: 'LG전자', project: '커머스 글로벌', color: '#C30036', image: '/lg.png', logo: '/logo-lg.svg' },
+  { id: 'shinhyup', name: '신협중앙회', project: '기업 전자 금융 채널', color: '#08529B', image: '/shinhyeob.svg.png', logo: '/logo-shinhyeob.svg' },
+  { id: 'dancesnap', name: '텐씨엘', project: '운영 플랫폼 개발', color: '#999999', image: '/dansnap.png', logo: '/logo-dansnap.svg' },
+  { id: 'kit', name: 'KIT 경남정보대학교', project: '유학생 통합 관리 시스템', color: '#E11737', image: '/kit.png', logo: '/logo-kit.svg' },
   { id: 'bizplay', name: '비즈플레이', project: '토탈 솔루션 개발 및 운영', color: '#0037FF', image: '/bizplay.png', logo: '/logo-bizplay.png' },
 ]
 

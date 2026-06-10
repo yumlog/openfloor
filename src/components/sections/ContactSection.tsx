@@ -46,9 +46,9 @@ const FIELDS: FormFieldDef[] = [
 ]
 
 const FOOTER_ROWS = [
-  { label: 'TEL', value: '123-456-789' },
-  { label: 'MAIL', value: 'ABC@openfloor.kr' },
-  { label: 'ADDRESS', value: '서울시 종로구 어쩌구 4층' },
+  { label: 'TEL', value: '010-8718-5785' },
+  { label: 'MAIL', value: 'by.lee@openfloor.kr' },
+  { label: 'ADDRESS', value: '서울 중구 세종대로16길 18, 4층' },
 ]
 
 const FOOTER_MENUS = ['Company Profile', 'Portfolio']
@@ -145,10 +145,10 @@ export function ContactSection({ active }: ContactSectionProps) {
               {FOOTER_ROWS.map((row) => (
                 <div
                   key={row.label}
-                  className="flex gap-3 text-[15px] leading-[1] font-normal tracking-normal text-white"
+                  className="flex gap-[16px] text-[16px] leading-[1] font-normal tracking-[-0.04em] text-text-on-dark"
                 >
-                  <span className="w-[64px] shrink-0">{row.label}</span>
-                  <span>{row.value}</span>
+                  <span className="font-montserrat w-[80px] shrink-0">{row.label}</span>
+                  <span className="font-pretendard">{row.value}</span>
                 </div>
               ))}
             </motion.div>
@@ -261,12 +261,12 @@ export function ContactSection({ active }: ContactSectionProps) {
           {FOOTER_ROWS.map((row) => (
             <div
               key={row.label}
-              className="flex gap-3 text-[16px] leading-[1] font-normal tracking-normal text-white"
+              className="flex gap-[16px] text-[16px] leading-[1] font-normal tracking-[-0.04em] text-text-on-dark"
             >
-              <span className="shrink-0" style={{ width: 76 }}>
+              <span className="font-montserrat shrink-0" style={{ width: 80 }}>
                 {row.label}
               </span>
-              <span>{row.value}</span>
+              <span className="font-pretendard">{row.value}</span>
             </div>
           ))}
         </motion.div>

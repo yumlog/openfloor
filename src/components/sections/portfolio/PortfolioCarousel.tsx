@@ -118,7 +118,7 @@ function PortfolioCard({
           <p className="text-[20px] leading-[1.4] font-normal text-white">
             {project.name}
           </p>
-          <p className="text-[24px] leading-[1.4] font-bold text-white">
+          <p className="text-[24px] leading-[1.4] font-bold whitespace-pre-line text-center text-white">
             {project.project}
           </p>
         </div>

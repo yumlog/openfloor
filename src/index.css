@@ -36,6 +36,10 @@
   /* 숫자 표시(About 통계) — 큼직한 수치는 Pretendard */
   --font-num: 'Pretendard', sans-serif;
 
+  /* 단일 글꼴 강제용(라벨은 Montserrat, 값은 Pretendard) */
+  --font-montserrat: 'Montserrat', sans-serif;
+  --font-pretendard: 'Pretendard', sans-serif;
+
   /* 디자인 프레임 너비 — max-w-frame 유틸리티를 구동 */
   --container-frame: 1440px;
 }

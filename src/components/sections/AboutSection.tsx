@@ -162,16 +162,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
 
   return (
     <div className="flex flex-col items-start md:min-w-0 md:flex-1">
-      <motion.span
-        variants={RISE}
-        initial="hidden"
-        animate={active ? 'show' : 'hidden'}
-        transition={entryTransition(base)}
-        className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[14px]"
-      >
-        {stat.label}
-      </motion.span>
-      <span className="font-num text-title-on-dark mt-[clamp(12px,1.39vw,20px)] mb-[clamp(12px,1.11vw,16px)] text-[clamp(46px,5.56vw,80px)] leading-[1.2] font-bold tracking-normal tabular-nums max-md:my-2 max-md:text-[40px]">
+      <span className="font-num text-title-on-dark text-[80px] leading-[1.2] font-bold tracking-normal tabular-nums max-md:text-[40px]">
         <span ref={numRef}>0</span>
         {stat.suffix}
       </span>
@@ -179,8 +170,17 @@ function StatItem({ stat, active, index }: StatItemProps) {
         variants={RISE}
         initial="hidden"
         animate={active ? 'show' : 'hidden'}
+        transition={entryTransition(base)}
+        className="text-title-on-dark mt-[16px] text-[20px] leading-[1.4] font-normal tracking-[-0.04em]"
+      >
+        {stat.label}
+      </motion.span>
+      <motion.span
+        variants={RISE}
+        initial="hidden"
+        animate={active ? 'show' : 'hidden'}
         transition={entryTransition(base + 0.12)}
-        className="text-title-on-dark text-[clamp(16px,1.94vw,28px)] leading-[1.4] font-medium tracking-[-0.04em] max-md:text-[20px]"
+        className="text-text-on-dark mt-[4px] text-[16px] leading-[1.4] font-normal tracking-[-0.04em]"
       >
         {stat.caption}
       </motion.span>
