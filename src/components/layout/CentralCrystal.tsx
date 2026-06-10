@@ -1,4 +1,4 @@
-import { Fragment, Suspense, useMemo, useRef } from 'react'
+import { Fragment, memo, Suspense, useMemo, useRef } from 'react'
 import { motion, type MotionValue } from 'motion/react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import {
@@ -84,8 +84,8 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
     () => ({
       // 가장 큰 성능 레버: 투과 버퍼 샘플/해상도. 일렁임/색수차를 줄였으니
       // 적은 샘플로도 매끈하다.
-      samples: lowSpec ? 2 : 3,
-      resolution: lowSpec ? 256 : 512,
+      samples: lowSpec ? 2 : 2,
+      resolution: lowSpec ? 256 : 384,
       transmission: 1,
       thickness: 0.5,
       ior: 1.5,
@@ -169,6 +169,117 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
 useGLTF.preload('/crystal.glb')
 
 /**
+ * Canvas 내부 씬(조명 + 환경 + 크리스탈). React.memo로 감싸 frameloop/visible
+ * 토글로 Canvas가 리렌더돼도 씬이 재실행·환경맵 재베이크되지 않게 한다 —
+ * 재개 시 로딩 스파이크를 막는 핵심.
+ */
+const Scene = memo(function Scene({ lowSpec }: { lowSpec: boolean }) {
+  return (
+    <>
+      <ambientLight intensity={1.0} />
+      <directionalLight position={[5, 8, 5]} intensity={1.2} color="#dcefff" />
+      <Environment environmentIntensity={3.0} resolution={lowSpec ? 128 : 256}>
+        <Lightformer
+          intensity={5}
+          color="#cfeaff"
+          position={[0, 3, 4]}
+          scale={[6, 6, 1]}
+        />
+        <Lightformer
+          intensity={2.5}
+          color="#3a7bd5"
+          position={[-4, -1, 3]}
+          scale={[5, 5, 1]}
+        />
+        <Lightformer
+          intensity={4}
+          color="#ffffff"
+          position={[4, 1, -2]}
+          scale={[3, 3, 1]}
+        />
+        <Lightformer
+          intensity={2}
+          color="#1a3a7a"
+          position={[0, -4, 2]}
+          scale={[8, 4, 1]}
+        />
+        <Lightformer
+          intensity={20}
+          color="#ffffff"
+          position={[2, 3, 3]}
+          scale={[0.4, 0.4, 1]}
+        />
+        <Lightformer
+          intensity={15}
+          color="#dff1ff"
+          position={[-3, 2, 2]}
+          scale={[0.35, 0.35, 1]}
+        />
+        <Lightformer
+          intensity={17}
+          color="#ffffff"
+          position={[3, -2, 3]}
+          scale={[0.35, 0.35, 1]}
+        />
+        <Lightformer
+          intensity={14}
+          color="#bfe6ff"
+          position={[-2, -2, 3]}
+          scale={[0.3, 0.3, 1]}
+        />
+        {/* 추가 작은 점광 — 회전하며 표면에 글린트가 여러 번 잡히게. */}
+        <Lightformer
+          intensity={20}
+          color="#ffffff"
+          position={[-1, 4, 2]}
+          scale={[0.32, 0.32, 1]}
+        />
+        <Lightformer
+          intensity={18}
+          color="#dff1ff"
+          position={[1, -3, 4]}
+          scale={[0.3, 0.3, 1]}
+        />
+        <Lightformer
+          intensity={22}
+          color="#ffffff"
+          position={[4, -1, 2]}
+          scale={[0.35, 0.35, 1]}
+        />
+        <Lightformer
+          intensity={16}
+          color="#dff1ff"
+          position={[-4, 3, -1]}
+          scale={[0.3, 0.3, 1]}
+        />
+        {/* 더 흩뿌린 작은 점광 — 회전 시 글린트 빈도 ↑. */}
+        <Lightformer
+          intensity={21}
+          color="#ffffff"
+          position={[0, -4, 3]}
+          scale={[0.3, 0.3, 1]}
+        />
+        <Lightformer
+          intensity={18}
+          color="#ffffff"
+          position={[-3, -3, 2]}
+          scale={[0.3, 0.3, 1]}
+        />
+        <Lightformer
+          intensity={19}
+          color="#ffffff"
+          position={[3, 4, -2]}
+          scale={[0.3, 0.3, 1]}
+        />
+      </Environment>
+      <Suspense fallback={null}>
+        <CrystalModel lowSpec={lowSpec} />
+      </Suspense>
+    </>
+  )
+})
+
+/**
  * hero -> about 중심 크리스탈. 바깥 래퍼/스크롤 안무(scale/x/y/opacity)는 예전
  * CentralVideo 구조 그대로 — <video> 자리에 알파 Canvas를 둔다(블렌드 모드 없음).
  *
@@ -191,119 +302,14 @@ export function CentralCrystal({
             className="h-full w-full"
             gl={{ alpha: true, antialias: true }}
             camera={{ position: [0, 0, 6], fov: 35 }}
-            dpr={lowSpec ? [1, 1.25] : [1, 1.5]}
+            dpr={lowSpec ? [1, 1] : [1, 1.25]}
             frameloop={visible ? 'always' : 'never'}
             onCreated={({ gl }) => {
               // 노출을 살짝만 올린다 — 몸통을 채우지 않고 반사/하이라이트만 밝게.
               gl.toneMappingExposure = 1.4
             }}
           >
-            <ambientLight intensity={1.0} />
-            <directionalLight
-              position={[5, 8, 5]}
-              intensity={1.2}
-              color="#dcefff"
-            />
-            <Environment
-              environmentIntensity={3.0}
-              resolution={lowSpec ? 128 : 256}
-            >
-              <Lightformer
-                intensity={5}
-                color="#cfeaff"
-                position={[0, 3, 4]}
-                scale={[6, 6, 1]}
-              />
-              <Lightformer
-                intensity={2.5}
-                color="#3a7bd5"
-                position={[-4, -1, 3]}
-                scale={[5, 5, 1]}
-              />
-              <Lightformer
-                intensity={4}
-                color="#ffffff"
-                position={[4, 1, -2]}
-                scale={[3, 3, 1]}
-              />
-              <Lightformer
-                intensity={2}
-                color="#1a3a7a"
-                position={[0, -4, 2]}
-                scale={[8, 4, 1]}
-              />
-              <Lightformer
-                intensity={20}
-                color="#ffffff"
-                position={[2, 3, 3]}
-                scale={[0.4, 0.4, 1]}
-              />
-              <Lightformer
-                intensity={15}
-                color="#dff1ff"
-                position={[-3, 2, 2]}
-                scale={[0.35, 0.35, 1]}
-              />
-              <Lightformer
-                intensity={17}
-                color="#ffffff"
-                position={[3, -2, 3]}
-                scale={[0.35, 0.35, 1]}
-              />
-              <Lightformer
-                intensity={14}
-                color="#bfe6ff"
-                position={[-2, -2, 3]}
-                scale={[0.3, 0.3, 1]}
-              />
-              {/* 추가 작은 점광 — 회전하며 표면에 글린트가 여러 번 잡히게. */}
-              <Lightformer
-                intensity={20}
-                color="#ffffff"
-                position={[-1, 4, 2]}
-                scale={[0.32, 0.32, 1]}
-              />
-              <Lightformer
-                intensity={18}
-                color="#dff1ff"
-                position={[1, -3, 4]}
-                scale={[0.3, 0.3, 1]}
-              />
-              <Lightformer
-                intensity={22}
-                color="#ffffff"
-                position={[4, -1, 2]}
-                scale={[0.35, 0.35, 1]}
-              />
-              <Lightformer
-                intensity={16}
-                color="#dff1ff"
-                position={[-4, 3, -1]}
-                scale={[0.3, 0.3, 1]}
-              />
-              {/* 더 흩뿌린 작은 점광 — 회전 시 글린트 빈도 ↑. */}
-              <Lightformer
-                intensity={21}
-                color="#ffffff"
-                position={[0, -4, 3]}
-                scale={[0.3, 0.3, 1]}
-              />
-              <Lightformer
-                intensity={18}
-                color="#ffffff"
-                position={[-3, -3, 2]}
-                scale={[0.3, 0.3, 1]}
-              />
-              <Lightformer
-                intensity={19}
-                color="#ffffff"
-                position={[3, 4, -2]}
-                scale={[0.3, 0.3, 1]}
-              />
-            </Environment>
-            <Suspense fallback={null}>
-              <CrystalModel lowSpec={lowSpec} />
-            </Suspense>
+            <Scene lowSpec={lowSpec} />
           </Canvas>
         </motion.div>
       </motion.div>

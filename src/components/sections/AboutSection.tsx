@@ -1,8 +1,7 @@
-import { Fragment } from 'react'
-import { motion, type Variants } from 'motion/react'
+import { Fragment, useEffect, useRef } from 'react'
+import { animate, motion, type Variants } from 'motion/react'
 import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
-import { useCountUp } from '@/hooks/useCountUp'
 import { RISE, entryTransition } from '@/lib/motion'
 import { SLIDES } from '@/config/slides'
 
@@ -11,7 +10,9 @@ const def = SLIDES[1]
 /* 진입 애니메이션 타이밍. 상단 블록이 먼저; 통계 행은 세 컬럼을 좌 -> 우로
    캐스케이드하고, 각 컬럼 안에선 라벨 -> 숫자 -> 캡션 순. */
 const INTRO_DELAY = 0.5
-const STATS_BASE_DELAY = 0.35
+// 카운트업은 매 프레임 setState로 리렌더하므로, 슬라이드 스냅(~1.05s)이 끝난
+// 정적 상태에서 시작하도록 지연을 둬 전환 프레임과 겹쳐 튀지 않게 한다.
+const STATS_BASE_DELAY = 0.9
 const STATS_STAGGER = 0.12
 /** 통계 컬럼 `i`의 시작 지연(좌 -> 우 캐스케이드). */
 const columnDelay = (i: number) => STATS_BASE_DELAY + i * STATS_STAGGER
@@ -138,8 +139,26 @@ interface StatItemProps {
 
 function StatItem({ stat, active, index }: StatItemProps) {
   const base = columnDelay(index)
-  // 숫자는 컬럼에 맞춰 등장; 라벨이 먼저, 캡션이 뒤따른다.
-  const value = useCountUp(stat.target, active, base + 0.05)
+  // 카운트업을 DOM ref에 직접 써 React 리렌더를 없앤다 — 매 프레임 setState가
+  // 크리스탈 frameloop 재개와 부딪히지 않도록. 숫자는 컬럼에 맞춰 등장.
+  const numRef = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    const el = numRef.current
+    if (!el) return
+    if (!active) {
+      el.textContent = '0'
+      return
+    }
+    const controls = animate(0, stat.target, {
+      duration: 1.3,
+      delay: base + 0.05,
+      ease: 'easeOut',
+      onUpdate: (v) => {
+        el.textContent = String(Math.round(v))
+      },
+    })
+    return () => controls.stop()
+  }, [active, stat.target, base])
 
   return (
     <div className="flex flex-col items-start md:min-w-0 md:flex-1">
@@ -153,7 +172,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
         {stat.label}
       </motion.span>
       <span className="font-num text-title-on-dark mt-[clamp(12px,1.39vw,20px)] mb-[clamp(12px,1.11vw,16px)] text-[clamp(46px,5.56vw,80px)] leading-[1.2] font-bold tracking-normal tabular-nums max-md:my-2 max-md:text-[40px]">
-        {value}
+        <span ref={numRef}>0</span>
         {stat.suffix}
       </span>
       <motion.span
