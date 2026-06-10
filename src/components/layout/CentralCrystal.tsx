@@ -88,15 +88,15 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
       roughness: 0,
       clearcoat: 1,
       clearcoatRoughness: 0.03,
-      // 모서리 무지개 분산 — 크리스탈 반짝.
-      chromaticAberration: 0.04,
-      anisotropy: 0.12,
-      // 뒤가 일렁이는 굴절 — 진짜 유리감(temporalDistortion은 잔상/비용 탓에 끔).
-      distortion: 0.2,
+      // 모서리 미세 무지개 — 가벼움.
+      chromaticAberration: 0.05,
+      anisotropy: 0,
+      // 굴절 일렁임은 가장 무거운 노이즈 — 끈 채 유지.
+      distortion: 0,
       distortionScale: 0.4,
       temporalDistortion: 0,
-      // 회전 시 어른거리는 색막 시머.
-      iridescence: 0.3,
+      // 회전 시 은은한 색막 시머 — 가벼움.
+      iridescence: 0.5,
       iridescenceIOR: 1.3,
       iridescenceThicknessRange: [100, 400] as [number, number],
       color: '#ffffff',
@@ -297,7 +297,7 @@ export function CentralCrystal({
             resize={{ offsetSize: true }}
             gl={{ alpha: true, antialias: true }}
             camera={{ position: [0, 0, 6], fov: 35 }}
-            dpr={lowSpec ? [1, 1] : [1, 1.25]}
+            dpr={[1, 1]}
             frameloop={visible ? 'always' : 'never'}
             onCreated={({ gl }) => {
               // 노출을 살짝만 올린다 — 몸통을 채우지 않고 반사/하이라이트만 밝게.
