@@ -7,7 +7,6 @@ import {
   MeshTransmissionMaterial,
   useGLTF,
 } from '@react-three/drei'
-import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
 
 interface CentralCrystalProps {
@@ -51,7 +50,12 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
     const geos: THREE.BufferGeometry[] = []
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh
-      if (mesh.isMesh && mesh.geometry) geos.push(mesh.geometry)
+      if (mesh.isMesh && mesh.geometry) {
+        // 매끈한 셰이딩을 위해 부드러운 노멀이 필요 — 없으면 계산.
+        if (!mesh.geometry.getAttribute('normal'))
+          mesh.geometry.computeVertexNormals()
+        geos.push(mesh.geometry)
+      }
     })
     return geos
   }, [scene])
@@ -78,9 +82,9 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
   // 저사양은 samples/resolution만 낮춘다.
   const crystalProps = useMemo(
     () => ({
-      // 가장 큰 성능 레버: 투과 버퍼 샘플/해상도. 맑은 투과를 위해 복구하되
-      // 예전 렉 구성(10/512)보다는 가볍게.
-      samples: lowSpec ? 4 : 10,
+      // 가장 큰 성능 레버: 투과 버퍼 샘플/해상도. 일렁임/색수차를 줄였으니
+      // 적은 샘플로도 매끈하다.
+      samples: lowSpec ? 2 : 3,
       resolution: lowSpec ? 256 : 512,
       transmission: 1,
       thickness: 0.5,
@@ -88,13 +92,15 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
       roughness: 0,
       clearcoat: 1,
       clearcoatRoughness: 0.03,
-      chromaticAberration: 0.14,
+      // 모서리 색 노이즈(자글) 제거.
+      chromaticAberration: 0,
       anisotropy: 0.1,
-      distortion: 0.1,
-      distortionScale: 0.3,
-      // 매 프레임 투과 갱신을 유발하므로 0으로 끈다.
+      // 굴절 일렁임/노이즈 전부 끔 → 매끈한 유리.
+      distortion: 0,
+      distortionScale: 0,
       temporalDistortion: 0,
-      iridescence: 0.6,
+      // 회전 시 어른거리는 색막 제거 → 깨끗한 유리.
+      iridescence: 0,
       iridescenceIOR: 1.3,
       iridescenceThicknessRange: [100, 400] as [number, number],
       color: '#ffffff',
@@ -114,7 +120,7 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
       uColor: { value: new THREE.Color('#ffffff') },
       // uPower를 낮추면 글로우가 가장자리→면 안쪽까지 넓게 퍼져 전체가 하얗게 빛난다.
       uPower: { value: 1.6 },
-      uIntensity: { value: 2.2 },
+      uIntensity: { value: 1.4 },
     }),
     []
   )
@@ -138,7 +144,7 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
             <Fragment key={i}>
               {/* 본체: 유리 투과 질감. */}
               <mesh geometry={geo}>
-                <MeshTransmissionMaterial flatShading {...crystalProps} />
+                <MeshTransmissionMaterial {...crystalProps} />
               </mesh>
               {/* 림: 살짝 부풀린 프레넬 가산 셸. */}
               <mesh geometry={geo} scale={1.015}>
@@ -183,9 +189,9 @@ export function CentralCrystal({
         <motion.div className="h-full w-full" style={{ scale, x, y }}>
           <Canvas
             className="h-full w-full"
-            gl={{ alpha: true, antialias: false }}
+            gl={{ alpha: true, antialias: true }}
             camera={{ position: [0, 0, 6], fov: 35 }}
-            dpr={lowSpec ? [1, 1] : [1, 1.5]}
+            dpr={lowSpec ? [1, 1.25] : [1, 1.5]}
             frameloop={visible ? 'always' : 'never'}
             onCreated={({ gl }) => {
               // 노출을 살짝만 올린다 — 몸통을 채우지 않고 반사/하이라이트만 밝게.
@@ -275,20 +281,29 @@ export function CentralCrystal({
                 position={[-4, 3, -1]}
                 scale={[0.3, 0.3, 1]}
               />
+              {/* 더 흩뿌린 작은 점광 — 회전 시 글린트 빈도 ↑. */}
+              <Lightformer
+                intensity={21}
+                color="#ffffff"
+                position={[0, -4, 3]}
+                scale={[0.3, 0.3, 1]}
+              />
+              <Lightformer
+                intensity={18}
+                color="#ffffff"
+                position={[-3, -3, 2]}
+                scale={[0.3, 0.3, 1]}
+              />
+              <Lightformer
+                intensity={19}
+                color="#ffffff"
+                position={[3, 4, -2]}
+                scale={[0.3, 0.3, 1]}
+              />
             </Environment>
             <Suspense fallback={null}>
               <CrystalModel lowSpec={lowSpec} />
             </Suspense>
-            {/* 가벼운 Bloom: 밝은 글린트/모서리만 은은히 글로우. 임계를 높여
-                어두운 투명 몸통은 그대로 두고, alpha는 보존된다. */}
-            <EffectComposer>
-              <Bloom
-                intensity={0.6}
-                luminanceThreshold={0.65}
-                luminanceSmoothing={0.2}
-                mipmapBlur
-              />
-            </EffectComposer>
           </Canvas>
         </motion.div>
       </motion.div>
