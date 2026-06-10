@@ -7,6 +7,7 @@ import {
   MeshTransmissionMaterial,
   useGLTF,
 } from '@react-three/drei'
+import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import * as THREE from 'three'
 
 interface CentralCrystalProps {
@@ -68,7 +69,7 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
     box.getSize(dim)
     const maxDim = Math.max(dim.x, dim.y, dim.z) || 1
     // 알 수 없는 GLB 크기를 일정한 화면 크기로 정규화한다.
-    return { offset: center, baseScale: 2.6 / maxDim }
+    return { offset: center, baseScale: 3.4 / maxDim }
   }, [geometries])
 
   // 반응형 스케일: 좁은 화면에서 비례 축소(floor 0.6, ceil 1.1).
@@ -79,7 +80,7 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
     () => ({
       // 가장 큰 성능 레버: 투과 버퍼 샘플/해상도. 맑은 투과를 위해 복구하되
       // 예전 렉 구성(10/512)보다는 가볍게.
-      samples: lowSpec ? 4 : 8,
+      samples: lowSpec ? 4 : 10,
       resolution: lowSpec ? 256 : 512,
       transmission: 1,
       thickness: 0.5,
@@ -87,13 +88,13 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
       roughness: 0,
       clearcoat: 1,
       clearcoatRoughness: 0.03,
-      chromaticAberration: 0.08,
+      chromaticAberration: 0.14,
       anisotropy: 0.1,
       distortion: 0.1,
       distortionScale: 0.3,
       // 매 프레임 투과 갱신을 유발하므로 0으로 끈다.
       temporalDistortion: 0,
-      iridescence: 0.4,
+      iridescence: 0.6,
       iridescenceIOR: 1.3,
       iridescenceThicknessRange: [100, 400] as [number, number],
       color: '#ffffff',
@@ -249,10 +250,45 @@ export function CentralCrystal({
                 position={[-2, -2, 3]}
                 scale={[0.3, 0.3, 1]}
               />
+              {/* 추가 작은 점광 — 회전하며 표면에 글린트가 여러 번 잡히게. */}
+              <Lightformer
+                intensity={20}
+                color="#ffffff"
+                position={[-1, 4, 2]}
+                scale={[0.32, 0.32, 1]}
+              />
+              <Lightformer
+                intensity={18}
+                color="#dff1ff"
+                position={[1, -3, 4]}
+                scale={[0.3, 0.3, 1]}
+              />
+              <Lightformer
+                intensity={22}
+                color="#ffffff"
+                position={[4, -1, 2]}
+                scale={[0.35, 0.35, 1]}
+              />
+              <Lightformer
+                intensity={16}
+                color="#dff1ff"
+                position={[-4, 3, -1]}
+                scale={[0.3, 0.3, 1]}
+              />
             </Environment>
             <Suspense fallback={null}>
               <CrystalModel lowSpec={lowSpec} />
             </Suspense>
+            {/* 가벼운 Bloom: 밝은 글린트/모서리만 은은히 글로우. 임계를 높여
+                어두운 투명 몸통은 그대로 두고, alpha는 보존된다. */}
+            <EffectComposer>
+              <Bloom
+                intensity={0.6}
+                luminanceThreshold={0.65}
+                luminanceSmoothing={0.2}
+                mipmapBlur
+              />
+            </EffectComposer>
           </Canvas>
         </motion.div>
       </motion.div>
