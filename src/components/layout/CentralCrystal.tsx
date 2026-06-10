@@ -100,18 +100,20 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
       // 은은한 쿨 틴트(크리스탈 느낌) — 불투명 아님.
       attenuationColor: '#cfeeff',
       attenuationDistance: 12,
-      // 페이지와 같은 어두운색을 투과 → 뒤(어두움)를 비치는 맑은 유리.
-      // (흰색이면 불투명 덩어리가 된다.)
-      background: new THREE.Color('#171717'),
+      // 페이지(#171717)에서 한 단계만 밝은 쿨다크 → 몸통이 살짝 밝아져 하얗게
+      // 보이되 여전히 반투명/비치는 느낌 유지(하얘짐 메인 다이얼). 더 하얗게는
+      // 한 단계씩만 ↑(#2f3641 → #3a4250 …); 너무 밝히면 다시 불투명해진다.
+      background: new THREE.Color('#575D64'),
     }),
     [lowSpec]
   )
 
   const fresnelUniforms = useMemo(
     () => ({
-      uColor: { value: new THREE.Color('#eaf3ff') },
-      uPower: { value: 2.6 },
-      uIntensity: { value: 1.2 },
+      uColor: { value: new THREE.Color('#ffffff') },
+      // uPower를 낮추면 글로우가 가장자리→면 안쪽까지 넓게 퍼져 전체가 하얗게 빛난다.
+      uPower: { value: 1.6 },
+      uIntensity: { value: 2.2 },
     }),
     []
   )
@@ -186,7 +188,7 @@ export function CentralCrystal({
             frameloop={visible ? 'always' : 'never'}
             onCreated={({ gl }) => {
               // 노출을 살짝만 올린다 — 몸통을 채우지 않고 반사/하이라이트만 밝게.
-              gl.toneMappingExposure = 1.1
+              gl.toneMappingExposure = 1.4
             }}
           >
             <ambientLight intensity={1.0} />
@@ -196,7 +198,7 @@ export function CentralCrystal({
               color="#dcefff"
             />
             <Environment
-              environmentIntensity={2.0}
+              environmentIntensity={3.0}
               resolution={lowSpec ? 128 : 256}
             >
               <Lightformer
@@ -224,25 +226,25 @@ export function CentralCrystal({
                 scale={[8, 4, 1]}
               />
               <Lightformer
-                intensity={14}
+                intensity={20}
                 color="#ffffff"
                 position={[2, 3, 3]}
                 scale={[0.4, 0.4, 1]}
               />
               <Lightformer
-                intensity={11}
+                intensity={15}
                 color="#dff1ff"
                 position={[-3, 2, 2]}
                 scale={[0.35, 0.35, 1]}
               />
               <Lightformer
-                intensity={12}
+                intensity={17}
                 color="#ffffff"
                 position={[3, -2, 3]}
                 scale={[0.35, 0.35, 1]}
               />
               <Lightformer
-                intensity={10}
+                intensity={14}
                 color="#bfe6ff"
                 position={[-2, -2, 3]}
                 scale={[0.3, 0.3, 1]}
