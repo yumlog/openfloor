@@ -77,33 +77,41 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
   // 저사양은 samples/resolution만 낮춘다.
   const crystalProps = useMemo(
     () => ({
-      samples: lowSpec ? 6 : 10,
+      // 가장 큰 성능 레버: 투과 버퍼 샘플/해상도. 맑은 투과를 위해 복구하되
+      // 예전 렉 구성(10/512)보다는 가볍게.
+      samples: lowSpec ? 4 : 8,
       resolution: lowSpec ? 256 : 512,
       transmission: 1,
-      ior: 1.45,
+      thickness: 0.5,
+      ior: 1.5,
       roughness: 0,
       clearcoat: 1,
       clearcoatRoughness: 0.03,
-      chromaticAberration: 0.12,
-      anisotropy: 0.2,
-      distortion: 0.4,
-      distortionScale: 0.5,
-      temporalDistortion: 0.15,
-      iridescence: 0.8,
+      chromaticAberration: 0.08,
+      anisotropy: 0.1,
+      distortion: 0.1,
+      distortionScale: 0.3,
+      // 매 프레임 투과 갱신을 유발하므로 0으로 끈다.
+      temporalDistortion: 0,
+      iridescence: 0.4,
       iridescenceIOR: 1.3,
-      iridescenceThicknessRange: [100, 500] as [number, number],
+      iridescenceThicknessRange: [100, 400] as [number, number],
       color: '#ffffff',
+      // 은은한 쿨 틴트(크리스탈 느낌) — 불투명 아님.
       attenuationColor: '#cfeeff',
-      attenuationDistance: 8,
+      attenuationDistance: 12,
+      // 페이지와 같은 어두운색을 투과 → 뒤(어두움)를 비치는 맑은 유리.
+      // (흰색이면 불투명 덩어리가 된다.)
+      background: new THREE.Color('#171717'),
     }),
     [lowSpec]
   )
 
   const fresnelUniforms = useMemo(
     () => ({
-      uColor: { value: new THREE.Color('#bfe6ff') },
+      uColor: { value: new THREE.Color('#eaf3ff') },
       uPower: { value: 2.6 },
-      uIntensity: { value: 1.8 },
+      uIntensity: { value: 1.2 },
     }),
     []
   )
@@ -127,11 +135,7 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
             <Fragment key={i}>
               {/* 본체: 유리 투과 질감. */}
               <mesh geometry={geo}>
-                <MeshTransmissionMaterial
-                  thickness={0.7}
-                  flatShading
-                  {...crystalProps}
-                />
+                <MeshTransmissionMaterial flatShading {...crystalProps} />
               </mesh>
               {/* 림: 살짝 부풀린 프레넬 가산 셸. */}
               <mesh geometry={geo} scale={1.015}>
@@ -176,18 +180,25 @@ export function CentralCrystal({
         <motion.div className="h-full w-full" style={{ scale, x, y }}>
           <Canvas
             className="h-full w-full"
-            gl={{ alpha: true, antialias: true }}
+            gl={{ alpha: true, antialias: false }}
             camera={{ position: [0, 0, 6], fov: 35 }}
-            dpr={lowSpec ? [1, 1.5] : [1, 2]}
+            dpr={lowSpec ? [1, 1] : [1, 1.5]}
             frameloop={visible ? 'always' : 'never'}
+            onCreated={({ gl }) => {
+              // 노출을 살짝만 올린다 — 몸통을 채우지 않고 반사/하이라이트만 밝게.
+              gl.toneMappingExposure = 1.1
+            }}
           >
-            <ambientLight intensity={0.6} />
+            <ambientLight intensity={1.0} />
             <directionalLight
               position={[5, 8, 5]}
-              intensity={0.8}
+              intensity={1.2}
               color="#dcefff"
             />
-            <Environment resolution={lowSpec ? 128 : 256}>
+            <Environment
+              environmentIntensity={2.0}
+              resolution={lowSpec ? 128 : 256}
+            >
               <Lightformer
                 intensity={5}
                 color="#cfeaff"
