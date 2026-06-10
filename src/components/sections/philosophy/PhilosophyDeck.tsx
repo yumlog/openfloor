@@ -28,19 +28,19 @@ const CANVAS_W = 1440
 const CANVAS_H = 600
 
 // 펼침 크기(design-philosophy.png).
-const CENTER = 500
-const SIDE = 380
+const CENTER = 420
+const SIDE = 300
 const CARD_GAP = 40
 // 스테이지 중심에서 옆 카드 중심까지의 거리.
-const SLOT_X = CENTER / 2 + CARD_GAP + SIDE / 2 // 480
+const SLOT_X = CENTER / 2 + CARD_GAP + SIDE / 2
 
 // 세움 덱(philosophy-standing-name.png): 동일한 세로형 카드(W:H ≈ 0.7), 공유
 // skew 하나, 일정 대각선 step. 앞(인덱스 0)이 맨 위; 뒤 카드가 그 위를 넘어
 // 아래로 들어간다.
-const DECK_W = 280
-const DECK_H = 380 // ≈ DECK_W / 0.7 -> 레퍼런스처럼 세로형
+const DECK_W = 220
+const DECK_H = 320 // ≈ DECK_W / 0.7 -> 레퍼런스처럼 세로형
 const SKEW = 30 // skewY, 도 — "\" 기울기(왼쪽 변이 높음); 세로 변은 수직 유지
-const STEP_X = 120
+const STEP_X = 100
 const STEP_Y = 0
 const HOVER_LIFT = 30
 
@@ -149,6 +149,7 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
         // context를 만들어, 안쪽 z-index로는 형제 순서를 정할 수 없다.
         const { zIndex, ...layout } = t
         const isSelected = selected === i
+        const isCenter = selected === null ? i === 1 : selected === i
         // 본문/스크림 페이드. 펼칠 땐 사이즈 스프링이 최종 너비에 거의 도달할
         // 때까지 기다려 최종 줄바꿈에서 등장하게 한다(리사이즈 중 reflow 깜빡임
         // 없음). 접을 땐 빠르게 사라진다 — 축소가 보이는 텍스트를 reflow 하기 전에.
@@ -193,32 +194,23 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
               onHoverStart={() => setHovered(i)}
               onHoverEnd={() => setHovered((h) => (h === i ? null : h))}
             >
-              {/* 이미지 플레이스홀더 — 스크림 + 본문을 둥근 카드로 클립. */}
+              {/* 이미지 플레이스홀더 — 본문을 둥근 카드로 클립. */}
               <div
                 className={cn(
-                  'absolute inset-0 overflow-hidden rounded-[20px]',
-                  card.tint
+                  'absolute inset-0 overflow-hidden rounded-[24px]',
+                  isCenter ? 'bg-[#FB3640]' : 'bg-[#E4E4E7]'
                 )}
               >
-                {/* 흰 텍스트 가독성용 스크림 — 가운데 카드에만. */}
+                {/* 본문 — 가운데 카드에만. */}
                 <motion.div
-                  className="pointer-events-none absolute inset-0 bg-black/35"
-                  animate={{ opacity: isSelected ? 1 : 0 }}
-                  transition={bodyFade}
-                />
-                {/* 본문 + 닫는 따옴표 — 가운데 카드에만. */}
-                <motion.div
-                  className="pointer-events-none absolute inset-0 px-[48px] py-[60px]"
+                  className="pointer-events-none absolute inset-0 px-[44px] py-[48px]"
                   animate={{ opacity: isSelected ? 1 : 0 }}
                   transition={bodyFade}
                   aria-hidden={!isSelected}
                 >
-                  <p className="text-title-on-dark text-[32px] leading-[1.4] font-medium tracking-[-0.05em]">
+                  <p className="text-title-on-dark text-[24px] leading-[1.4] font-medium tracking-[-0.05em]">
                     {card.body}
                   </p>
-                  <span className="text-title-on-dark absolute right-[48px] bottom-[40px] h-[84px] w-[84px] text-[120px] leading-[0.7] font-bold">
-                    &rdquo;
-                  </span>
                 </motion.div>
               </div>
 
@@ -228,7 +220,8 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
                 카드를 따라간다(레퍼런스 "MILLA"). */}
               <motion.p
                 className={cn(
-                  'text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[28px] text-[20px] leading-[1.4] font-bold tracking-[-0.04em]',
+                  'text-card-name pointer-events-none absolute top-full right-0 left-0 mt-[20px] leading-[1.4] font-bold tracking-[-0.04em]',
+                  isSelected ? 'text-[24px]' : 'text-[16px]',
                   standing ? 'text-right' : 'text-center'
                 )}
                 animate={{
