@@ -89,14 +89,14 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
       clearcoat: 1,
       clearcoatRoughness: 0.03,
       // 모서리 무지개 분산 — 크리스탈 반짝.
-      chromaticAberration: 0.1,
-      anisotropy: 0.2,
+      chromaticAberration: 0.04,
+      anisotropy: 0.12,
       // 뒤가 일렁이는 굴절 — 진짜 유리감(temporalDistortion은 잔상/비용 탓에 끔).
-      distortion: 0.3,
+      distortion: 0.2,
       distortionScale: 0.4,
       temporalDistortion: 0,
       // 회전 시 어른거리는 색막 시머.
-      iridescence: 0.6,
+      iridescence: 0.3,
       iridescenceIOR: 1.3,
       iridescenceThicknessRange: [100, 400] as [number, number],
       color: '#ffffff',
