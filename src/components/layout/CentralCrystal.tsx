@@ -82,25 +82,25 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
   // 저사양은 samples/resolution만 낮춘다.
   const crystalProps = useMemo(
     () => ({
-      // 가장 큰 성능 레버: 투과 버퍼 샘플/해상도. 일렁임/색수차를 줄였으니
-      // 적은 샘플로도 매끈하다.
-      samples: lowSpec ? 2 : 2,
-      resolution: lowSpec ? 256 : 384,
+      // 가장 큰 성능 레버: 투과 버퍼 샘플/해상도. 굴절/색수차가 있으니 매끈하게
+      // 보이려면 약간 ↑.
+      samples: lowSpec ? 2 : 3,
+      resolution: lowSpec ? 256 : 512,
       transmission: 1,
       thickness: 0.5,
       ior: 1.5,
       roughness: 0,
       clearcoat: 1,
       clearcoatRoughness: 0.03,
-      // 모서리 색 노이즈(자글) 제거.
-      chromaticAberration: 0,
-      anisotropy: 0.1,
-      // 굴절 일렁임/노이즈 전부 끔 → 매끈한 유리.
-      distortion: 0,
-      distortionScale: 0,
+      // 모서리 무지개 분산 — 크리스탈 반짝.
+      chromaticAberration: 0.1,
+      anisotropy: 0.2,
+      // 뒤가 일렁이는 굴절 — 진짜 유리감(temporalDistortion은 잔상/비용 탓에 끔).
+      distortion: 0.3,
+      distortionScale: 0.4,
       temporalDistortion: 0,
-      // 회전 시 어른거리는 색막 제거 → 깨끗한 유리.
-      iridescence: 0,
+      // 회전 시 어른거리는 색막 시머.
+      iridescence: 0.6,
       iridescenceIOR: 1.3,
       iridescenceThicknessRange: [100, 400] as [number, number],
       color: '#ffffff',
@@ -125,13 +125,11 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
     []
   )
 
-  // 자동 모션만: 부유 + 회전(레이캐스트/호버/파편 없음).
+  // 자동 모션만: 위아래 부유 + Y축 회전(기울임 없이 밑면 수평 유지).
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime
     if (groupRef.current) {
       groupRef.current.position.y = Math.sin(t * 0.5) * 0.12
-      groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.12
-      groupRef.current.rotation.z = Math.cos(t * 0.23) * 0.08
     }
     if (spinRef.current) spinRef.current.rotation.y += delta * 0.12
   })
