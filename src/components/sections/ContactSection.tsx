@@ -29,7 +29,11 @@ interface FormFieldDef {
 }
 
 const FIELDS: FormFieldDef[] = [
-  { label: 'Name / Company', value: '홍길동 / 주식회사 오픈플로어', delay: 0.18 },
+  {
+    label: 'Name / Company',
+    value: '홍길동 / 주식회사 오픈플로어',
+    delay: 0.18,
+  },
   { label: 'Email', value: 'hello@company.com', delay: 0.24 },
   { label: 'Phone', value: '연락처를 입력해 주세요', delay: 0.3 },
   {

@@ -44,7 +44,7 @@
 - **디자인 프레임**은 `max-width: 1440px`, 가운데 정렬. 더 넓은 뷰포트는 좌우
   동일 마진을 갖고, 그 마진은 **현재 슬라이드의 배경색으로 번진다(bleed).**
 - **풀블리드 요소**(섹션 배경, bg 크로스페이드)는 1440으로 제한하면 **안 된다.**
-  _콘텐츠_만 프레임 안에 둔다. 콘텐츠에는 `<Container>`를 쓰고, 배경은 그 바깥에
+  *콘텐츠*만 프레임 안에 둔다. 콘텐츠에는 `<Container>`를 쓰고, 배경은 그 바깥에
   둔다.
 - **각 섹션은 정확히 한 화면 높이.** `100dvh` / `svh`(모바일 주소창 안전)를 쓰고,
   절대 `vh`를 쓰지 않는다.
@@ -74,9 +74,9 @@
   재배치·재크기 조정한다.
 - **모든 섹션은 모든 너비에서 한 화면(`100dvh`)에 맞아야 한다** — 모바일에서도
   스크롤 엔진이 제스처당 한 섹션씩 스냅한다.
-- **중앙 비디오**(`App.tsx`)는 `frame.w / 1440`(`useFrameSize` 경유)로 스케일되어
+- **중앙 크리스탈**(`App.tsx`)은 `frame.w / 1440`(`useFrameSize` 경유)로 스케일되어
   hero→about 합성이 모든 너비에서 같은 비율을 유지한다; 모바일에선 쌓인 텍스트를
-  피해 위치도 옮긴다.
+  피해 위치도 옮기고 저사양 렌더로 떨어진다.
 
 ## 디자인 토큰 (`src/index.css`의 `@theme`)
 
@@ -104,8 +104,8 @@
 - **`useSlideController`**(`src/hooks/useSlideController.ts`)가 이를 소유한다.
   휠 / 터치 / 키보드를 가로채 **한 제스처 = 한 섹션**으로 스냅하고(쿨다운을 둬
   빠른 스크롤이 건너뛰지 않게), 데스크탑·모바일 모두 스냅을 유지하며, body 스크롤을
-  잠그고 `body.is-dark`(비디오 블렌드용)를 토글한다. `{ slide, index, goTo }`를
-  반환한다. `index`는 스크롤스파이용 반올림 슬라이드, `goTo`는 헤더 내비가 쓴다.
+  잠근다. `{ slide, index, goTo }`를 반환한다. `index`는 스크롤스파이용 반올림
+  슬라이드, `goTo`는 헤더 내비가 쓴다.
 - **트랙:** 세로 스택, `transform: translateY(-slide * 100dvh)`(`Slides`).
 - **배경 크로스페이드:** `slide` → 라이트/다크를 `useTransform`으로. 라이트/다크
   시퀀스는 설정 기반(`SLIDES`에서 파생한 `BG_STOPS` / `BG_COLORS`)이라, 섹션을
@@ -118,17 +118,22 @@
 속하면 `NAV_ITEMS`도 갱신한다. 그다음 `src/App.tsx`의 트랙에 섹션 컴포넌트를
 추가한다.
 
-## 중앙 비디오 (hero → about)
+## 중앙 크리스탈 (hero → about)
 
-- 소스 `public/bg.mp4`, `<video autoplay muted loop playsinline>`. **알파 없음.**
-- 다크 슬라이드 위에 `mix-blend-mode`로 합성된다. 클립에 알파가 없으므로
-  풀블리드 bg 레이어와 1440 프레임 레이어 **둘 다** 같은 배경색을 칠해(`Frame`에서)
-  블렌드가 하나의 스택 컨텍스트에서 해결된다 — 이게 블렌드 모드가 바뀔 때 하얀
-  플래시를 막아준다.
-- `body.is-dark`(`slide > 0.55`일 때 토글)가 블렌드 모드를 전환한다(`index.css`의
-  `.central-video` 규칙).
-- 슬라이드 0 → 1: 비디오가 축소되며 우상단으로 이동한 뒤 Philosophy 슬라이드
-  직전에 페이드 아웃한다(`App.tsx`의 `useTransform` 매핑).
+- three.js로 렌더하는 부유 크리스탈(`src/components/layout/CentralCrystal.tsx`).
+  GLB 소스 `public/crystal.glb`(URL `/crystal.glb`), R3F `<Canvas>`(알파)로 그린다.
+  비디오/블렌드 모드 없음 — 캔버스가 HeroGhost 위에 일반 스택 순서로 겹친다.
+- 질감: drei `MeshTransmissionMaterial`(유리 투과) + 프레넬 림 셸 + `Environment`
+  안의 `Lightformer` 라이트 + `EffectComposer`의 Bloom/DOF. 호버·파편 없이 자동
+  부유 + 회전만(`useFrame`).
+- 멀티 메시 대응: scene을 순회해 모든 mesh geometry를 모으고, 합 바운딩박스로
+  원점 정렬·정규화 스케일을 잡는다. 반응형으로 `clamp(size.width/1440, 0.6, 1.1)`.
+- 저사양(모바일 `<768px`): `samples`/`resolution`을 낮추고 Bloom을 줄이며 DOF를 끈다.
+- 성능: `slide < 1.9`(hero/about 구간)일 때만 `frameloop='always'`, 그 밖에선
+  `'never'`로 렌더를 멈춘다(`App.tsx`의 `crystalVisible` 구독).
+- 스크롤 안무: 예전 비디오와 동일한 박스(`scale/x/y/opacity`)를 받는다. 슬라이드
+  0 → 1에서 축소되며 우상단으로 이동, slide 1.3~1.75에서 페이드 아웃한다
+  (`App.tsx`의 `useTransform` 매핑).
 
 ## 헤더 / 내비
 
@@ -150,7 +155,7 @@
 ```
 src/
   components/
-    layout/    Frame, Slides, Container, Header, CentralVideo
+    layout/    Frame, Slides, Container, Header, CentralCrystal
     sections/  Hero, About, Philosophy, Vision, Portfolio, Manifesto, Contact
     ui/        공용 UI (PlaceholderSection, RevealText)
   hooks/       useSlideController, useFrameSize, useCountUp

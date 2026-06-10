@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMotionValue, useTransform } from 'motion/react'
 import { Frame } from '@/components/layout/Frame'
 import { Slides } from '@/components/layout/Slides'
 import { Header } from '@/components/layout/Header'
-import { CentralVideo } from '@/components/layout/CentralVideo'
+import { CentralCrystal } from '@/components/layout/CentralCrystal'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { HeroGhost } from '@/components/sections/hero/HeroGhost'
 import { AboutSection } from '@/components/sections/AboutSection'
@@ -69,16 +69,28 @@ export default function App() {
   )
   const videoOpacity = useTransform(slide, [1.3, 1.75], [1, 0])
 
+  // 크리스탈 캔버스는 hero/about 구간(slide < ~1.9)에서만 렌더한다 — 그 밖에선
+  // 페이드아웃이 끝나 안 보이므로 frameloop를 멈춰 GPU를 아낀다.
+  const [crystalVisible, setCrystalVisible] = useState(true)
+  useEffect(() => {
+    const apply = (v: number) => setCrystalVisible(v < 1.9)
+    apply(slide.get())
+    const unsub = slide.on('change', apply)
+    return () => unsub()
+  }, [slide])
+
   return (
     <Frame background={background}>
       <HeroGhost slide={slide} active={index === 0} />
 
-      <CentralVideo
+      <CentralCrystal
         size={videoSize}
         scale={videoScale}
         x={videoX}
         y={videoY}
         opacity={videoOpacity}
+        lowSpec={isMobile}
+        visible={crystalVisible}
       />
 
       <Slides trackY={trackY}>

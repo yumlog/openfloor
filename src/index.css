@@ -58,22 +58,3 @@
     color: #fff;
   }
 }
-
-/* ---------------------------------------------------------------------------
-   중앙 비디오 블렌드. multiply는 (알파 없는) 클립이 라이트 배경 위에 놓이게
-   한다. 다크 슬라이드에선 소스를 invert 해 흰 배경은 검게, 어두운 유리는 밝게
-   만든 뒤 lighten으로 합성한다 — 검정-위-거의검정은 사라지고 밝은 오브젝트만
-   남는다. invert 뒤 hue-rotate(180deg)가 보색 이동을 상쇄해 유리 톤이 누렇게
-   기울지 않고 중립을 유지한다.
---------------------------------------------------------------------------- */
-.central-video {
-  mix-blend-mode: multiply;
-}
-
-body.is-dark .central-video {
-  mix-blend-mode: lighten;
-}
-
-body.is-dark .central-video__el {
-  filter: invert(1) hue-rotate(180deg);
-}

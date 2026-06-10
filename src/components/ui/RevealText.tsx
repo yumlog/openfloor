@@ -4,6 +4,7 @@ import {
   useState,
   type CSSProperties,
   type ElementType,
+  type ReactNode,
 } from 'react'
 import { cn } from '@/lib/cn'
 
@@ -38,7 +39,7 @@ interface RevealTextProps {
 export function RevealText({
   lines,
   active,
-  as: Tag = 'div',
+  as: TagName = 'div',
   className,
   stagger = 0.27,
   baseDelay = 0,
@@ -53,6 +54,13 @@ export function RevealText({
     if (active && !wasActive.current) setRunId((n) => n + 1)
     wasActive.current = active
   }, [active])
+
+  // R3F가 전역 JSX.IntrinsicElements를 확장하면서 동적 `ElementType` 태그의
+  // children 추론이 깨진다 — 받는 props를 명시해 다시 ReactNode로 고정.
+  const Tag = TagName as ElementType<{
+    className?: string
+    children?: ReactNode
+  }>
 
   return (
     <Tag className={className}>

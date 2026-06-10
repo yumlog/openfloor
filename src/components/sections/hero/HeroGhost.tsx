@@ -9,10 +9,10 @@ interface HeroGhostProps {
 }
 
 /**
- * 큼직한 "UNDERSTAND DEEPER / BUILD TO LAST" 고스트 텍스트. 배경과 CentralVideo
- * 사이의 Frame 레이어에 있다(비디오보다 먼저 렌더, z-index 없음). 그래서 비디오의
- * lighten 블렌드가 그 위로 칠해진다 — 유리 오브젝트가 텍스트를 가리는 것처럼
- * 읽혀 시안의 깊이감과 맞는다.
+ * 큼직한 "UNDERSTAND DEEPER / BUILD TO LAST" 고스트 텍스트. 배경과 중앙 크리스탈
+ * 사이의 Frame 레이어에 있다(크리스탈 캔버스보다 먼저 렌더, z-index 없음). 그래서
+ * 크리스탈이 그 위에 겹쳐 그려진다 — 유리 오브젝트가 텍스트를 가리는 것처럼 읽혀
+ * 시안의 깊이감과 맞는다.
  *
  * Slides 트랙 안에 있지 않으므로, 여기서 hero의 모션을 재현한다: 트랙과 함께
  * translate(-slide * 100dvh)하고 슬라이드 0을 떠날 때 페이드 아웃해, 나머지

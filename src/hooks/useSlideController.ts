@@ -54,7 +54,7 @@ const ROLL_EPS = 1e-3
 /**
  * 한 제스처 = 한 섹션 스냅. 휠 / 터치 / 키보드를 가로채 단일 `slide` motion
  * value를 구동하며, 쿨다운을 둬서 빠른 스크롤이 섹션을 건너뛰지 않게 한다.
- * body 스크롤 잠금과 중앙 비디오 블렌드에 쓰이는 `is-dark` 클래스도 소유.
+ * body 스크롤 잠금도 소유.
  */
 export function useSlideController({
   total,
@@ -83,14 +83,11 @@ export function useSlideController({
     }
   }, [])
 
-  // 스크롤스파이 인덱스 + 비디오 블렌드용 다크모드 토글. `is-dark`는 임의의
-  // progress 임계가 아니라 현재 슬라이드의 설정 테마를 따르므로, 비디오가 다크
-  // 슬라이드(hero + about)에 있는 내내 다크 블렌드 처리가 유지된다.
+  // 스크롤스파이 인덱스 — 가장 가까운 정수 슬라이드를 추적해 활성 내비 상태를 구동.
   useEffect(() => {
     const apply = (v: number) => {
       const next = clamp(Math.round(v), 0, SLIDES.length - 1)
       setIndex((prev) => (prev === next ? prev : next))
-      document.body.classList.toggle('is-dark', SLIDES[next]?.theme === 'dark')
     }
     apply(slide.get())
     const unsub = slide.on('change', apply)
