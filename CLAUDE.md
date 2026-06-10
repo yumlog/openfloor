@@ -158,7 +158,7 @@ src/
     layout/    Frame, Slides, Container, Header, CentralCrystal
     sections/  Hero, About, Philosophy, Vision, Portfolio, Manifesto, Contact
     ui/        공용 UI (PlaceholderSection, RevealText)
-  hooks/       useSlideController, useFrameSize, useCountUp
+  hooks/       useSlideController, useFrameSize
   lib/         cn.ts, motion.ts
   config/      slides.ts (슬라이드 순서, 테마, 내비, 엔진 타이밍)
   styles/      keyframes.css (토큰은 index.css @theme에 있음)
