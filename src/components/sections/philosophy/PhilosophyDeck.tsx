@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { motion, type TargetAndTransition, type Transition } from 'motion/react'
+import {
+  motion,
+  type MotionValue,
+  type TargetAndTransition,
+  type Transition,
+} from 'motion/react'
 import { cn } from '@/lib/cn'
 import { PHILOSOPHY_CARDS } from './cards'
 
@@ -115,22 +120,28 @@ interface PhilosophyDeckProps {
   active: boolean
   /** frame.w / 1440 (<=1) — 전체 디자인 캔버스를 유동 스케일. */
   ratio: number
+  /** philosophy 트랩 progress(0..1) — 중앙 카드를 스텝. */
+  progress?: MotionValue<number>
 }
 
-export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
+export function PhilosophyDeck({ active, ratio, progress }: PhilosophyDeckProps) {
   const [selected, setSelected] = useState<number | null>(null)
   const [hovered, setHovered] = useState<number | null>(null)
 
   // 섹션을 떠나면 덱을 다시 접어, 재진입 시 standing에서 시작하게 한다.
   useEffect(() => {
-    if (!active) {
-      setSelected(null)
-      setHovered(null)
-    }
+    if (!active) setHovered(null)
   }, [active])
 
-  const handleClick = (i: number) =>
-    setSelected((prev) => (prev === null ? i : prev === i ? null : i))
+  // 스크롤 트랩 progress가 중앙 카드를 구동: <0.125 세움 → c0 → c1 → c2.
+  useEffect(() => {
+    if (!progress) return
+    const apply = (p: number) =>
+      setSelected(p < 0.125 ? null : p < 0.375 ? 0 : p < 0.625 ? 1 : 2)
+    apply(progress.get())
+    const unsub = progress.on('change', apply)
+    return () => unsub()
+  }, [progress, active])
 
   const standing = selected === null
 
@@ -189,10 +200,9 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
             {/* 안쪽 = 레이아웃 상태 머신(standing/expanded/hover). 바깥 원점
                 (스테이지 중심)에 앵커; t의 x/y가 거기서부터 translate. */}
             <motion.div
-              className="absolute cursor-pointer select-none"
+              className="absolute select-none"
               animate={layout}
               transition={TRANSITION}
-              onClick={() => handleClick(i)}
               onHoverStart={() => setHovered(i)}
               onHoverEnd={() => setHovered((h) => (h === i ? null : h))}
             >

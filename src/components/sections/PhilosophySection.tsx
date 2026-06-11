@@ -1,4 +1,4 @@
-import { motion } from 'motion/react'
+import { motion, type MotionValue } from 'motion/react'
 import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
@@ -9,6 +9,9 @@ import { PhilosophyMobile } from './philosophy/PhilosophyMobile'
 
 const def = SLIDES[2]
 
+/** philosophy 트랩 스텝 수(standing + 카드 3장; 마지막 노치는 4b의 확대용). */
+export const PHILOSOPHY_STEPS = 4
+
 // reveal sweep이 줄 박스 단위로 크기를 갖도록 헤드라인을 미리 분할(wrap 없음).
 const HEADLINE_LINES = ['결과로 말하는 것이', '우리의 방식입니다.']
 
@@ -18,6 +21,8 @@ const HEADLINE_DELAY = 0.15
 interface PhilosophySectionProps {
   /** Philosophy가 활성 슬라이드인 동안 true — reveal + 덱 리셋을 구동. */
   active: boolean
+  /** philosophy 트랩 progress(0..1). */
+  progress: MotionValue<number>
 }
 
 /**
@@ -30,7 +35,7 @@ interface PhilosophySectionProps {
  * 대 다크의 흰색) — 흰 halo + 청/적 색수차는 CSS에 있고 색에 독립적이라 keyframe
  * 변경이 필요 없다.
  */
-export function PhilosophySection({ active }: PhilosophySectionProps) {
+export function PhilosophySection({ active, progress }: PhilosophySectionProps) {
   const frame = useFrameSize()
   const isMobile = frame.w < 768
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
@@ -66,7 +71,7 @@ export function PhilosophySection({ active }: PhilosophySectionProps) {
         {isMobile ? (
           <PhilosophyMobile active={active} />
         ) : (
-          <PhilosophyDeck active={active} ratio={ratio} />
+          <PhilosophyDeck active={active} ratio={ratio} progress={progress} />
         )}
       </div>
     </section>

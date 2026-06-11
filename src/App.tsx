@@ -7,7 +7,7 @@ import { CentralCrystal } from '@/components/layout/CentralCrystal'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { HeroGhost } from '@/components/sections/hero/HeroGhost'
 import { AboutSection } from '@/components/sections/AboutSection'
-import { PhilosophySection } from '@/components/sections/PhilosophySection'
+import { PhilosophySection, PHILOSOPHY_STEPS } from '@/components/sections/PhilosophySection'
 import { PortfolioSection, PORTFOLIO_STEPS } from '@/components/sections/PortfolioSection'
 import {
   ManifestoSection,
@@ -25,17 +25,22 @@ import {
 
 export default function App() {
   const frame = useFrameSize()
+  const isMobile = frame.w < 768
 
   // Manifesto 드럼 롤: 스크롤 엔진이 슬라이드 4를 가두고 이 0..1 값을 제스처당
   // 한 칸씩 구동한다; 섹션이 이를 원통 롤로 바꾼다.
   const rollProgress = useMotionValue(0)
   const portfolioRoll = useMotionValue(0)
+  const philosophyRoll = useMotionValue(0)
   const traps = useMemo(
     () => [
+      ...(isMobile
+        ? []
+        : [{ index: 2, steps: PHILOSOPHY_STEPS, progress: philosophyRoll }]),
       { index: 3, steps: PORTFOLIO_STEPS, progress: portfolioRoll },
       { index: 4, steps: MANIFESTO_STEPS, progress: rollProgress },
     ],
-    [portfolioRoll, rollProgress]
+    [isMobile, philosophyRoll, portfolioRoll, rollProgress]
   )
   const { slide, index, goTo } = useSlideController({
     total: TOTAL_SLIDES,
@@ -61,7 +66,6 @@ export default function App() {
   // 결정한다.
   // 모바일에선 슬라이드-0 박스를 아래로 살짝 내려 쌓인 hero 텍스트를 피한다.
   const ratio = frame.w / DESIGN_WIDTH
-  const isMobile = frame.w < 768
   const videoSize = 860 * ratio
   const videoScale = useTransform(slide, [0, 1], [0.78, 354 / 860])
   const videoX = useTransform(slide, [0, 1], [0, frame.w / 2 - 402 * ratio])
@@ -99,7 +103,7 @@ export default function App() {
       <Slides trackY={trackY}>
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
         <AboutSection active={index === 1} />
-        <PhilosophySection active={index === 2} />
+        <PhilosophySection active={index === 2} progress={philosophyRoll} />
         <PortfolioSection active={index === 3} progress={portfolioRoll} />
         <ManifestoSection active={index === 4} progress={rollProgress} />
         <ContactSection active={index === 5} />
