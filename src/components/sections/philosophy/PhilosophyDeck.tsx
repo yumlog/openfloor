@@ -235,7 +235,7 @@ export function PhilosophyDeck({ active, ratio }: PhilosophyDeckProps) {
 
                 {/* 우하단 쌍따옴표 — 가운데 128×88 / 양옆 88×60. */}
                 <motion.img
-                  src="/card.svg"
+                  src="/images/card.svg"
                   alt=""
                   aria-hidden="true"
                   draggable={false}

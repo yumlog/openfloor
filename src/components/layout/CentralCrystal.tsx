@@ -35,7 +35,7 @@ const fresnelFragment = `
     gl_FragColor=vec4(uColor*f*uIntensity,f); }`
 
 function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
-  const { scene } = useGLTF('/crystal.glb')
+  const { scene } = useGLTF('/models/crystal.glb')
   // 외곽 그룹: 부유(y) + 정규화 스케일.
   const groupRef = useRef<THREE.Group>(null)
   // 내부 그룹: y축 자동 회전(원점 정렬된 지오메트리를 중심으로 돈다).
@@ -160,7 +160,7 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
   )
 }
 
-useGLTF.preload('/crystal.glb')
+useGLTF.preload('/models/crystal.glb')
 
 /**
  * Canvas 내부 씬(조명 + 환경 + 크리스탈). React.memo로 감싸 frameloop/visible
