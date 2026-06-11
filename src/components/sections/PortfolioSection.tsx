@@ -20,10 +20,10 @@ import { PORTFOLIO_SLIDES } from './portfolio/projects'
 /** 트랩 스텝 수: (리컬러+분리) + 슬라이드 3장. */
 export const PORTFOLIO_STEPS = 4
 
-const SPLIT_START = 0.13
-const SPLIT_END = 0.25
+const SPLIT_START = 0.16
+const SPLIT_END = 0.27
 const SLIDE_BANDS: [number, number][] = [
-  [0.25, 0.5],
+  [0.27, 0.5],
   [0.5, 0.75],
   [0.75, 1],
 ]
@@ -38,7 +38,7 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
 
   // 빨강 배경(philosophy 확대에서 이어받음) → 다크로 페이드.
-  const redOverlay = useTransform(progress, [0, 0.08], [1, 0], { clamp: true })
+  const redOverlay = useTransform(progress, [0, 0.06], [1, 0], { clamp: true })
 
   return (
     <>
@@ -50,7 +50,7 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
           className="pointer-events-none fixed inset-0 z-[40] overflow-hidden"
           initial={false}
           animate={{ opacity: active ? 1 : 0 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
+          transition={{ duration: 0.4, ease: 'easeOut', delay: active ? 0 : 0.4 }}
         >
           {/* 빨강 배경 → 다크. */}
           <motion.div
@@ -92,7 +92,7 @@ function PortfolioText({
   const topY = useTransform(t, (v) => -v * frameH * 0.7)
   const bottomY = useTransform(t, (v) => v * frameH * 0.7)
   const opacity = useTransform(t, [0, 0.85], [1, 0])
-  const color = useTransform(progress, [0.05, 0.15], ['#ffffff', '#FB3640'])
+  const color = useTransform(progress, [0.04, 0.11], ['#ffffff', '#FB3640'])
 
   const base = {
     fontFamily: 'var(--font-montserrat)',

@@ -172,7 +172,7 @@ function PhilosophyGrow({
       className="pointer-events-none fixed inset-0 z-[40] overflow-hidden"
       initial={false}
       animate={{ opacity: active ? 1 : 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
+      transition={{ duration: 0.3, ease: 'easeOut', delay: active ? 0 : 0.4 }}
     >
       {/* 측정한 덱 c2 위치(cx,cy)에서 시작해 확대되는 빨간 카드. */}
       <motion.div
