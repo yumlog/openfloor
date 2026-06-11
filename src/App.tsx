@@ -29,13 +29,13 @@ export default function App() {
   // Manifesto 드럼 롤: 스크롤 엔진이 슬라이드 4를 가두고 이 0..1 값을 제스처당
   // 한 칸씩 구동한다; 섹션이 이를 원통 롤로 바꾼다.
   const rollProgress = useMotionValue(0)
-  const trap = useMemo(
-    () => ({ index: 4, steps: MANIFESTO_STEPS, progress: rollProgress }),
+  const traps = useMemo(
+    () => [{ index: 4, steps: MANIFESTO_STEPS, progress: rollProgress }],
     [rollProgress]
   )
   const { slide, index, goTo } = useSlideController({
     total: TOTAL_SLIDES,
-    trap,
+    traps,
   })
 
   // 배경은 슬라이드 설정에 따라 라이트 <-> 다크로 크로스페이드.

@@ -26,12 +26,12 @@ interface Options {
   /** 입력 처리 게이트(예: 로딩 화면이 떠 있는 동안). */
   enabled?: boolean
   /**
-   * 선택적 "스크롤 트랩": `trap.index`에 머무는 동안 입력이 다음 섹션으로
-   * 스냅하는 대신 `trap.progress`(0..1)를 구동한다 — 휠 / 터치는 스프링 관성으로
-   * 비례 롤, 키보드는 한 칸(1/steps) 이동. progress가 해당 끝에 핀 채로 계속
-   * 밀어야만 슬라이드를 빠져나간다. Manifesto 드럼에서 사용.
+   * 선택적 "스크롤 트랩" 목록: 현재 슬라이드가 어떤 트랩의 `index`와 같으면
+   * 입력이 다음 섹션으로 스냅하는 대신 그 트랩의 `progress`(0..1)를 구동한다 —
+   * 휠 / 터치는 스프링 관성으로 비례 롤, 키보드는 한 칸(1/steps) 이동. progress가
+   * 해당 끝에 핀 채로 계속 밀어야만 슬라이드를 빠져나간다. Manifesto 드럼에서 사용.
    */
-  trap?: TrapOptions
+  traps?: TrapOptions[]
 }
 
 const clamp = (v: number, min: number, max: number) =>
@@ -59,7 +59,7 @@ const ROLL_EPS = 1e-3
 export function useSlideController({
   total,
   enabled = true,
-  trap,
+  traps,
 }: Options): SlideController {
   const slide = useMotionValue(0)
   const [index, setIndex] = useState(0)
@@ -96,15 +96,17 @@ export function useSlideController({
 
   // 입력 처리.
   useEffect(() => {
+    const trapAt = (idx: number) => traps?.find((t) => t.index === idx)
     const goTo = (next: number) => {
       next = clamp(next, 0, total - 1)
       if (next === currentRef.current || animatingRef.current) return
       const from = currentRef.current
       // 가둔 슬라이드로 진입: 드럼을 해당 끝에 seat 해서 위(아래로 진입)에서
       // 앞으로 굴리거나, 아래(위로 되돌아 진입)에서 거꾸로 굴리게 한다.
-      if (trap && next === trap.index) {
+      const entering = trapAt(next)
+      if (entering) {
         const seat = next > from ? 0 : 1
-        trap.progress.set(seat)
+        entering.progress.set(seat)
         rollTargetRef.current = seat
         // 여기서 `.set()`이 진행 중인 노치 애니를 중단시켜 onComplete가 안 불리므로,
         // 잠금을 수동으로 풀지 않으면 true로 박혀 아래 step() 게이트가 이후 모든
@@ -132,14 +134,15 @@ export function useSlideController({
       // 아래의 비례 경로를 쓰며, 이 경로가 `rollTargetRef`를 동기화해 둘이 경계에서
       // 일치한다. 드럼이 이미 해당 끝에 있을 때만 step이 통과해 슬라이드 밖으로
       // advance 한다.
-      if (trap && !animatingRef.current && currentRef.current === trap.index) {
+      const curTrap = trapAt(currentRef.current)
+      if (curTrap && !animatingRef.current) {
         if (rollAnimatingRef.current) return // 한 키 = 한 칸
         const p = rollTargetRef.current
-        const sz = 1 / trap.steps
+        const sz = 1 / curTrap.steps
         if (dir > 0 && p < 1 - ROLL_EPS) {
           rollAnimatingRef.current = true
           rollTargetRef.current = Math.min(1, p + sz)
-          animate(trap.progress, rollTargetRef.current, {
+          animate(curTrap.progress, rollTargetRef.current, {
             duration: ROLL_DURATION,
             ease: ROLL_EASE,
             onComplete: () => {
@@ -151,7 +154,7 @@ export function useSlideController({
         if (dir < 0 && p > ROLL_EPS) {
           rollAnimatingRef.current = true
           rollTargetRef.current = Math.max(0, p - sz)
-          animate(trap.progress, rollTargetRef.current, {
+          animate(curTrap.progress, rollTargetRef.current, {
             duration: ROLL_DURATION,
             ease: ROLL_EASE,
             onComplete: () => {
@@ -168,19 +171,19 @@ export function useSlideController({
     }
 
     // 가둔 슬라이드에 머무는 중이고, 섹션 스냅 중이 아닌가?
-    const inTrap = () =>
-      !!trap && !animatingRef.current && currentRef.current === trap.index
+    const inTrap = () => !animatingRef.current && !!trapAt(currentRef.current)
 
     // 비례 드럼 롤을 재타깃한다. 속도를 이어받는 스프링이 목표를 추종해, 튕기는
     // 도중 재타깃해도 모멘텀이 유지되고(휘리릭) 작은 너지 하나는 살짝만 움직인다.
     const rollTo = (target: number) => {
-      if (!trap) return
+      const t = trapAt(currentRef.current)
+      if (!t) return
       // 비례 롤은 어떤 discrete 노치도 대체한다; 잠금을 풀어 두면 드럼을 휠/드래그로
       // 끝까지 굴린 뒤 step()이 (stale 노치 잠금에 막히지 않고) 통과해 트랩 밖으로
       // advance 할 수 있다.
       rollAnimatingRef.current = false
       rollTargetRef.current = clamp(target, 0, 1)
-      animate(trap.progress, rollTargetRef.current, {
+      animate(t.progress, rollTargetRef.current, {
         type: 'spring',
         stiffness: 120,
         damping: 24,
@@ -317,7 +320,7 @@ export function useSlideController({
       window.removeEventListener('keydown', onKey)
       clearTimeout(wheelResetTimer)
     }
-  }, [enabled, total, slide, trap])
+  }, [enabled, total, slide, traps])
 
   const goTo = useCallback((next: number) => goToRef.current(next), [])
 
