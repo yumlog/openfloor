@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type Ref } from 'react'
 import {
   motion,
   type MotionValue,
@@ -122,9 +122,16 @@ interface PhilosophyDeckProps {
   ratio: number
   /** philosophy 트랩 progress(0..1) — 중앙 카드를 스텝. */
   progress?: MotionValue<number>
+  /** 확대 브릿지가 측정할 덱 캔버스(= c2 중앙) 루트 ref. */
+  canvasRef?: Ref<HTMLDivElement>
 }
 
-export function PhilosophyDeck({ active, ratio, progress }: PhilosophyDeckProps) {
+export function PhilosophyDeck({
+  active,
+  ratio,
+  progress,
+  canvasRef,
+}: PhilosophyDeckProps) {
   const [selected, setSelected] = useState<number | null>(null)
   const [hovered, setHovered] = useState<number | null>(null)
 
@@ -147,6 +154,7 @@ export function PhilosophyDeck({ active, ratio, progress }: PhilosophyDeckProps)
 
   return (
     <div
+      ref={canvasRef}
       className="relative shrink-0"
       style={{
         width: CANVAS_W,
