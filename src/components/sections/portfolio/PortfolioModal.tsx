@@ -5,9 +5,8 @@ import type { Project } from './projects'
 
 /* ---------------------------------------------------------------------------
    Portfolio 상세 모달(design-6.png). 어두운 배경 + 가운데 둥근 프레임; 프레임은
-   프로젝트의 콘텐츠 슬라이드(브랜드 컬러 채움, 가독성 스크림, 좌상단 라벨/타이틀)를
-   담고 그 사이를 크로스페이드한다. 이전/다음 화살표는 프레임 가장자리에서 36px
-   떨어진 어두운 영역에 있다.
+   프로젝트의 콘텐츠 슬라이드 이미지를 담고 그 사이를 크로스페이드한다. 이전/다음
+   화살표는 프레임 가장자리에서 36px 떨어진 어두운 영역에 있다.
 
    슬라이드 트랙이 transform 되어 있어, 그 아래 중첩된 `fixed` 오버레이는 갇히므로
    PortfolioSection이 body 포털을 통해 렌더한다.
@@ -52,26 +51,17 @@ export function PortfolioModal({ project, onClose }: PortfolioModalProps) {
             어두움이 아니라 흰색이 보이게; 실제 이미지가 들어와도 backstop 역할. */}
         <div className="relative h-full w-full overflow-hidden rounded-[20px] bg-white">
           <AnimatePresence>
-            <motion.div
+            <motion.img
               key={i}
-              className="absolute inset-0"
-              style={{ backgroundColor: project.color }}
+              src={slide.image}
+              alt=""
+              draggable={false}
+              className="absolute inset-0 h-full w-full object-cover"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.35, ease: 'easeOut' }}
-            >
-              {/* 브랜드 컬러 위 흰 텍스트 가독성용 스크림. */}
-              <div className="absolute inset-0 bg-black/25" />
-              <div className="absolute top-0 left-0 p-[clamp(36px,4.44vw,64px)]">
-                <p className="text-[clamp(14px,1.39vw,20px)] font-semibold tracking-[-0.02em] text-white/90">
-                  {slide.label}
-                </p>
-                <h3 className="mt-[clamp(8px,1.11vw,16px)] text-[clamp(28px,3.06vw,44px)] leading-[1.3] font-bold tracking-[-0.03em] text-white">
-                  {slide.title}
-                </h3>
-              </div>
-            </motion.div>
+            />
           </AnimatePresence>
         </div>
 
