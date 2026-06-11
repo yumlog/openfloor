@@ -160,7 +160,7 @@ function PhilosophyGrow({
   const scale = useTransform(growT, [0, 0.55], [ratio, coverScale], {
     clamp: true,
   })
-  const panelOpacity = useTransform(progress, [0.73, 0.75], [0, 1], {
+  const panelOpacity = useTransform(progress, [0.742, 0.75], [0, 1], {
     clamp: true,
   })
   const contentOpacity = useTransform(growT, [0, 0.4], [1, 0], { clamp: true })
