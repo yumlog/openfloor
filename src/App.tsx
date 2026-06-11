@@ -104,7 +104,7 @@ export default function App() {
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
         <AboutSection active={index === 1} />
         <PhilosophySection active={index === 2} progress={philosophyRoll} />
-        <PortfolioSection active={index === 3} progress={portfolioRoll} />
+        <PortfolioSection active={index === 3} progress={portfolioRoll} slide={slide} />
         <ManifestoSection active={index === 4} progress={rollProgress} />
         <ContactSection active={index === 5} />
       </Slides>
