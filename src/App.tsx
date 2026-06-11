@@ -8,7 +8,7 @@ import { HeroSection } from '@/components/sections/HeroSection'
 import { HeroGhost } from '@/components/sections/hero/HeroGhost'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { PhilosophySection } from '@/components/sections/PhilosophySection'
-import { PortfolioSection } from '@/components/sections/PortfolioSection'
+import { PortfolioSection, PORTFOLIO_STEPS } from '@/components/sections/PortfolioSection'
 import {
   ManifestoSection,
   MANIFESTO_STEPS,
@@ -29,9 +29,13 @@ export default function App() {
   // Manifesto 드럼 롤: 스크롤 엔진이 슬라이드 4를 가두고 이 0..1 값을 제스처당
   // 한 칸씩 구동한다; 섹션이 이를 원통 롤로 바꾼다.
   const rollProgress = useMotionValue(0)
+  const portfolioRoll = useMotionValue(0)
   const traps = useMemo(
-    () => [{ index: 4, steps: MANIFESTO_STEPS, progress: rollProgress }],
-    [rollProgress]
+    () => [
+      { index: 3, steps: PORTFOLIO_STEPS, progress: portfolioRoll },
+      { index: 4, steps: MANIFESTO_STEPS, progress: rollProgress },
+    ],
+    [portfolioRoll, rollProgress]
   )
   const { slide, index, goTo } = useSlideController({
     total: TOTAL_SLIDES,
@@ -96,7 +100,7 @@ export default function App() {
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
         <AboutSection active={index === 1} />
         <PhilosophySection active={index === 2} />
-        <PortfolioSection active={index === 3} />
+        <PortfolioSection active={index === 3} progress={portfolioRoll} />
         <ManifestoSection active={index === 4} progress={rollProgress} />
         <ContactSection active={index === 5} />
       </Slides>

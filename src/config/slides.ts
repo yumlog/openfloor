@@ -21,15 +21,12 @@ export interface SlideDef {
   bg?: string
 }
 
-/** Portfolio 슬라이드용 오프화이트 배경(캐러셀 카드가 더 잘 읽힘). */
-export const BG_PORTFOLIO = '#fafafa'
-
 /** 섹션 순서. 인덱스 === slide 값. */
 export const SLIDES: SlideDef[] = [
   { id: 'hero', label: 'Hero', theme: 'dark' },
   { id: 'about', label: 'About', theme: 'dark' },
   { id: 'philosophy', label: 'Philosophy', theme: 'light' },
-  { id: 'portfolio', label: 'Portfolio', theme: 'light', bg: BG_PORTFOLIO },
+  { id: 'portfolio', label: 'Portfolio', theme: 'dark' },
   { id: 'manifesto', label: 'Manifesto', theme: 'dark' },
   { id: 'contact', label: 'Contact', theme: 'dark' },
 ]
