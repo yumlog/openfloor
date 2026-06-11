@@ -7,14 +7,14 @@ import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
 
 /* ---------------------------------------------------------------------------
-   Contact — 슬라이드 6, 다크(#171717). 배경은 Frame 크로스페이드가 칠하므로
+   Contact — 슬라이드 5, 다크(#171717). 배경은 Frame 크로스페이드가 칠하므로
    섹션은 투명하다. Manifesto와 같은 패턴으로 1440 design-px 캔버스를 `ratio`로
    스케일해 모든 너비에서 같은 비율로 렌더한다 — 내부 요소는 전부 절대 배치.
 
    폼은 시각 전용(입력 기능 없음): 라벨 + 플레이스홀더 텍스트만 보여준다.
 --------------------------------------------------------------------------- */
 
-const def = SLIDES[6]
+const def = SLIDES[5]
 
 const TITLE_LINES = ['더 나은 경험을', '함께 만들어갑니다']
 

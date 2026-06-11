@@ -29,7 +29,6 @@ export const SLIDES: SlideDef[] = [
   { id: 'hero', label: 'Hero', theme: 'dark' },
   { id: 'about', label: 'About', theme: 'dark' },
   { id: 'philosophy', label: 'Philosophy', theme: 'light' },
-  { id: 'vision', label: 'Vision', theme: 'dark' },
   { id: 'portfolio', label: 'Portfolio', theme: 'light', bg: BG_PORTFOLIO },
   { id: 'manifesto', label: 'Manifesto', theme: 'dark' },
   { id: 'contact', label: 'Contact', theme: 'dark' },
@@ -63,8 +62,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: 'About Us', index: 1 },
   { label: 'Philosophy', index: 2 },
-  { label: 'Vision', index: 3 },
-  { label: 'Portfolio', index: 4 },
+  { label: 'Portfolio', index: 3 },
 ]
 
 /* 스냅 엔진 타이밍. */

@@ -11,7 +11,7 @@ import { PortfolioCarousel } from './portfolio/PortfolioCarousel'
 import { PortfolioModal } from './portfolio/PortfolioModal'
 import { PortfolioMobile } from './portfolio/PortfolioMobile'
 
-const def = SLIDES[4]
+const def = SLIDES[3]
 
 // 한 줄 — reveal sweep이 줄 박스 단위로 크기를 갖는다.
 const HEADLINE_LINES = ['함께 만들어온 결과']
