@@ -115,10 +115,10 @@ function PortfolioCard({
           className="h-full w-full object-cover"
         />
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-[4px] bg-black/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <p className="text-[20px] leading-[1.4] font-normal text-white">
+          <p className="text-[14px] leading-[1.4] font-normal text-white">
             {project.name}
           </p>
-          <p className="text-[24px] leading-[1.4] font-bold whitespace-pre-line text-center text-white">
+          <p className="text-[20px] leading-[1.4] font-bold whitespace-pre-line text-center text-white">
             {project.project}
           </p>
         </div>

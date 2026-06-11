@@ -60,7 +60,7 @@ export default function App() {
   const ratio = frame.w / DESIGN_WIDTH
   const isMobile = frame.w < 768
   const videoSize = 860 * ratio
-  const videoScale = useTransform(slide, [0, 1], [1, 354 / 860])
+  const videoScale = useTransform(slide, [0, 1], [0.78, 354 / 860])
   const videoX = useTransform(slide, [0, 1], [0, frame.w / 2 - 402 * ratio])
   const videoY = useTransform(
     slide,
