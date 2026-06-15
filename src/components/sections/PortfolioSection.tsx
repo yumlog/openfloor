@@ -1,26 +1,41 @@
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, useTransform, type MotionValue } from 'motion/react'
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useTransform,
+  type MotionValue,
+} from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH } from '@/config/slides'
 import { PORTFOLIO_SLIDES } from './portfolio/projects'
 
 /* ---------------------------------------------------------------------------
-   Portfolio (슬라이드 3). 빨강 배경 + 흰 PORTFOLIO 텍스트가 트랩 progress(0..1)로
-   반으로 갈라져 사라지고, 슬라이드가 풀커버로 올라온다(다크 리컬러 없음).
-     progress 0    빨강 + 흰 PORTFOLIO (rest)
-     ~0.04         글자 갈라지기 시작
-     0.25~         slide-oliveyoung-1 → 2 → 3 풀커버 스택
+   Portfolio (슬라이드 3). 빨강 배경 + 흰 PORTFOLIO 텍스트.
+   진입 후 progress가 REVEAL_TRIGGER를 넘으면 단일 시간 기반 reveal(0→1)이 재생되고,
+   그 하나의 클럭에서 [텍스트 갈라짐 + 페이드]와 [첫 슬라이드 중앙 scale]을 겹쳐 구동한다.
+   → 스크롤 속도와 무관하게 "텍스트가 아직 보이는 동안 슬라이드가 커지기 시작"이 보장됨.
+   2·3번 슬라이드는 기존처럼 스크롤 연속으로 아래→위 상승(RISE_BANDS).
    풀블리드라 body로 포털.
 --------------------------------------------------------------------------- */
 
 export const PORTFOLIO_STEPS = 4
 
-const SPLIT_START = 0
-const SPLIT_END = 0.55
-const SLIDE_BANDS: [number, number][] = [
-  [0, 0.55], // 첫 슬라이드: split과 동시에 중앙에서 scale-in
-  [0.55, 0.775], // 두 번째: 아래→위
-  [0.775, 1], // 세 번째: 아래→위
+/* reveal: progress가 이 값을 넘으면 시간 기반 0→1 재생(휠 양 무관). */
+const REVEAL_TRIGGER = 0.05
+const REVEAL_DURATION = 0.9
+const TIME_EASE = [0.22, 1, 0.36, 1] as const
+
+/* reveal 구간 매핑(겹침이 핵심). */
+const TEXT_SPLIT_RANGE: [number, number] = [0, 0.6] // 텍스트가 위/아래로 벌어지는 구간
+const TEXT_FADE_RANGE: [number, number] = [0.35, 0.75] // 텍스트가 사라지는 구간(늦게 시작)
+const SLIDE_SCALE_RANGE: [number, number] = [0.25, 0.85] // 첫 슬라이드 확대(텍스트 보일 때 시작)
+
+/* 후속 슬라이드(2·3): 스크롤 연속 상승(기존 그대로). */
+const RISE_BANDS: [number, number][] = [
+  [0.55, 0.775],
+  [0.775, 1],
 ]
 
 interface PortfolioSectionProps {
@@ -31,6 +46,23 @@ interface PortfolioSectionProps {
 export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
   const frame = useFrameSize()
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
+
+  // 단일 시간 기반 reveal 클럭. progress가 트리거를 넘으면 0→1, 되돌아가면 1→0.
+  const reveal = useMotionValue(0)
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    const apply = (p: number) => setOn(p >= REVEAL_TRIGGER)
+    apply(progress.get())
+    const unsub = progress.on('change', apply)
+    return () => unsub()
+  }, [progress])
+  useEffect(() => {
+    const c = animate(reveal, on ? 1 : 0, {
+      duration: REVEAL_DURATION,
+      ease: TIME_EASE,
+    })
+    return () => c.stop()
+  }, [on, reveal])
 
   return (
     <>
@@ -50,16 +82,19 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
           {/* 솔리드 빨강 배경. */}
           <div className="absolute inset-0 bg-[#FB3640]" />
 
-          <PortfolioText progress={progress} ratio={ratio} frameH={frame.h} />
+          <PortfolioText reveal={reveal} ratio={ratio} frameH={frame.h} />
 
-          {PORTFOLIO_SLIDES.map((src, i) => (
-            <PortfolioSlide
+          {/* 첫 슬라이드: reveal 클럭으로 중앙 확대(텍스트와 겹침). */}
+          <PortfolioScaleSlide src={PORTFOLIO_SLIDES[0]} z={10} reveal={reveal} />
+
+          {/* 후속 슬라이드: 스크롤 연속 상승. */}
+          {PORTFOLIO_SLIDES.slice(1).map((src, i) => (
+            <PortfolioRiseSlide
               key={src}
               src={src}
-              band={SLIDE_BANDS[i]}
-              z={10 * (i + 1)}
+              band={RISE_BANDS[i]}
+              z={10 * (i + 2)}
               progress={progress}
-              scaleIn={i === 0}
             />
           ))}
         </motion.div>,
@@ -69,22 +104,20 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
   )
 }
 
-/** 거대한 흰 PORTFOLIO 텍스트. progress로 위/아래 반쪽이 갈라져 이탈. */
+/** 거대한 흰 PORTFOLIO. reveal로 위/아래 반쪽이 갈라지고(SPLIT) 늦게 페이드(FADE). */
 function PortfolioText({
-  progress,
+  reveal,
   ratio,
   frameH,
 }: {
-  progress: MotionValue<number>
+  reveal: MotionValue<number>
   ratio: number
   frameH: number
 }) {
-  const t = useTransform(progress, [SPLIT_START, SPLIT_END], [0, 1], {
-    clamp: true,
-  })
-  const topY = useTransform(t, (v) => -v * frameH * 0.7)
-  const bottomY = useTransform(t, (v) => v * frameH * 0.7)
-  const opacity = useTransform(t, [0, 0.85], [1, 0])
+  const split = useTransform(reveal, TEXT_SPLIT_RANGE, [0, 1], { clamp: true })
+  const topY = useTransform(split, (v) => -v * frameH * 0.7)
+  const bottomY = useTransform(split, (v) => v * frameH * 0.7)
+  const opacity = useTransform(reveal, TEXT_FADE_RANGE, [1, 0], { clamp: true })
 
   const base = {
     fontFamily: 'var(--font-montserrat)',
@@ -117,26 +150,17 @@ function PortfolioText({
   )
 }
 
-/**
- * 풀커버 슬라이드. 기본은 자기 band 구간에서 아래(100%)→0으로 올라온다.
- * scaleIn이면 중앙에서 scale 0→1로 확대(split과 동시 진행). 훅은 조건부 호출
- * 금지라 y/scale을 항상 만들고 style만 분기한다.
- */
-function PortfolioSlide({
+/** 첫 슬라이드: reveal의 SLIDE_SCALE_RANGE 구간에서 중앙 scale 0→1(텍스트 보일 때 시작). */
+function PortfolioScaleSlide({
   src,
-  band,
   z,
-  progress,
-  scaleIn,
+  reveal,
 }: {
   src: string
-  band: [number, number]
   z: number
-  progress: MotionValue<number>
-  scaleIn?: boolean
+  reveal: MotionValue<number>
 }) {
-  const y = useTransform(progress, band, ['100%', '0%'], { clamp: true })
-  const scale = useTransform(progress, band, [0, 1], { clamp: true })
+  const scale = useTransform(reveal, SLIDE_SCALE_RANGE, [0, 1], { clamp: true })
   return (
     <motion.img
       src={src}
@@ -144,7 +168,32 @@ function PortfolioSlide({
       aria-hidden
       draggable={false}
       className="absolute inset-0 h-full w-full object-cover"
-      style={scaleIn ? { scale, zIndex: z } : { y, zIndex: z }}
+      style={{ scale, zIndex: z }}
+    />
+  )
+}
+
+/** 후속 슬라이드: 자기 band 구간에서 아래(100%)→0으로 스크롤 연속 상승. */
+function PortfolioRiseSlide({
+  src,
+  band,
+  z,
+  progress,
+}: {
+  src: string
+  band: [number, number]
+  z: number
+  progress: MotionValue<number>
+}) {
+  const y = useTransform(progress, band, ['100%', '0%'], { clamp: true })
+  return (
+    <motion.img
+      src={src}
+      alt=""
+      aria-hidden
+      draggable={false}
+      className="absolute inset-0 h-full w-full object-cover"
+      style={{ y, zIndex: z }}
     />
   )
 }
