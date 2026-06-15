@@ -166,7 +166,6 @@ export function PhilosophySection({
       {!isMobile &&
         createPortal(
           <PhilosophyGrow
-            growing={growing}
             g={g}
             slide={slide}
             ratio={ratio}
@@ -191,7 +190,6 @@ export function PhilosophySection({
  * 유지하므로 역방향엔 덮인 채 들어와 스크롤 백에 따라 축소된다.
  */
 function PhilosophyGrow({
-  growing,
   g,
   slide,
   ratio,
@@ -199,7 +197,6 @@ function PhilosophyGrow({
   cy,
   frameH,
 }: {
-  growing: boolean
   g: MotionValue<number>
   slide: MotionValue<number>
   ratio: number
@@ -225,12 +222,9 @@ function PhilosophyGrow({
     { clamp: true }
   )
 
-  // 확대 패널(빨강 카드)은 트리거 직전 빠르게 떠올라 쌓인 빨강 카드와 1:1로 겹친다.
-  const panelOpacity = useMotionValue(0)
-  useEffect(() => {
-    const c = animate(panelOpacity, growing ? 1 : 0, { duration: 0.12 })
-    return () => c.stop()
-  }, [growing, panelOpacity])
+  // 확대 패널(빨강 카드) 투명도는 g(스케일 진행)에 묶는다 — 역방향 축소(g 1→0)에도
+  // 끝까지 보이다 g≈0에서만 사라져 흰 배경이 새지 않는다.
+  const panelOpacity = useTransform(g, [0, 0.05], [0, 1], { clamp: true })
 
   return (
     <motion.div
