@@ -4,8 +4,10 @@ import { SLIDE_DURATION, SLIDE_EASE, SLIDES } from '@/config/slides'
 import {
   REVEAL_DURATION,
   REVEAL_END,
+  REVEAL_HOLD,
   TIME_EASE,
 } from '@/components/sections/PortfolioSection'
+import { GROW_DURATION } from '@/components/sections/PhilosophySection'
 
 export interface SlideController {
   /** 실수값 슬라이드 진행도(0 = 첫 섹션). 모든 애니메이션을 구동. */
@@ -112,6 +114,8 @@ export function useSlideController({
   // 입력 처리.
   useEffect(() => {
     const trapAt = (idx: number) => traps?.find((t) => t.index === idx)
+    // 역방향 seam(portfolio→philosophy) 빨강 카드 축소 동안 입력 잠금 해제 타이머.
+    let reverseUnlockTimer: ReturnType<typeof setTimeout>
     const goTo = (next: number) => {
       next = clamp(next, 0, total - 1)
       if (next === currentRef.current || animatingRef.current) return
@@ -140,16 +144,32 @@ export function useSlideController({
       // animatingRef를 true로 유지해(inTrap()=false → 롤 잠금, step() 게이트) 휠/터치/
       // 키보드가 reveal을 끊지 못하게 한다. (역방향·그 외는 onComplete에서 즉시 unlock.)
       const isForwardSeam = from === PHILO_IDX && next === PORT_IDX
+      // 역방향 portfolio→philosophy: 빨강 카드가 g 1→0으로 축소되는 GROW_DURATION 동안
+      // 입력을 잠가, 역스크롤 잔여 모멘텀이 philosophyRoll을 마지막 카드 임계값(0.42)
+      // 밑으로 끌어내려 카드가 풀리는 걸 막는다(정방향 확대 잠금과 대칭).
+      const isReverseSeam = from === PORT_IDX && next === PHILO_IDX
       animate(slide, next, {
         duration: isSeam ? SEAM_DURATION : SLIDE_DURATION,
         ease: SLIDE_EASE,
         onComplete: () => {
-          if (!isForwardSeam) animatingRef.current = false
+          // 정방향: progress 자동 전진 onComplete가 unlock을 담당(여기선 아무것도 안 함).
+          if (isForwardSeam) return
+          // 역방향: 빨강 카드 축소(GROW_DURATION) 뒤 unlock.
+          if (isReverseSeam) {
+            clearTimeout(reverseUnlockTimer)
+            reverseUnlockTimer = setTimeout(() => {
+              animatingRef.current = false
+            }, GROW_DURATION * 1000)
+            return
+          }
+          animatingRef.current = false
         },
       })
       if (isForwardSeam && entering) {
+        // 진입 후 REVEAL_HOLD 동안 progress=0(통짜 텍스트)으로 멈췄다가 split 시작.
         animate(entering.progress, REVEAL_END, {
           duration: REVEAL_DURATION,
+          delay: REVEAL_HOLD,
           ease: TIME_EASE,
           onComplete: () => {
             // 잠금 해제 후 첫 스크롤이 progress를 0으로 되돌리지 않도록 목표를 동기화.
@@ -357,6 +377,7 @@ export function useSlideController({
       window.removeEventListener('touchend', onTouchEnd)
       window.removeEventListener('keydown', onKey)
       clearTimeout(wheelResetTimer)
+      clearTimeout(reverseUnlockTimer)
     }
   }, [enabled, total, slide, traps])
 

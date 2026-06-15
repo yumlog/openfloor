@@ -20,6 +20,8 @@ export const PORTFOLIO_STEPS = 4
 export const REVEAL_END = 0.3
 /** reveal 자동 전진 시간(s). 컨트롤러가 이 값으로 progress를 전진시킨다. */
 export const REVEAL_DURATION = 2.55
+/** 진입 후 텍스트가 합쳐진 채 멈춰 있는 시간(s) — 컨트롤러가 자동 전진 delay로 참조. */
+export const REVEAL_HOLD = 1.0
 /** reveal 자동 전진 이징(컨트롤러가 참조). */
 export const TIME_EASE = [0.65, 0, 0.35, 1] as const
 
