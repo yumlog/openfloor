@@ -6,13 +6,17 @@ import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
-import { PhilosophyDeck } from './philosophy/PhilosophyDeck'
+import {
+  PhilosophyStack,
+  CardFace,
+  LAST_CARD_CENTER_FRAC,
+} from './philosophy/PhilosophyStack'
 import { PhilosophyMobile } from './philosophy/PhilosophyMobile'
 import { PHILOSOPHY_CARDS } from './philosophy/cards'
 
 const def = SLIDES[2]
 
-/** philosophy 트랩 스텝 수(세움 + 카드 3장; 마지막 노치 .75→1 이 확대 구간). */
+/** philosophy 트랩 스텝 수(카드 쌓임 + 마지막 노치 .75→1 확대). */
 export const PHILOSOPHY_STEPS = 4
 
 const HEADLINE_LINES = ['결과로 말하는 것이', '우리의 방식입니다.']
@@ -20,8 +24,9 @@ const LABEL_DELAY = 0
 const HEADLINE_DELAY = 0.15
 
 const GROW_START = 0.75
-const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 중앙 카드(c2)
-const CARD_PX = 420 // 덱 중앙 카드 design 크기
+const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
+const GCW = 800 // 확대 카드 design 너비
+const GCH = 280 // 확대 카드 design 높이
 
 interface PhilosophySectionProps {
   active: boolean
@@ -34,34 +39,33 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
   const isMobile = frame.w < 768
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
 
-  // 확대 구간(.78~)에서 타이틀+덱을 페이드아웃해 빨간 카드에 무대를 넘긴다.
+  // 확대 구간(.78~)에서 타이틀+스택을 페이드아웃해 빨간 카드에 무대를 넘긴다.
   const stageOpacity = useTransform(progress, [0.78, 0.92], [1, 0], {
     clamp: true,
   })
 
-  // 덱 c2 카드의 화면 좌표를 측정 — 확대 카드가 "그 자리·그 크기"에서 시작하게.
-  // cx = 섹션 가로 중앙(= 뷰포트 중앙), cy = 카드 세로 중심(섹션 기준 고정 오프셋
-  // → active일 때 곧 뷰포트 y). 트랙 translate와 무관하게 상대 측정.
+  // 빨강(마지막) 카드의 쌓인 화면 중심을 측정 — 확대 카드가 그 자리·그 크기에서 시작.
+  // cx = 섹션 가로 중앙, cy = stage 안에서 마지막 카드 중심(LAST_CARD_CENTER_FRAC).
   const sectionRef = useRef<HTMLElement>(null)
-  const canvasRef = useRef<HTMLDivElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
   const [center, setCenter] = useState({ cx: frame.w / 2, cy: frame.h / 2 })
   useLayoutEffect(() => {
     if (isMobile) return
     const sec = sectionRef.current
-    const canvas = canvasRef.current
-    if (!sec || !canvas) return
+    const stage = stageRef.current
+    if (!sec || !stage) return
     const measure = () => {
       const sr = sec.getBoundingClientRect()
-      const cr = canvas.getBoundingClientRect()
+      const gr = stage.getBoundingClientRect()
       setCenter({
         cx: sr.left + sr.width / 2,
-        cy: cr.top - sr.top + cr.height / 2,
+        cy: gr.top - sr.top + gr.height * LAST_CARD_CENTER_FRAC,
       })
     }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(sec)
-    ro.observe(canvas)
+    ro.observe(stage)
     window.addEventListener('resize', measure)
     return () => {
       ro.disconnect()
@@ -75,7 +79,7 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
       id={def.id}
       className="relative flex h-[100dvh] w-full flex-col overflow-hidden"
     >
-      {/* 타이틀 + 덱 — 확대 구간에서 함께 페이드. */}
+      {/* 타이틀 + 스택 — 확대 구간에서 함께 페이드. */}
       <motion.div
         className="flex flex-1 flex-col"
         style={{ opacity: isMobile ? 1 : stageOpacity }}
@@ -101,15 +105,15 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
           />
         </Container>
 
-        <div className="flex flex-1 items-center justify-center pb-[clamp(73px,8.75vw,126px)] max-md:pb-[48px]">
+        <div className="flex flex-1 items-center justify-center pb-[clamp(16px,2vw,32px)] max-md:pb-[48px]">
           {isMobile ? (
             <PhilosophyMobile active={active} />
           ) : (
-            <PhilosophyDeck
+            <PhilosophyStack
               active={active}
               ratio={ratio}
               progress={progress}
-              canvasRef={canvasRef}
+              stageRef={stageRef}
             />
           )}
         </div>
@@ -133,10 +137,10 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
 }
 
 /**
- * Philosophy → Portfolio 브릿지. 측정한 덱 c2 위치(cx,cy)에서, 덱과 같은 크기
- * (scale=ratio)로 시작해 progress .75→1 동안 화면을 덮을 때까지 확대 — 실제
- * 중앙 카드가 그대로 커지는 것처럼 보인다. 본문/따옴표는 카드와 함께 커지다
- * 페이드아웃, 그 뒤 흰 PORTFOLIO가 떠오른다. 끝 상태(빨강 + 흰 PORTFOLIO)는
+ * Philosophy → Portfolio 브릿지. 측정한 빨강 카드 위치(cx,cy)에서, 쌓인 카드와
+ * 같은 크기(800×280, scale=ratio)로 시작해 progress .75→1 동안 화면을 덮을 때까지
+ * 확대 — 실제 마지막 카드가 그대로 커지는 것처럼 보인다. 본문/따옴표는 카드와 함께
+ * 커지다 페이드아웃, 그 뒤 흰 PORTFOLIO가 떠오른다. 끝 상태(빨강 + 흰 PORTFOLIO)는
  * Portfolio progress 0 과 동일해 슬라이드 2→3 스냅이 안 보인다.
  */
 function PhilosophyGrow({
@@ -155,7 +159,11 @@ function PhilosophyGrow({
   frameH: number
 }) {
   const growT = useTransform(progress, [GROW_START, 1], [0, 1], { clamp: true })
-  const coverScale = (2 * Math.max(cx, cy, frameH - cy) * 1.3) / CARD_PX
+  // 800×280 카드를 화면을 덮을 때까지 확대 — 가로/세로 중 더 필요한 쪽 기준.
+  const coverScale = Math.max(
+    (2 * Math.max(cy, frameH - cy) * 1.3) / GCH,
+    (2 * cx * 1.3) / GCW
+  )
   // 카드가 growT 0.85에 화면을 다 덮음(확대를 길게 = 천천히, 덮인 뒤 머무는 구간 최소).
   const scale = useTransform(growT, [0, 0.85], [ratio, coverScale], {
     clamp: true,
@@ -164,8 +172,7 @@ function PhilosophyGrow({
     clamp: true,
   })
   const contentOpacity = useTransform(growT, [0, 0.4], [1, 0], { clamp: true })
-  // 화면이 다 덮인 뒤 흰 PORTFOLIO가 떠오른다. 끝 상태 = 흰 PORTFOLIO + 빨강(rest).
-  // 흰→빨강·빨강→다크 리컬러는 Portfolio가 스냅(slide 2→3) 중에 한다.
+  // 화면이 다 덮인 뒤 흰 PORTFOLIO가 떠오른다(끝 = 흰 PORTFOLIO + 빨강 rest).
   const titleOpacity = useTransform(growT, [0.85, 1], [0, 1], { clamp: true })
 
   return (
@@ -186,26 +193,8 @@ function PhilosophyGrow({
           opacity: panelOpacity,
         }}
       >
-        <div
-          className="relative overflow-hidden rounded-[24px] bg-[#FB3640]"
-          style={{ width: CARD_PX, height: CARD_PX }}
-        >
-          <motion.div
-            className="pointer-events-none absolute inset-0 px-[44px] py-[48px]"
-            style={{ opacity: contentOpacity }}
-          >
-            <p className="text-title-on-dark text-[24px] leading-[1.4] font-medium tracking-[-0.05em] text-pretty break-keep">
-              {GROWN_CARD.body}
-            </p>
-          </motion.div>
-          <motion.img
-            src="/images/card.svg"
-            alt=""
-            aria-hidden
-            draggable={false}
-            className="pointer-events-none absolute right-[40px] bottom-[44px]"
-            style={{ width: 128, height: 88, opacity: contentOpacity }}
-          />
+        <div style={{ width: GCW, height: GCH }}>
+          <CardFace card={GROWN_CARD} contentOpacity={contentOpacity} />
         </div>
       </motion.div>
 

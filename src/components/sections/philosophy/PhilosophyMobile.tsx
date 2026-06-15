@@ -1,13 +1,10 @@
 import { motion } from 'motion/react'
-import { cn } from '@/lib/cn'
 import { RISE, entryTransition } from '@/lib/motion'
 import { PHILOSOPHY_CARDS } from './cards'
 
 /* ---------------------------------------------------------------------------
-   모바일(<768px) reflow. 3D 덱 / 3-up은 폰에 맞지 않으므로, 세 카드를 단순
-   세로 스택(이미지 + 이름 + 본문)으로 만들어 한 100dvh 화면 안에 한꺼번에
-   보이게 한다. 스케일된 데스크탑이 아닌 전용 reflow. (모바일 다듬기는 나중에
-   별도로.)
+   모바일(<768px) reflow. 스택/확대는 폰에 맞지 않으므로, 세 카드를 단순 세로
+   리스트(스와치 + 타이틀 + 본문)로 한 100dvh 안에 보여준다. (모바일 다듬기 별도.)
 --------------------------------------------------------------------------- */
 
 export function PhilosophyMobile({ active }: { active: boolean }) {
@@ -23,16 +20,14 @@ export function PhilosophyMobile({ active }: { active: boolean }) {
           className="flex items-center gap-4"
         >
           <div
-            className={cn(
-              'h-[76px] w-[76px] shrink-0 rounded-[12px]',
-              card.tint
-            )}
+            className="h-[76px] w-[76px] shrink-0 rounded-[12px]"
+            style={{ backgroundColor: card.bg }}
           />
           <div>
             <p className="text-card-name text-[16px] leading-[1.4] font-bold tracking-[-0.04em]">
               {card.name}
             </p>
-            <p className="text-text-on-light mt-1.5 text-[13px] leading-[1.5]">
+            <p className="text-text-on-light mt-1.5 text-[13px] leading-[1.5] whitespace-pre-line">
               {card.body}
             </p>
           </div>
