@@ -23,7 +23,8 @@ import { PORTFOLIO_SLIDES } from './portfolio/projects'
 export const PORTFOLIO_STEPS = 4
 
 /* reveal: progress가 이 값을 넘으면 시간 기반 0→1 재생(휠 양 무관). */
-const REVEAL_TRIGGER = 0.05
+const REVEAL_ON = 0.05 // 올라갈 때(정방향): 이 값 넘으면 reveal 재생(갈라짐 시작)
+const REVEAL_OFF = 0.5 // 내려올 때(역방향): 이 값 아래로 내려오면 reveal 되감기(모임 시작) — 빠져나가기 전에 다 모이도록 일찍 트리거
 const REVEAL_DURATION = 1.7
 const TIME_EASE = [0.65, 0, 0.35, 1] as const
 
@@ -51,7 +52,16 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
   const reveal = useMotionValue(0)
   const [on, setOn] = useState(false)
   useEffect(() => {
-    const apply = (p: number) => setOn(p >= REVEAL_TRIGGER)
+    let prev = progress.get()
+    const apply = (p: number) => {
+      const rising = p >= prev
+      prev = p
+      setOn((cur) => {
+        if (!cur && rising && p >= REVEAL_ON) return true
+        if (cur && !rising && p <= REVEAL_OFF) return false
+        return cur
+      })
+    }
     apply(progress.get())
     const unsub = progress.on('change', apply)
     return () => unsub()

@@ -36,7 +36,7 @@ const DWELL = 0.29
 /** 이 progress를 "넘으면" 확대가 시간 기반으로 쭉 진행된다(휠 양 무관). */
 const GROW_START = STACK_END + DWELL // 0.84
 /** 확대 글라이드 시간(s). */
-const GROW_DURATION = 0.85
+const GROW_DURATION = 0.55
 const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
 const GCW = 800 // 확대 카드 design 너비
 const GCH = 280 // 확대 카드 design 높이
@@ -79,7 +79,7 @@ export function PhilosophySection({
   useEffect(() => {
     const controls = animate(g, growing ? 1 : 0, {
       duration: GROW_DURATION,
-      delay: growing ? 0.1 : 0,
+      delay: 0,
       ease: growing ? [0.4, 0, 0.2, 1] : [0.4, 0, 1, 1],
       // 확대가 끝나면 트랩을 1.0까지 더 굴리는 죽은 스크롤 없이 곧장 portfolio로 넘긴다.
       // 정방향 확대 완료에서만(아직 philosophy일 때) 발동 — 역방향 재진입은 growing이

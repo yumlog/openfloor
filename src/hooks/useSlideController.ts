@@ -39,6 +39,10 @@ interface Options {
 const clamp = (v: number, min: number, max: number) =>
   Math.max(min, Math.min(max, v))
 
+const PHILO_IDX = SLIDES.findIndex((sl) => sl.id === 'philosophy')
+const PORT_IDX = SLIDES.findIndex((sl) => sl.id === 'portfolio')
+const SEAM_DURATION = 0.4
+
 /* 제스처 임계값. */
 const WHEEL_THRESHOLD = 40
 const WHEEL_RESET_MS = 180
@@ -117,8 +121,12 @@ export function useSlideController({
       }
       currentRef.current = next
       animatingRef.current = true
+      // philosophy↔portfolio 전환만 빠르게(빨강만 깔린 대기 구간 최소화), 그 외엔 기본.
+      const isSeam =
+        (from === PHILO_IDX && next === PORT_IDX) ||
+        (from === PORT_IDX && next === PHILO_IDX)
       animate(slide, next, {
-        duration: SLIDE_DURATION,
+        duration: isSeam ? SEAM_DURATION : SLIDE_DURATION,
         ease: SLIDE_EASE,
         onComplete: () => {
           animatingRef.current = false
