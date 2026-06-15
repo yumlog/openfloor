@@ -36,8 +36,20 @@ export default function App() {
     () => [
       ...(isMobile
         ? []
-        : [{ index: 2, steps: PHILOSOPHY_STEPS, progress: philosophyRoll }]),
-      { index: 3, steps: PORTFOLIO_STEPS, progress: portfolioRoll },
+        : [
+            {
+              index: 2,
+              steps: PHILOSOPHY_STEPS,
+              progress: philosophyRoll,
+              sensitivity: 0.0003,
+            },
+          ]),
+      {
+        index: 3,
+        steps: PORTFOLIO_STEPS,
+        progress: portfolioRoll,
+        sensitivity: 0.0004,
+      },
       { index: 4, steps: MANIFESTO_STEPS, progress: rollProgress },
     ],
     [isMobile, philosophyRoll, portfolioRoll, rollProgress]
@@ -104,7 +116,7 @@ export default function App() {
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
         <AboutSection active={index === 1} />
         <PhilosophySection active={index === 2} progress={philosophyRoll} />
-        <PortfolioSection active={index === 3} progress={portfolioRoll} slide={slide} />
+        <PortfolioSection active={index === 3} progress={portfolioRoll} />
         <ManifestoSection active={index === 4} progress={rollProgress} />
         <ContactSection active={index === 5} />
       </Slides>

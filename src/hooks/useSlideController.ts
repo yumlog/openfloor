@@ -18,6 +18,8 @@ interface TrapOptions {
   steps: number
   /** 가둔 슬라이드가 구동하는 0..1 progress(예: manifesto 드럼 롤). */
   progress: MotionValue<number>
+  /** 휠/터치 비례 롤 감도(deltaY * 이 값). 생략 시 ROLL_SENSITIVITY. */
+  sensitivity?: number
 }
 
 interface Options {
@@ -213,12 +215,13 @@ export function useSlideController({
       // 가둔 슬라이드: 드럼을 관성으로 비례 롤. 끝에 핀 채로 계속 밀 때만
       // 누적 버스트가 밖으로 advance.
       if (inTrap()) {
+        const sens = trapAt(currentRef.current)?.sensitivity ?? ROLL_SENSITIVITY
         const t = rollTargetRef.current
         const pushingPastEnd =
           (e.deltaY > 0 && t >= 1 - ROLL_EPS) || (e.deltaY < 0 && t <= ROLL_EPS)
         if (!pushingPastEnd) {
           resetWheel()
-          rollTo(t + e.deltaY * ROLL_SENSITIVITY)
+          rollTo(t + e.deltaY * sens)
           return
         }
         rollEdgeAccum += e.deltaY
@@ -270,10 +273,11 @@ export function useSlideController({
       const dy = touchPrevY - y
       touchPrevY = y
       if (inTrap()) {
+        const sens = trapAt(currentRef.current)?.sensitivity ?? ROLL_SENSITIVITY
         const t = rollTargetRef.current
         const pushingPastEnd =
           (dy > 0 && t >= 1 - ROLL_EPS) || (dy < 0 && t <= ROLL_EPS)
-        if (!pushingPastEnd) rollTo(t + dy * ROLL_SENSITIVITY)
+        if (!pushingPastEnd) rollTo(t + dy * sens)
       }
     }
     const onTouchEnd = (e: TouchEvent) => {

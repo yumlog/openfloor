@@ -156,8 +156,8 @@ function PhilosophyGrow({
 }) {
   const growT = useTransform(progress, [GROW_START, 1], [0, 1], { clamp: true })
   const coverScale = (2 * Math.max(cx, cy, frameH - cy) * 1.3) / CARD_PX
-  // 카드가 growT 0.55에 화면을 다 덮음.
-  const scale = useTransform(growT, [0, 0.55], [ratio, coverScale], {
+  // 카드가 growT 0.85에 화면을 다 덮음(확대를 길게 = 천천히, 덮인 뒤 머무는 구간 최소).
+  const scale = useTransform(growT, [0, 0.85], [ratio, coverScale], {
     clamp: true,
   })
   const panelOpacity = useTransform(progress, [0.742, 0.75], [0, 1], {
@@ -166,7 +166,7 @@ function PhilosophyGrow({
   const contentOpacity = useTransform(growT, [0, 0.4], [1, 0], { clamp: true })
   // 화면이 다 덮인 뒤 흰 PORTFOLIO가 떠오른다. 끝 상태 = 흰 PORTFOLIO + 빨강(rest).
   // 흰→빨강·빨강→다크 리컬러는 Portfolio가 스냅(slide 2→3) 중에 한다.
-  const titleOpacity = useTransform(growT, [0.6, 0.82], [0, 1], { clamp: true })
+  const titleOpacity = useTransform(growT, [0.85, 1], [0, 1], { clamp: true })
 
   return (
     <motion.div
