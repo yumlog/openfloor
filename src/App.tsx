@@ -81,20 +81,19 @@ export default function App() {
   // 모바일에선 슬라이드-0 박스를 아래로 살짝 내려 쌓인 hero 텍스트를 피한다.
   const ratio = frame.w / DESIGN_WIDTH
   const videoSize = 860 * ratio
-  const videoScale = useTransform(slide, [0, 1], [0.78, 354 / 860])
-  const videoX = useTransform(slide, [0, 1], [0, frame.w / 2 - 402 * ratio])
-  const videoY = useTransform(
-    slide,
-    [0, 1],
-    [isMobile ? frame.h * 0.22 : 0, 301 * ratio - frame.h / 2]
-  )
-  const videoOpacity = useTransform(slide, [1.3, 1.75], [1, 0])
+  // hero 전용: about으로 이동/축소시키지 않고 hero 자리(가운데, scale 0.78)에 고정.
+  const heroCrystalY = isMobile ? frame.h * 0.22 : 0
+  const videoScale = useTransform(slide, [0, 1], [0.78, 0.78])
+  const videoX = useTransform(slide, [0, 1], [0, 0])
+  const videoY = useTransform(slide, [0, 1], [heroCrystalY, heroCrystalY])
+  // hero를 벗어나면(0→0.8) 그 자리에서 페이드아웃 → about에선 안 보임.
+  const videoOpacity = useTransform(slide, [0, 0.8], [1, 0])
 
   // 크리스탈 캔버스는 hero/about 구간(slide < ~1.9)에서만 렌더한다 — 그 밖에선
   // 페이드아웃이 끝나 안 보이므로 frameloop를 멈춰 GPU를 아낀다.
   const [crystalVisible, setCrystalVisible] = useState(true)
   useEffect(() => {
-    const apply = (v: number) => setCrystalVisible(v < 1.9)
+    const apply = (v: number) => setCrystalVisible(v < 1.0)
     apply(slide.get())
     const unsub = slide.on('change', apply)
     return () => unsub()

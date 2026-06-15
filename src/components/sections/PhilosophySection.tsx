@@ -36,7 +36,7 @@ const DWELL = 0.29
 /** 이 progress를 "넘으면" 확대가 시간 기반으로 쭉 진행된다(휠 양 무관). */
 const GROW_START = STACK_END + DWELL // 0.84
 /** 확대 글라이드 시간(s). */
-const GROW_DURATION = 0.55
+const GROW_DURATION = 1.0
 const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
 const GCW = 800 // 확대 카드 design 너비
 const GCH = 280 // 확대 카드 design 높이
@@ -222,7 +222,7 @@ function PhilosophyGrow({
     (2 * Math.max(cy, frameH - cy) * 1.3) / GCH,
     (2 * cx * 1.3) / GCW
   )
-  const scale = useTransform(g, [0, 0.9], [ratio, coverScale], { clamp: true })
+  const scale = useTransform(g, [0, 1], [ratio, coverScale], { clamp: true })
   const contentOpacity = useTransform(g, [0, 0.4], [1, 0], { clamp: true })
 
   // 오버레이 가시성 — philosophy(2)~전환 구간에서 1, portfolio(3) 직전(빨강 배경)에서만
