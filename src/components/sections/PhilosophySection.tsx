@@ -30,9 +30,9 @@ const HEADLINE_LINES = ['결과로 말하는 것이', '우리의 방식입니다
 const LABEL_DELAY = 0
 const HEADLINE_DELAY = 0.15
 
-/** 쌓임 종료(STACK_END) 후 마지막 카드를 읽을 멈춤 구간(DWELL)을 두고 확대 트리거. */
+/** 쌓임 종료(STACK_END) 후 읽을 멈춤 구간(DWELL)을 두고 확대 트리거. */
 const DWELL = 0.13
-/** 이 progress를 "넘으면" 확대가 시간 기반으로 쭉 진행된다(휠 양 무관, 카드 쌓임과 동일 방식). */
+/** 이 progress를 "넘으면" 확대가 시간 기반으로 쭉 진행된다(휠 양 무관). */
 const GROW_START = STACK_END + DWELL // 0.68
 /** 확대 글라이드 시간(s). */
 const GROW_DURATION = 0.85
@@ -45,15 +45,24 @@ interface PhilosophySectionProps {
   active: boolean
   /** philosophy 트랩 progress(0..1). */
   progress: MotionValue<number>
+  /** 전역 슬라이드 위치(2≈philosophy, 3≈portfolio) — 확대 오버레이가 전환 seam을
+      양방향으로 덮게 하는 데 쓴다. */
+  slide: MotionValue<number>
 }
 
-export function PhilosophySection({ active, progress }: PhilosophySectionProps) {
+export function PhilosophySection({
+  active,
+  progress,
+  slide,
+}: PhilosophySectionProps) {
   const frame = useFrameSize()
   const isMobile = frame.w < 768
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
 
   // 확대 트리거: progress가 GROW_START를 "넘으면" 시간 기반으로 g:0→1 (쭉 커짐).
-  // 휠을 얼마나 돌렸는지와 무관하게 한 번 넘으면 끝까지 진행(카드 쌓임과 동일).
+  // active와 무관하게 progress를 추적한다 → 포트폴리오로 나가도 philosophy progress는
+  // 끝(≈1)에 머무르므로 growing=true·g=1(덮인 상태)이 유지되고, 되돌아올 때 빨강이
+  // 즉시 덮은 채로 시작해 축소된다.
   const [growing, setGrowing] = useState(false)
   useEffect(() => {
     const apply = (p: number) => setGrowing(p >= GROW_START)
@@ -66,7 +75,7 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
   useEffect(() => {
     const controls = animate(g, growing ? 1 : 0, {
       duration: GROW_DURATION,
-      delay: growing ? 0.1 : 0, // 패널이 먼저 뜨고(0.12s) 그 다음 확대.
+      delay: growing ? 0.1 : 0,
       ease: growing ? [0.4, 0, 0.2, 1] : [0.4, 0, 1, 1],
     })
     return () => controls.stop()
@@ -135,8 +144,7 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
           />
         </Container>
 
-        {/* 데스크탑: 헤딩 아래 72px 고정 간격 + 상단 정렬(stage origin top과 맞물림).
-            모바일: 중앙 정렬 reflow. */}
+        {/* 데스크탑: 헤딩 아래 72px 고정 간격 + 상단 정렬. 모바일: 중앙 정렬 reflow. */}
         <div
           className="flex flex-1 flex-col items-center max-md:justify-center"
           style={{ paddingTop: isMobile ? undefined : TITLE_GAP * ratio }}
@@ -160,7 +168,7 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
           <PhilosophyGrow
             growing={growing}
             g={g}
-            active={active}
+            slide={slide}
             ratio={ratio}
             cx={center.cx}
             cy={center.cy}
@@ -174,14 +182,18 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
 
 /**
  * Philosophy → Portfolio 브릿지. progress가 GROW_START를 넘으면(growing) 시간 기반
- * g:0→1 로 빨강 카드가 측정 위치(cx,cy)에서 화면을 덮을 때까지 쭉 확대된다 — 휠 양과
- * 무관(카드 쌓임과 동일 방식). 본문/따옴표는 함께 커지다 페이드아웃, 그 뒤 흰 PORTFOLIO가
- * 떠오른다. 끝 상태(빨강 + 흰 PORTFOLIO)는 Portfolio progress 0 과 동일해 스냅이 안 보인다.
+ * g:0→1 로 빨강 카드가 화면을 덮을 때까지 쭉 확대된다(휠 양 무관). 본문/따옴표는 함께
+ * 커지다 페이드아웃, 그 뒤 흰 PORTFOLIO가 떠오른다.
+ *
+ * 오버레이 가시성은 `active`가 아니라 `slide`로 게이트한다 — philosophy↔portfolio
+ * 슬라이드 전환 구간(2↔3) 내내 빨강이 덮어, 정/역방향 모두 흰 배경 노출 없이 seam을
+ * 잇는다(빨강 배경이 깔린 slide≈3 쪽에서만 페이드). g는 progress 추적으로 parked 1을
+ * 유지하므로 역방향엔 덮인 채 들어와 스크롤 백에 따라 축소된다.
  */
 function PhilosophyGrow({
   growing,
   g,
-  active,
+  slide,
   ratio,
   cx,
   cy,
@@ -189,7 +201,7 @@ function PhilosophyGrow({
 }: {
   growing: boolean
   g: MotionValue<number>
-  active: boolean
+  slide: MotionValue<number>
   ratio: number
   cx: number
   cy: number
@@ -200,11 +212,20 @@ function PhilosophyGrow({
     (2 * Math.max(cy, frameH - cy) * 1.3) / GCH,
     (2 * cx * 1.3) / GCW
   )
-  // g(시간 기반 0→1)로 확대/콘텐츠 페이드/타이틀 등장을 구동(스크롤 양엔 직접 안 묶임).
   const scale = useTransform(g, [0, 0.9], [ratio, coverScale], { clamp: true })
   const contentOpacity = useTransform(g, [0, 0.4], [1, 0], { clamp: true })
   const titleOpacity = useTransform(g, [0.9, 1], [0, 1], { clamp: true })
-  // 확대 패널은 트리거 직전 빠르게 떠올라 쌓인 빨강 카드와 1:1로 겹친 뒤 커진다.
+
+  // 오버레이 가시성 — philosophy(2)~전환 구간에서 1, portfolio(3) 직전(빨강 배경)에서만
+  // 페이드. 양방향 seam을 덮는다.
+  const overlayOpacity = useTransform(
+    slide,
+    [1.8, 2, 2.97, 3],
+    [0, 1, 1, 0],
+    { clamp: true }
+  )
+
+  // 확대 패널(빨강 카드)은 트리거 직전 빠르게 떠올라 쌓인 빨강 카드와 1:1로 겹친다.
   const panelOpacity = useMotionValue(0)
   useEffect(() => {
     const c = animate(panelOpacity, growing ? 1 : 0, { duration: 0.12 })
@@ -214,9 +235,7 @@ function PhilosophyGrow({
   return (
     <motion.div
       className="pointer-events-none fixed inset-0 z-[40] overflow-hidden"
-      initial={false}
-      animate={{ opacity: active ? 1 : 0 }}
-      transition={{ duration: active ? 0 : 0.3, ease: 'easeOut', delay: active ? 0 : 0.4 }}
+      style={{ opacity: overlayOpacity }}
     >
       <motion.div
         className="absolute"
