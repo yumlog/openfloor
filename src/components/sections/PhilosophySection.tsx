@@ -32,11 +32,11 @@ const LABEL_DELAY = 0
 const HEADLINE_DELAY = 0.15
 
 /** 쌓임 종료(STACK_END) 후 읽을 멈춤 구간(DWELL)을 두고 확대 트리거. */
-const DWELL = 0.29
+const DWELL = 0.1
 /** 이 progress를 "넘으면" 확대가 시간 기반으로 쭉 진행된다(휠 양 무관). */
-const GROW_START = STACK_END + DWELL // 0.84
+const GROW_START = STACK_END + DWELL // 0.65
 /** 확대 글라이드 시간(s). */
-const GROW_DURATION = 1.0
+const GROW_DURATION = 1.5
 const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
 const GCW = 800 // 확대 카드 design 너비
 const GCH = 280 // 확대 카드 design 높이

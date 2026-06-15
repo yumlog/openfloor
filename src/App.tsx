@@ -42,7 +42,7 @@ export default function App() {
               index: 2,
               steps: PHILOSOPHY_STEPS,
               progress: philosophyRoll,
-              sensitivity: 0.0003,
+              sensitivity: 0.0006,
               reverseSeat: STACK_END,
             },
           ]),
