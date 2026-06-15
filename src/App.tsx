@@ -9,6 +9,7 @@ import { HeroGhost } from '@/components/sections/hero/HeroGhost'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { PhilosophySection, PHILOSOPHY_STEPS } from '@/components/sections/PhilosophySection'
 import { PortfolioSection, PORTFOLIO_STEPS } from '@/components/sections/PortfolioSection'
+import { STACK_END } from '@/components/sections/philosophy/PhilosophyStack'
 import {
   ManifestoSection,
   MANIFESTO_STEPS,
@@ -42,6 +43,7 @@ export default function App() {
               steps: PHILOSOPHY_STEPS,
               progress: philosophyRoll,
               sensitivity: 0.0003,
+              reverseSeat: STACK_END,
             },
           ]),
       {

@@ -74,6 +74,12 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
     return () => c.stop()
   }, [on, reveal])
 
+  // 정방향 진입(혹은 manifesto에서 역진입) 시 reveal 자동 재생 — 추가 스크롤 없이
+  // [텍스트 갈라짐 + 첫 슬라이드]가 자동 진행. (역방향 모임은 히스테리시스 falling<=REVEAL_OFF에서 끔.)
+  useEffect(() => {
+    if (active) setOn(true)
+  }, [active])
+
   return (
     <>
       <section id="portfolio" className="h-[100dvh] w-full" />

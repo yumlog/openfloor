@@ -20,6 +20,10 @@ interface TrapOptions {
   progress: MotionValue<number>
   /** 휠/터치 비례 롤 감도(deltaY * 이 값). 생략 시 ROLL_SENSITIVITY. */
   sensitivity?: number
+  /** 역방향(아래에서 위로 되돌아) 진입 시 progress를 앉힐 값. 생략 시 1. philosophy는
+      STACK_END로 앉혀 되돌아오는 즉시 growing=false가 되어 확대 카드가 자동 축소(g 1→0)되고
+      카드가 스택 상태로 정착한다. */
+  reverseSeat?: number
 }
 
 interface Options {
@@ -111,7 +115,7 @@ export function useSlideController({
       // 앞으로 굴리거나, 아래(위로 되돌아 진입)에서 거꾸로 굴리게 한다.
       const entering = trapAt(next)
       if (entering) {
-        const seat = next > from ? 0 : 1
+        const seat = next > from ? 0 : (entering.reverseSeat ?? 1)
         entering.progress.set(seat)
         rollTargetRef.current = seat
         // 여기서 `.set()`이 진행 중인 노치 애니를 중단시켜 onComplete가 안 불리므로,
