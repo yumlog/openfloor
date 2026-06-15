@@ -216,12 +216,23 @@ function PhilosophyGrow({
   cy: number
   frameH: number
 }) {
-  // 800×280 카드를 화면을 덮을 때까지 확대 — 가로/세로 중 더 필요한 쪽 기준.
-  const coverScale = Math.max(
-    (2 * Math.max(cy, frameH - cy) * 1.3) / GCH,
-    (2 * cx * 1.3) / GCW
+  // 카드가 화면을 '딱 덮는' 스케일(여유 배율 없이).
+  const exactCover = Math.max(
+    (2 * Math.max(cy, frameH - cy)) / GCH,
+    (2 * cx) / GCW
   )
-  const scale = useTransform(g, [0, 1], [ratio, coverScale], { clamp: true })
+  // 최종(g=1)은 1.3배 여유까지 — 커버리지 마진 유지(가장자리 안 샘).
+  const coverScale = exactCover * 1.3
+  // g 0→COVER_AT: 작음→딱 덮음(눈에 보이는 확대). g COVER_AT→1: 1.3배 여유로
+  // 빠르게 오버슈트(이미 덮여 있어 안 보임). '다 덮인 뒤 변화 없는 정지 빨강' 꼬리가
+  // 거의 사라진다.
+  const COVER_AT = 0.92
+  const scale = useTransform(
+    g,
+    [0, COVER_AT, 1],
+    [ratio, exactCover, coverScale],
+    { clamp: true }
+  )
   const contentOpacity = useTransform(g, [0, 0.4], [1, 0], { clamp: true })
 
   // 오버레이 가시성 — philosophy(2)~전환 구간에서 1, portfolio(3) 직전(빨강 배경)에서만
