@@ -25,7 +25,7 @@ export interface SlideDef {
 export const SLIDES: SlideDef[] = [
   { id: 'hero', label: 'Hero', theme: 'dark' },
   { id: 'about', label: 'About', theme: 'dark' },
-  { id: 'philosophy', label: 'Philosophy', theme: 'light' },
+  { id: 'philosophy', label: 'Philosophy', theme: 'dark' },
   { id: 'portfolio', label: 'Portfolio', theme: 'dark' },
   { id: 'manifesto', label: 'Manifesto', theme: 'dark' },
   { id: 'contact', label: 'Contact', theme: 'dark' },

@@ -24,10 +24,10 @@ export function PhilosophyMobile({ active }: { active: boolean }) {
             style={{ backgroundColor: card.bg }}
           />
           <div>
-            <p className="text-card-name text-[16px] leading-[1.4] font-bold tracking-[-0.04em]">
+            <p className="text-title-on-dark text-[16px] leading-[1.4] font-bold tracking-[-0.04em]">
               {card.name}
             </p>
-            <p className="text-text-on-light mt-1.5 text-[13px] leading-[1.5] whitespace-pre-line">
+            <p className="text-text-on-dark mt-1.5 text-[13px] leading-[1.5] whitespace-pre-line">
               {card.body}
             </p>
           </div>
