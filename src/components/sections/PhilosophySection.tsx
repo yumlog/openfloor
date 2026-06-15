@@ -10,23 +10,26 @@ import {
   PhilosophyStack,
   CardFace,
   LAST_CARD_CENTER_FRAC,
+  STACK_END,
 } from './philosophy/PhilosophyStack'
 import { PhilosophyMobile } from './philosophy/PhilosophyMobile'
 import { PHILOSOPHY_CARDS } from './philosophy/cards'
 
 const def = SLIDES[2]
 
-/** philosophy 트랩 스텝 수(카드 쌓임 + 마지막 노치 .75→1 확대). */
+/** philosophy 트랩 스텝 수(카드 쌓임 + 마지막 노치 확대). */
 export const PHILOSOPHY_STEPS = 4
 
 const HEADLINE_LINES = ['결과로 말하는 것이', '우리의 방식입니다.']
 const LABEL_DELAY = 0
 const HEADLINE_DELAY = 0.15
 
-const GROW_START = 0.75
+/** 확대 시작 = 쌓임 종료. 이후 progress 1 까지가 확대 구간(넓을수록 확대가 느림). */
+const GROW_START = STACK_END
 const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
 const GCW = 800 // 확대 카드 design 너비
 const GCH = 280 // 확대 카드 design 높이
+const TITLE_GAP = 72 // 헤딩 ↔ 첫 카드 간격(design px)
 
 interface PhilosophySectionProps {
   active: boolean
@@ -39,13 +42,12 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
   const isMobile = frame.w < 768
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
 
-  // 확대 구간(.78~)에서 타이틀+스택을 페이드아웃해 빨간 카드에 무대를 넘긴다.
-  const stageOpacity = useTransform(progress, [0.78, 0.92], [1, 0], {
+  // 확대 구간에서 타이틀+스택을 페이드아웃해 빨간 카드에 무대를 넘긴다.
+  const stageOpacity = useTransform(progress, [0.72, 0.9], [1, 0], {
     clamp: true,
   })
 
   // 빨강(마지막) 카드의 쌓인 화면 중심을 측정 — 확대 카드가 그 자리·그 크기에서 시작.
-  // cx = 섹션 가로 중앙, cy = stage 안에서 마지막 카드 중심(LAST_CARD_CENTER_FRAC).
   const sectionRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const [center, setCenter] = useState({ cx: frame.w / 2, cy: frame.h / 2 })
@@ -105,7 +107,12 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
           />
         </Container>
 
-        <div className="flex flex-1 items-center justify-center pb-[clamp(16px,2vw,32px)] max-md:pb-[48px]">
+        {/* 데스크탑: 헤딩 아래 72px 고정 간격 + 상단 정렬(stage origin top과 맞물림).
+            모바일: 중앙 정렬 reflow. */}
+        <div
+          className="flex flex-1 flex-col items-center max-md:justify-center"
+          style={{ paddingTop: isMobile ? undefined : TITLE_GAP * ratio }}
+        >
           {isMobile ? (
             <PhilosophyMobile active={active} />
           ) : (
@@ -138,7 +145,7 @@ export function PhilosophySection({ active, progress }: PhilosophySectionProps) 
 
 /**
  * Philosophy → Portfolio 브릿지. 측정한 빨강 카드 위치(cx,cy)에서, 쌓인 카드와
- * 같은 크기(800×280, scale=ratio)로 시작해 progress .75→1 동안 화면을 덮을 때까지
+ * 같은 크기(800×280, scale=ratio)로 시작해 GROW_START→1 동안 화면을 덮을 때까지
  * 확대 — 실제 마지막 카드가 그대로 커지는 것처럼 보인다. 본문/따옴표는 카드와 함께
  * 커지다 페이드아웃, 그 뒤 흰 PORTFOLIO가 떠오른다. 끝 상태(빨강 + 흰 PORTFOLIO)는
  * Portfolio progress 0 과 동일해 슬라이드 2→3 스냅이 안 보인다.
@@ -164,16 +171,20 @@ function PhilosophyGrow({
     (2 * Math.max(cy, frameH - cy) * 1.3) / GCH,
     (2 * cx * 1.3) / GCW
   )
-  // 카드가 growT 0.85에 화면을 다 덮음(확대를 길게 = 천천히, 덮인 뒤 머무는 구간 최소).
-  const scale = useTransform(growT, [0, 0.85], [ratio, coverScale], {
+  // 카드가 growT 0.9에 화면을 다 덮음(확대를 길게 = 천천히, 덮인 뒤 머무는 구간 최소).
+  const scale = useTransform(growT, [0, 0.9], [ratio, coverScale], {
     clamp: true,
   })
-  const panelOpacity = useTransform(progress, [0.742, 0.75], [0, 1], {
-    clamp: true,
-  })
+  // GROW_START 직전부터 확대 패널이 떠오른다(쌓인 빨강 카드와 1:1로 겹침).
+  const panelOpacity = useTransform(
+    progress,
+    [GROW_START - 0.01, GROW_START],
+    [0, 1],
+    { clamp: true }
+  )
   const contentOpacity = useTransform(growT, [0, 0.4], [1, 0], { clamp: true })
   // 화면이 다 덮인 뒤 흰 PORTFOLIO가 떠오른다(끝 = 흰 PORTFOLIO + 빨강 rest).
-  const titleOpacity = useTransform(growT, [0.85, 1], [0, 1], { clamp: true })
+  const titleOpacity = useTransform(growT, [0.9, 1], [0, 1], { clamp: true })
 
   return (
     <motion.div

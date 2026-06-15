@@ -27,7 +27,7 @@ export const PHILOSOPHY_CARDS: PhilosophyCard[] = [
     id: 'collab',
     num: '02',
     name: '열린 협업 구조',
-    body: '역할은 나누지만 정보를 닫아두지 않습니다. 좋은 결과물은 각자의 전문성보다\n맥락이 연결될 때 만들어집니다.',
+    body: '역할은 나누지만 정보를 닫아두지 않습니다. 좋은 결과물은 각자의 전문성보다 맥락이 연결될 때 만들어집니다.',
     bg: '#3B82F6',
   },
   {
