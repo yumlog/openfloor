@@ -115,7 +115,7 @@ export default function App() {
       <Slides trackY={trackY}>
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
         <AboutSection active={index === 1} />
-        <PhilosophySection active={index === 2} progress={philosophyRoll} slide={slide} />
+        <PhilosophySection active={index === 2} progress={philosophyRoll} slide={slide} goTo={goTo} />
         <PortfolioSection active={index === 3} progress={portfolioRoll} />
         <ManifestoSection active={index === 4} progress={rollProgress} />
         <ContactSection active={index === 5} />

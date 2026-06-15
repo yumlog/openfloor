@@ -22,6 +22,7 @@ import { PhilosophyMobile } from './philosophy/PhilosophyMobile'
 import { PHILOSOPHY_CARDS } from './philosophy/cards'
 
 const def = SLIDES[2]
+const PORTFOLIO_INDEX = SLIDES.findIndex((sl) => sl.id === 'portfolio')
 
 /** philosophy 트랩 스텝 수(카드 쌓임 + 마지막 노치 확대). */
 export const PHILOSOPHY_STEPS = 4
@@ -48,12 +49,15 @@ interface PhilosophySectionProps {
   /** 전역 슬라이드 위치(2≈philosophy, 3≈portfolio) — 확대 오버레이가 전환 seam을
       양방향으로 덮게 하는 데 쓴다. */
   slide: MotionValue<number>
+  /** 프로그램 스냅 — 확대 완료 시 죽은 스크롤 없이 portfolio로 자동 전환하는 데 쓴다. */
+  goTo: (next: number) => void
 }
 
 export function PhilosophySection({
   active,
   progress,
   slide,
+  goTo,
 }: PhilosophySectionProps) {
   const frame = useFrameSize()
   const isMobile = frame.w < 768
@@ -77,9 +81,18 @@ export function PhilosophySection({
       duration: GROW_DURATION,
       delay: growing ? 0.1 : 0,
       ease: growing ? [0.4, 0, 0.2, 1] : [0.4, 0, 1, 1],
+      // 확대가 끝나면 트랩을 1.0까지 더 굴리는 죽은 스크롤 없이 곧장 portfolio로 넘긴다.
+      // 정방향 확대 완료에서만(아직 philosophy일 때) 발동 — 역방향 재진입은 growing이
+      // true로 유지돼 애니메이션이 재시작되지 않으므로 onComplete가 다시 불리지 않는다.
+      onComplete:
+        growing && PORTFOLIO_INDEX > 0
+          ? () => {
+              if (slide.get() < PORTFOLIO_INDEX) goTo(PORTFOLIO_INDEX)
+            }
+          : undefined,
     })
     return () => controls.stop()
-  }, [growing, g])
+  }, [growing, g, goTo, slide])
 
   // 확대 진행(g)에 따라 타이틀+스택을 페이드아웃(시간 기반, 스크롤 속도 무관).
   const stageOpacity = useTransform(g, [0.3, 0.6], [1, 0], { clamp: true })
@@ -182,7 +195,7 @@ export function PhilosophySection({
 /**
  * Philosophy → Portfolio 브릿지. progress가 GROW_START를 넘으면(growing) 시간 기반
  * g:0→1 로 빨강 카드가 화면을 덮을 때까지 쭉 확대된다(휠 양 무관). 본문/따옴표는 함께
- * 커지다 페이드아웃, 그 뒤 흰 PORTFOLIO가 떠오른다.
+ * 커지다 페이드아웃, 그 뒤 portfolio로 넘어간다.
  *
  * 오버레이 가시성은 `active`가 아니라 `slide`로 게이트한다 — philosophy↔portfolio
  * 슬라이드 전환 구간(2↔3) 내내 빨강이 덮어, 정/역방향 모두 흰 배경 노출 없이 seam을
@@ -211,7 +224,6 @@ function PhilosophyGrow({
   )
   const scale = useTransform(g, [0, 0.9], [ratio, coverScale], { clamp: true })
   const contentOpacity = useTransform(g, [0, 0.4], [1, 0], { clamp: true })
-  const titleOpacity = useTransform(g, [0.9, 1], [0, 1], { clamp: true })
 
   // 오버레이 가시성 — philosophy(2)~전환 구간에서 1, portfolio(3) 직전(빨강 배경)에서만
   // 페이드. 양방향 seam을 덮는다.
@@ -245,27 +257,6 @@ function PhilosophyGrow({
         <div style={{ width: GCW, height: GCH }}>
           <CardFace card={GROWN_CARD} contentOpacity={contentOpacity} />
         </div>
-      </motion.div>
-
-      {/* 흰 PORTFOLIO (빨강 위). */}
-      <motion.div
-        aria-hidden
-        className="absolute inset-0 flex items-center justify-center"
-        style={{ opacity: titleOpacity }}
-      >
-        <span
-          style={{
-            fontFamily: 'var(--font-montserrat)',
-            fontWeight: 700,
-            lineHeight: 1.2,
-            letterSpacing: '-0.04em',
-            color: '#ffffff',
-            fontSize: 224 * ratio,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          PORTFOLIO
-        </span>
       </motion.div>
     </motion.div>
   )

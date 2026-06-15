@@ -24,8 +24,8 @@ export const PORTFOLIO_STEPS = 4
 
 /* reveal: progress가 이 값을 넘으면 시간 기반 0→1 재생(휠 양 무관). */
 const REVEAL_TRIGGER = 0.05
-const REVEAL_DURATION = 0.9
-const TIME_EASE = [0.22, 1, 0.36, 1] as const
+const REVEAL_DURATION = 1.7
+const TIME_EASE = [0.65, 0, 0.35, 1] as const
 
 /* reveal 구간 매핑(겹침이 핵심). */
 const TEXT_SPLIT_RANGE: [number, number] = [0, 0.6] // 텍스트가 위/아래로 벌어지는 구간
