@@ -18,9 +18,9 @@ export const PORTFOLIO_STEPS = 4
 const SPLIT_START = 0
 const SPLIT_END = 0.55
 const SLIDE_BANDS: [number, number][] = [
-  [0.55, 0.7],
-  [0.7, 0.85],
-  [0.85, 1],
+  [0, 0.55], // 첫 슬라이드: split과 동시에 중앙에서 scale-in
+  [0.55, 0.775], // 두 번째: 아래→위
+  [0.775, 1], // 세 번째: 아래→위
 ]
 
 interface PortfolioSectionProps {
@@ -59,6 +59,7 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
               band={SLIDE_BANDS[i]}
               z={10 * (i + 1)}
               progress={progress}
+              scaleIn={i === 0}
             />
           ))}
         </motion.div>,
@@ -116,19 +117,26 @@ function PortfolioText({
   )
 }
 
-/** 풀커버 슬라이드. 자기 band 구간에서 아래(100%)→0으로 올라온다. */
+/**
+ * 풀커버 슬라이드. 기본은 자기 band 구간에서 아래(100%)→0으로 올라온다.
+ * scaleIn이면 중앙에서 scale 0→1로 확대(split과 동시 진행). 훅은 조건부 호출
+ * 금지라 y/scale을 항상 만들고 style만 분기한다.
+ */
 function PortfolioSlide({
   src,
   band,
   z,
   progress,
+  scaleIn,
 }: {
   src: string
   band: [number, number]
   z: number
   progress: MotionValue<number>
+  scaleIn?: boolean
 }) {
   const y = useTransform(progress, band, ['100%', '0%'], { clamp: true })
+  const scale = useTransform(progress, band, [0, 1], { clamp: true })
   return (
     <motion.img
       src={src}
@@ -136,7 +144,7 @@ function PortfolioSlide({
       aria-hidden
       draggable={false}
       className="absolute inset-0 h-full w-full object-cover"
-      style={{ y, zIndex: z }}
+      style={scaleIn ? { scale, zIndex: z } : { y, zIndex: z }}
     />
   )
 }
