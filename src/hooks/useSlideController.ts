@@ -7,7 +7,10 @@ import {
   REVEAL_HOLD,
   TIME_EASE,
 } from '@/components/sections/PortfolioSection'
-import { GROW_DURATION } from '@/components/sections/PhilosophySection'
+import {
+  GROW_DURATION,
+  GROW_START,
+} from '@/components/sections/PhilosophySection'
 
 export interface SlideController {
   /** 실수값 슬라이드 진행도(0 = 첫 섹션). 모든 애니메이션을 구동. */
@@ -220,6 +223,8 @@ export function useSlideController({
     // 한 제스처가 한 섹션만 이동하며, 아래의 휠 잠금 + quiet 타이머가 연속
     // 스크롤 / 관성이 그 너머로 advance하는 걸 막는다.
     const step = (dir: number) => {
+      // 확대 커밋 후 정방향 입력은 무시(조기 portfolio advance 방지).
+      if (philoGrowCommitted() && dir > 0) return
       // 스크롤 트랩 게이트(DISCRETE 경로 — 키보드 + 재생 제스처): 가둔 슬라이드에
       // 머무는 동안 step은 섹션 스냅 대신 드럼을 딱 한 칸 움직인다. 휠 / 터치는
       // 아래의 비례 경로를 쓰며, 이 경로가 `rollTargetRef`를 동기화해 둘이 경계에서
@@ -264,6 +269,14 @@ export function useSlideController({
     // 가둔 슬라이드에 머무는 중이고, 섹션 스냅 중이 아닌가?
     const inTrap = () => !animatingRef.current && !!trapAt(currentRef.current)
 
+    // Philosophy 확대가 커밋된 상태(정방향으로 GROW_START에 도달) — 이때 정방향
+    // 입력을 무시해 push-past-end로 인한 조기 슬라이드 advance를 막는다. 핸드오프는
+    // grow의 onComplete(goTo)만 담당. rollTargetRef(목표)로 판정해 빠른 스크롤에서
+    // 스프링이 따라오기 전이라도 즉시 차단(목표를 세팅하는 그 입력 자체는 체크가
+    // rollTo 이전이라 차단되지 않으므로 deadlock 없음).
+    const philoGrowCommitted = () =>
+      currentRef.current === PHILO_IDX && rollTargetRef.current >= GROW_START
+
     // 비례 드럼 롤을 재타깃한다. 속도를 이어받는 스프링이 목표를 추종해, 튕기는
     // 도중 재타깃해도 모멘텀이 유지되고(휘리릭) 작은 너지 하나는 살짝만 움직인다.
     const rollTo = (target: number) => {
@@ -304,6 +317,11 @@ export function useSlideController({
       // 가둔 슬라이드: 드럼을 관성으로 비례 롤. 끝에 핀 채로 계속 밀 때만
       // 누적 버스트가 밖으로 advance.
       if (inTrap()) {
+        // 확대 커밋 후 정방향 휠은 무시(조기 portfolio advance 방지).
+        if (philoGrowCommitted() && e.deltaY > 0) {
+          resetWheel()
+          return
+        }
         const sens = trapAt(currentRef.current)?.sensitivity ?? ROLL_SENSITIVITY
         const t = rollTargetRef.current
         const pushingPastEnd =
@@ -362,6 +380,8 @@ export function useSlideController({
       const dy = touchPrevY - y
       touchPrevY = y
       if (inTrap()) {
+        // 확대 커밋 후 정방향 터치는 무시(조기 portfolio advance 방지).
+        if (philoGrowCommitted() && dy > 0) return
         const sens = trapAt(currentRef.current)?.sensitivity ?? ROLL_SENSITIVITY
         const t = rollTargetRef.current
         const pushingPastEnd =
