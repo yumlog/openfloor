@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { animate, useMotionValue, type MotionValue } from 'motion/react'
 import { SLIDE_DURATION, SLIDE_EASE, SLIDES } from '@/config/slides'
-import { REVEAL_DURATION } from '@/components/sections/PortfolioSection'
+import {
+  REVEAL_DURATION,
+  REVEAL_END,
+  TIME_EASE,
+} from '@/components/sections/PortfolioSection'
 
 export interface SlideController {
   /** 실수값 슬라이드 진행도(0 = 첫 섹션). 모든 애니메이션을 구동. */
@@ -108,8 +112,6 @@ export function useSlideController({
   // 입력 처리.
   useEffect(() => {
     const trapAt = (idx: number) => traps?.find((t) => t.index === idx)
-    // 정방향 seam 자동 전환 잠금 해제 타이머(아래 goTo에서 set, cleanup에서 clear).
-    let seamUnlockTimer: ReturnType<typeof setTimeout>
     const goTo = (next: number) => {
       next = clamp(next, 0, total - 1)
       if (next === currentRef.current || animatingRef.current) return
@@ -132,28 +134,30 @@ export function useSlideController({
       const isSeam =
         (from === PHILO_IDX && next === PORT_IDX) ||
         (from === PORT_IDX && next === PHILO_IDX)
-      // 정방향 philosophy→portfolio: 확대 핸드오프 직후 Portfolio 텍스트 reveal이
-      // 시간 기반으로 재생되는 '커밋된 자동 전환'. 이 동안 휠/터치/키보드가 트랩 롤을
-      // advance시켜 reveal을 끊지 못하도록, seam 완료 후에도 REVEAL_DURATION(+0.1s
-      // 여유)만큼 animatingRef를 true로 유지해 입력을 잠근다. (역방향·그 외는 즉시 unlock.)
+      // 정방향 philosophy→portfolio: 확대 핸드오프 직후 Portfolio reveal을 '커밋된 자동
+      // 전환'으로 재생한다. seam(slide 2→3)과 동시에 trap progress를 0→REVEAL_END로
+      // 자동 전진시키면 reveal01이 함께 0→1로 재생된다. 그 전진이 끝날 때까지
+      // animatingRef를 true로 유지해(inTrap()=false → 롤 잠금, step() 게이트) 휠/터치/
+      // 키보드가 reveal을 끊지 못하게 한다. (역방향·그 외는 onComplete에서 즉시 unlock.)
       const isForwardSeam = from === PHILO_IDX && next === PORT_IDX
       animate(slide, next, {
         duration: isSeam ? SEAM_DURATION : SLIDE_DURATION,
         ease: SLIDE_EASE,
         onComplete: () => {
-          if (isForwardSeam) {
-            clearTimeout(seamUnlockTimer)
-            seamUnlockTimer = setTimeout(
-              () => {
-                animatingRef.current = false
-              },
-              (REVEAL_DURATION + 0.1) * 1000
-            )
-          } else {
-            animatingRef.current = false
-          }
+          if (!isForwardSeam) animatingRef.current = false
         },
       })
+      if (isForwardSeam && entering) {
+        animate(entering.progress, REVEAL_END, {
+          duration: REVEAL_DURATION,
+          ease: TIME_EASE,
+          onComplete: () => {
+            // 잠금 해제 후 첫 스크롤이 progress를 0으로 되돌리지 않도록 목표를 동기화.
+            rollTargetRef.current = REVEAL_END
+            animatingRef.current = false
+          },
+        })
+      }
     }
     goToRef.current = goTo
 
@@ -353,7 +357,6 @@ export function useSlideController({
       window.removeEventListener('touchend', onTouchEnd)
       window.removeEventListener('keydown', onKey)
       clearTimeout(wheelResetTimer)
-      clearTimeout(seamUnlockTimer)
     }
   }, [enabled, total, slide, traps])
 

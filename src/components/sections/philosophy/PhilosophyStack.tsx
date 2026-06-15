@@ -143,8 +143,9 @@ function CardCell({
       style={{ top: stackedTop, width: CARD_W, height: CARD_H, zIndex: index + 1 }}
       initial={false}
       animate={{
-        // active 전엔 펼침 + 투명. active면 임계값 통과 카드는 0(=쌓임), 아니면 펼침.
-        y: !active ? spreadOffset : stacked ? 0 : spreadOffset,
+        // y는 항상 stacked 상태를 따른다(가시성만 opacity로 게이트). 역방향 재진입은
+        // seat=STACK_END라 전 카드 stacked로 들어와, 펼쳐졌다 다시 포개지는 깜빡임이 없다.
+        y: stacked ? 0 : spreadOffset,
         opacity: active ? 1 : 0,
       }}
       transition={{

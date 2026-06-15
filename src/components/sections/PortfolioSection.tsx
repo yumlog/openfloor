@@ -1,43 +1,37 @@
-import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  animate,
-  motion,
-  useMotionValue,
-  useTransform,
-  type MotionValue,
-} from 'motion/react'
+import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH } from '@/config/slides'
 import { PORTFOLIO_SLIDES } from './portfolio/projects'
 
 /* ---------------------------------------------------------------------------
    Portfolio (슬라이드 3). 빨강 배경 + 흰 PORTFOLIO 텍스트.
-   진입 후 progress가 REVEAL_TRIGGER를 넘으면 단일 시간 기반 reveal(0→1)이 재생되고,
-   그 하나의 클럭에서 [텍스트 갈라짐 + 페이드]와 [첫 슬라이드 중앙 scale]을 겹쳐 구동한다.
-   → 스크롤 속도와 무관하게 "텍스트가 아직 보이는 동안 슬라이드가 커지기 시작"이 보장됨.
-   2·3번 슬라이드는 기존처럼 스크롤 연속으로 아래→위 상승(RISE_BANDS).
+   reveal은 trap progress로 직접 구동한다(0→REVEAL_END에서 0→1). 정방향 진입은
+   컨트롤러가 progress를 자동 전진시켜 재생(그동안 입력 잠금)하고, 역방향/재진입도
+   progress만 따르므로 별도 클럭/히스테리시스가 필요 없다. 그 하나의 reveal01에서
+   [텍스트 갈라짐 + 페이드]와 [첫 슬라이드 중앙 scale]을 겹쳐 구동한다.
+   2·3번 슬라이드는 REVEAL_END 위 구간에서 스크롤 연속으로 아래→위 상승(RISE_BANDS).
    풀블리드라 body로 포털.
 --------------------------------------------------------------------------- */
 
 export const PORTFOLIO_STEPS = 4
 
-/* reveal: progress가 이 값을 넘으면 시간 기반 0→1 재생(휠 양 무관). */
-const REVEAL_ON = 0.05 // 올라갈 때(정방향): 이 값 넘으면 reveal 재생(갈라짐 시작)
-const REVEAL_OFF = 0.5 // 내려올 때(역방향): 이 값 아래로 내려오면 reveal 되감기(모임 시작) — 빠져나가기 전에 다 모이도록 일찍 트리거
-/** reveal 재생 시간(s). 자동진행 입력 잠금(useSlideController)이 이 값을 참조하므로 export. */
+/** reveal이 완료되는 progress 지점. 컨트롤러가 정방향 진입 시 progress를 0→여기로 전진. */
+export const REVEAL_END = 0.3
+/** reveal 자동 전진 시간(s). 컨트롤러가 이 값으로 progress를 전진시킨다. */
 export const REVEAL_DURATION = 2.55
-const TIME_EASE = [0.65, 0, 0.35, 1] as const
+/** reveal 자동 전진 이징(컨트롤러가 참조). */
+export const TIME_EASE = [0.65, 0, 0.35, 1] as const
 
 /* reveal 구간 매핑(겹침이 핵심). */
 const TEXT_SPLIT_RANGE: [number, number] = [0, 0.6] // 텍스트가 위/아래로 벌어지는 구간
 const TEXT_FADE_RANGE: [number, number] = [0.35, 0.75] // 텍스트가 사라지는 구간(늦게 시작)
 const SLIDE_SCALE_RANGE: [number, number] = [0.25, 0.85] // 첫 슬라이드 확대(텍스트 보일 때 시작)
 
-/* 후속 슬라이드(2·3): 스크롤 연속 상승(기존 그대로). */
+/* 후속 슬라이드(2·3): REVEAL_END 직후부터 스크롤 연속 상승(데드존 제거). */
 const RISE_BANDS: [number, number][] = [
-  [0.55, 0.775],
-  [0.775, 1],
+  [0.3, 0.65],
+  [0.65, 1.0],
 ]
 
 interface PortfolioSectionProps {
@@ -49,37 +43,9 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
   const frame = useFrameSize()
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
 
-  // 단일 시간 기반 reveal 클럭. progress가 트리거를 넘으면 0→1, 되돌아가면 1→0.
-  const reveal = useMotionValue(0)
-  const [on, setOn] = useState(false)
-  useEffect(() => {
-    let prev = progress.get()
-    const apply = (p: number) => {
-      const rising = p >= prev
-      prev = p
-      setOn((cur) => {
-        if (!cur && rising && p >= REVEAL_ON) return true
-        if (cur && !rising && p <= REVEAL_OFF) return false
-        return cur
-      })
-    }
-    apply(progress.get())
-    const unsub = progress.on('change', apply)
-    return () => unsub()
-  }, [progress])
-  useEffect(() => {
-    const c = animate(reveal, on ? 1 : 0, {
-      duration: REVEAL_DURATION,
-      ease: TIME_EASE,
-    })
-    return () => c.stop()
-  }, [on, reveal])
-
-  // 정방향 진입(혹은 manifesto에서 역진입) 시 reveal 자동 재생 — 추가 스크롤 없이
-  // [텍스트 갈라짐 + 첫 슬라이드]가 자동 진행. (역방향 모임은 히스테리시스 falling<=REVEAL_OFF에서 끔.)
-  useEffect(() => {
-    if (active) setOn(true)
-  }, [active])
+  // reveal을 trap progress로 직접 구동(0→REVEAL_END에서 0→1). 정/역/재진입 모두
+  // progress만 따르므로 클럭/히스테리시스가 불필요.
+  const reveal01 = useTransform(progress, [0, REVEAL_END], [0, 1], { clamp: true })
 
   return (
     <>
@@ -99,10 +65,10 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
           {/* 솔리드 빨강 배경. */}
           <div className="absolute inset-0 bg-[#FB3640]" />
 
-          <PortfolioText reveal={reveal} ratio={ratio} frameH={frame.h} />
+          <PortfolioText reveal={reveal01} ratio={ratio} frameH={frame.h} />
 
           {/* 첫 슬라이드: reveal 클럭으로 중앙 확대(텍스트와 겹침). */}
-          <PortfolioScaleSlide src={PORTFOLIO_SLIDES[0]} z={10} reveal={reveal} />
+          <PortfolioScaleSlide src={PORTFOLIO_SLIDES[0]} z={10} reveal={reveal01} />
 
           {/* 후속 슬라이드: 스크롤 연속 상승. */}
           {PORTFOLIO_SLIDES.slice(1).map((src, i) => (
