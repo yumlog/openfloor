@@ -24,8 +24,10 @@ const HEADLINE_LINES = ['결과로 말하는 것이', '우리의 방식입니다
 const LABEL_DELAY = 0
 const HEADLINE_DELAY = 0.15
 
-/** 확대 시작 = 쌓임 종료. 이후 progress 1 까지가 확대 구간(넓을수록 확대가 느림). */
-const GROW_START = STACK_END
+/** 쌓임 종료(STACK_END) 후 마지막 카드를 읽을 멈춤 구간(DWELL)을 두고 확대 시작.
+   DWELL 구간은 스크롤해도 카드가 compact로 멈춰 있다가 GROW_START부터 커진다. */
+const DWELL = 0.13 // ≈ 스크롤 430px(감도 0.0003 기준) ≈ 1초 멈춤
+const GROW_START = STACK_END + DWELL
 const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
 const GCW = 800 // 확대 카드 design 너비
 const GCH = 280 // 확대 카드 design 높이
@@ -178,7 +180,7 @@ function PhilosophyGrow({
   // GROW_START 직전부터 확대 패널이 떠오른다(쌓인 빨강 카드와 1:1로 겹침).
   const panelOpacity = useTransform(
     progress,
-    [GROW_START - 0.01, GROW_START],
+    [GROW_START - 0.02, GROW_START],
     [0, 1],
     { clamp: true }
   )

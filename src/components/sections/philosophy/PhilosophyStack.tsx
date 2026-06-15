@@ -19,7 +19,7 @@ const STACK_OFFSET = 140
 const N = PHILOSOPHY_CARDS.length
 
 /** 쌓임이 끝나는 progress(= 확대 시작 GROW_START). 이후 .65→1 이 확대 구간. */
-export const STACK_END = 0.65
+export const STACK_END = 0.55
 /** 스테이지 높이(쌓인 상태 기준): 오프셋*(n-1) + 카드 높이. */
 export const STAGE_H = STACK_OFFSET * (N - 1) + CARD_H // 560
 /** 마지막(빨강) 카드 중심이 스테이지에서 차지하는 세로 비율 — 확대 측정용. */
@@ -127,9 +127,11 @@ function CardCell({
     const start = ((index - 1) / (N - 1)) * STACK_END
     const end = (index / (N - 1)) * STACK_END
     const pLocal = clamp01((p - start) / (end - start))
+    // easeOutCubic — 빠르게 올라오다 자리에 부드럽게 감속하며 안착.
+    const eased = 1 - Math.pow(1 - pLocal, 3)
     const spread = index * (CARD_H + GAP) // 펼침: i*300
     const stacked = index * STACK_OFFSET // 쌓임: i*140
-    return spread + (stacked - spread) * pLocal
+    return spread + (stacked - spread) * eased
   })
 
   return (
