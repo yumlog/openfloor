@@ -181,6 +181,41 @@ export function useSlideController({
     }
     goToRef.current = goTo
 
+    // 역방향 자동 re-gather: portfolio에서 progress가 REVEAL_END 아래로 하향 교차하면
+    // reveal를 0까지 자동 재생(잠금)한 뒤 philosophy로 핸드오프. 정방향 자동재생과 대칭.
+    // (philosophy가 트랩일 때 = 데스크탑에서만. mobile은 기존 손 스크롤 유지.)
+    const portTrap = trapAt(PORT_IDX)
+    const philoIsTrap = !!trapAt(PHILO_IDX)
+    let regatherPrev = portTrap ? portTrap.progress.get() : 0
+    let regathering = false
+    const onPortProgress = (p: number) => {
+      const crossingDown = regatherPrev >= REVEAL_END && p < REVEAL_END
+      regatherPrev = p
+      if (
+        !philoIsTrap ||
+        !portTrap ||
+        currentRef.current !== PORT_IDX ||
+        animatingRef.current ||
+        regathering ||
+        !crossingDown
+      )
+        return
+      regathering = true
+      animatingRef.current = true // inTrap()=false → 손굴림 잠금
+      rollAnimatingRef.current = false
+      rollTargetRef.current = 0
+      animate(portTrap.progress, 0, {
+        duration: REVEAL_DURATION,
+        ease: TIME_EASE,
+        onComplete: () => {
+          regathering = false
+          animatingRef.current = false // 아래 goTo 가드 통과용
+          goTo(PHILO_IDX) // isReverseSeam 잠금으로 빨강 카드 축소까지 이어짐
+        },
+      })
+    }
+    const unsubPort = portTrap?.progress.on('change', onPortProgress)
+
     // 한 방향 step. 스냅(또는 트랩 탈출)이 진행 중이면 추가 입력을 무시한다 —
     // 한 제스처가 한 섹션만 이동하며, 아래의 휠 잠금 + quiet 타이머가 연속
     // 스크롤 / 관성이 그 너머로 advance하는 걸 막는다.
@@ -378,6 +413,7 @@ export function useSlideController({
       window.removeEventListener('keydown', onKey)
       clearTimeout(wheelResetTimer)
       clearTimeout(reverseUnlockTimer)
+      unsubPort?.()
     }
   }, [enabled, total, slide, traps])
 
