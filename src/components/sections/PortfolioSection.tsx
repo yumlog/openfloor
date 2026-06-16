@@ -287,6 +287,9 @@ function PortfolioScaleSlide({
   const scale = useTransform(reveal, SLIDE_SCALE_IN, SLIDE_SCALE_OUT, {
     clamp: true,
   })
+  // scale 시작(0.25)부터 페이드 인 — 안착 직전(0.58)에 100% 도달. 작고 흐릿하게
+  // 나타나 커지며 또렷해진다(역방향은 자동 대칭으로 흐려지며 작아짐).
+  const opacity = useTransform(reveal, [0.25, 0.58], [0, 1], { clamp: true })
   // reveal이 거의 끝났을 때(REVEAL_SETTLE↑) dim/텍스트 등장. 역방향으로 내려가면
   // 다시 false가 되어 dim/텍스트가 먼저 사라진 뒤 이미지가 축소된다.
   const [revealed, setRevealed] = useState(false)
@@ -297,7 +300,7 @@ function PortfolioScaleSlide({
     return () => unsub()
   }, [reveal])
   return (
-    <motion.div className="absolute inset-0" style={{ scale, zIndex: z }}>
+    <motion.div className="absolute inset-0" style={{ scale, opacity, zIndex: z }}>
       <PortfolioSlideContent
         project={project}
         index={index}
