@@ -18,6 +18,8 @@ const CARD_H = 280
 const GAP = 20
 const STACK_OFFSET = 140
 const N = PHILOSOPHY_CARDS.length
+/** 진입 바운스 시작 y 오프셋(px) — 아래에서 통 튀어 올라온다. */
+const ENTRY_OFFSET = 40
 
 /** 쌓임이 끝나는 progress(= 확대 시작 GROW_START 계산 기준). 임계값은 이 안에 둔다. */
 export const STACK_END = 0.55
@@ -136,29 +138,37 @@ function CardCell({
   const spreadOffset = index * (CARD_H + GAP) - stackedTop // i*160
 
   return (
-    // z는 transform(y)이 만드는 stacking context와 같은 요소에 둔다 — 형제 순서는
-    // zIndex로 정렬되므로(뒤·빨강 index 2가 위로) 안전.
+    // 바깥: 진입 바운스(통 통 통) + 위치/z. z는 transform이 만드는 stacking
+    // context와 같은 요소에 둔다 — 형제 순서는 zIndex로 정렬(뒤·빨강 index 2가 위로).
     <motion.div
       className="absolute left-0"
       style={{ top: stackedTop, width: CARD_W, height: CARD_H, zIndex: index + 1 }}
-      initial={false}
-      animate={{
-        // y는 항상 stacked 상태를 따른다(가시성만 opacity로 게이트). 역방향 재진입은
-        // seat=STACK_END라 전 카드 stacked로 들어와, 펼쳐졌다 다시 포개지는 깜빡임이 없다.
-        y: stacked ? 0 : spreadOffset,
-        opacity: active ? 1 : 0,
-      }}
+      initial={{ opacity: 0, scale: 0.85, y: ENTRY_OFFSET }}
+      animate={
+        active
+          ? { opacity: 1, scale: 1, y: 0 }
+          : { opacity: 0, scale: 0.85, y: ENTRY_OFFSET }
+      }
       transition={{
-        // 쌓임 글라이드: 시간 기반 easeOut "스륵"(휠 양 무관, 항상 완전 안착).
-        y: { type: 'tween', duration: 0.65, ease: [0.22, 1, 0.36, 1] },
-        opacity: {
-          duration: 0.4,
-          ease: 'easeOut',
-          delay: active ? 0.1 + (N - 1 - index) * 0.06 : 0,
-        },
+        // 한 장씩 튀어나오는 스프링 바운스. delay로 통-통-통 stagger.
+        type: 'spring',
+        stiffness: 500,
+        damping: 14,
+        delay: active ? 0.08 + index * 0.12 : 0,
       }}
     >
-      <CardFace card={card} />
+      {/* 안: 기존 쌓임(spread↔stacked). y는 항상 stacked 상태를 따른다 — 역방향
+          재진입은 seat=STACK_END라 전 카드 stacked로 들어와 깜빡임이 없다. */}
+      <motion.div
+        className="absolute inset-0"
+        animate={{ y: stacked ? 0 : spreadOffset }}
+        transition={{
+          // 쌓임 글라이드: 시간 기반 easeOut "스륵"(휠 양 무관, 항상 완전 안착).
+          y: { type: 'tween', duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+        }}
+      >
+        <CardFace card={card} />
+      </motion.div>
     </motion.div>
   )
 }
