@@ -2,7 +2,10 @@ import { createPortal } from 'react-dom'
 import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH } from '@/config/slides'
-import { PORTFOLIO_SLIDES } from './portfolio/projects'
+import {
+  PORTFOLIO_PROJECTS,
+  type PortfolioProject,
+} from './portfolio/projects'
 
 /* ---------------------------------------------------------------------------
    Portfolio (슬라이드 3). 빨강 배경 + 흰 PORTFOLIO 텍스트.
@@ -33,11 +36,13 @@ const SLIDE_SCALE_IN: number[] = [0.25, 0.78, 0.9]
 // scale: 0 → 살짝 넘김(1.045) → 1.0 안착
 const SLIDE_SCALE_OUT: number[] = [0, 1.045, 1.0]
 
-/* 후속 슬라이드(2·3): REVEAL_END 직후부터 스크롤 연속 상승(데드존 제거). */
-const RISE_BANDS: [number, number][] = [
-  [0.3, 0.65],
-  [0.65, 1.0],
-]
+/* 후속 슬라이드: 첫 장 제외한 N-1개를 [REVEAL_END, 1]에 균등 분할해 스크롤
+   연속 상승(데드존 제거). 슬라이드 개수가 바뀌면 자동으로 재분할된다. */
+const FOLLOW = PORTFOLIO_PROJECTS.length - 1
+const RISE_BANDS: [number, number][] = Array.from({ length: FOLLOW }, (_, i) => {
+  const span = (1 - REVEAL_END) / FOLLOW
+  return [REVEAL_END + i * span, REVEAL_END + (i + 1) * span]
+})
 
 interface PortfolioSectionProps {
   active: boolean
@@ -73,13 +78,23 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
           <PortfolioText reveal={reveal01} ratio={ratio} frameH={frame.h} />
 
           {/* 첫 슬라이드: reveal 클럭으로 중앙 확대(텍스트와 겹침). */}
-          <PortfolioScaleSlide src={PORTFOLIO_SLIDES[0]} z={10} reveal={reveal01} />
+          <PortfolioScaleSlide
+            project={PORTFOLIO_PROJECTS[0]}
+            index={0}
+            total={PORTFOLIO_PROJECTS.length}
+            ratio={ratio}
+            z={10}
+            reveal={reveal01}
+          />
 
           {/* 후속 슬라이드: 스크롤 연속 상승. */}
-          {PORTFOLIO_SLIDES.slice(1).map((src, i) => (
+          {PORTFOLIO_PROJECTS.slice(1).map((p, i) => (
             <PortfolioRiseSlide
-              key={src}
-              src={src}
+              key={p.image}
+              project={p}
+              index={i + 1}
+              total={PORTFOLIO_PROJECTS.length}
+              ratio={ratio}
               band={RISE_BANDS[i]}
               z={10 * (i + 2)}
               progress={progress}
@@ -138,13 +153,144 @@ function PortfolioText({
   )
 }
 
+/** 슬라이드 한 장의 내용물: 배경 이미지 + 검정 dim + 텍스트 오버레이
+    (브랜드/프로젝트/설명) + 우상단 로고 + 좌하단 Our Portfolio/페이지네이션.
+    모든 design px는 PortfolioText와 동일하게 ratio로 스케일. */
+function PortfolioSlideContent({
+  project,
+  index,
+  total,
+  ratio,
+}: {
+  project: PortfolioProject
+  index: number
+  total: number
+  ratio: number
+}) {
+  return (
+    <div className="absolute inset-0">
+      {/* 배경 이미지 */}
+      <img
+        src={project.image}
+        alt=""
+        aria-hidden
+        draggable={false}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      {/* 검정 dim */}
+      <div className="absolute inset-0 bg-black/40" />
+
+      {/* 콘텐츠 */}
+      <div
+        className="absolute inset-0 flex flex-col justify-between"
+        style={{
+          paddingTop: 100 * ratio,
+          paddingRight: 64 * ratio,
+          paddingBottom: 72 * ratio,
+          paddingLeft: 64 * ratio,
+        }}
+      >
+        {/* 상단: 브랜드 / 프로젝트 / 설명 + 우상단 로고 */}
+        <div className="relative">
+          <img
+            src={project.logo}
+            alt={project.brand}
+            draggable={false}
+            className="absolute top-0 right-0 w-auto"
+            style={{ height: 28 * ratio }}
+          />
+          <p
+            style={{
+              fontFamily: 'var(--font-pretendard)',
+              fontSize: 24 * ratio,
+              fontWeight: 400,
+              lineHeight: 1.5,
+              color: '#ffffff',
+            }}
+          >
+            {project.brand}
+          </p>
+          <h3
+            style={{
+              fontFamily: 'var(--font-pretendard)',
+              fontSize: 56 * ratio,
+              fontWeight: 700,
+              lineHeight: 1.4,
+              color: '#ffffff',
+              marginTop: 24 * ratio,
+            }}
+          >
+            {project.project}
+          </h3>
+          <p
+            className="whitespace-pre-line"
+            style={{
+              fontFamily: 'var(--font-pretendard)',
+              fontSize: 24 * ratio,
+              fontWeight: 400,
+              lineHeight: 1.5,
+              color: '#ffffff',
+              marginTop: 24 * ratio,
+              maxWidth: 720 * ratio,
+            }}
+          >
+            {project.desc}
+          </p>
+        </div>
+
+        {/* 하단: Our Portfolio + 페이지네이션 */}
+        <div>
+          <p
+            style={{
+              fontFamily: 'var(--font-montserrat)',
+              fontSize: 20 * ratio,
+              fontWeight: 700,
+              lineHeight: 1.0,
+              letterSpacing: '-0.04em',
+              color: '#ffffff',
+            }}
+          >
+            Our Portfolio
+          </p>
+          <div className="flex" style={{ gap: 20 * ratio, marginTop: 8 * ratio }}>
+            {Array.from({ length: total }, (_, i) => {
+              const current = i === index
+              return (
+                <span
+                  key={i}
+                  style={{
+                    fontFamily: 'var(--font-montserrat)',
+                    fontSize: 20 * ratio,
+                    lineHeight: 1.4,
+                    letterSpacing: '-0.04em',
+                    fontWeight: current ? 700 : 400,
+                    color: current ? '#ffffff' : '#d4d4d4',
+                  }}
+                >
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /** 첫 슬라이드: reveal 구간에서 중앙 scale 0→1.045→1.0(살짝 부풀었다 톡 안착). */
 function PortfolioScaleSlide({
-  src,
+  project,
+  index,
+  total,
+  ratio,
   z,
   reveal,
 }: {
-  src: string
+  project: PortfolioProject
+  index: number
+  total: number
+  ratio: number
   z: number
   reveal: MotionValue<number>
 }) {
@@ -152,38 +298,47 @@ function PortfolioScaleSlide({
     clamp: true,
   })
   return (
-    <motion.img
-      src={src}
-      alt=""
-      aria-hidden
-      draggable={false}
-      className="absolute inset-0 h-full w-full object-cover"
+    <motion.div
+      className="absolute inset-0"
       style={{ scale, zIndex: z }}
-    />
+    >
+      <PortfolioSlideContent
+        project={project}
+        index={index}
+        total={total}
+        ratio={ratio}
+      />
+    </motion.div>
   )
 }
 
 /** 후속 슬라이드: 자기 band 구간에서 아래(100%)→0으로 스크롤 연속 상승. */
 function PortfolioRiseSlide({
-  src,
+  project,
+  index,
+  total,
+  ratio,
   band,
   z,
   progress,
 }: {
-  src: string
+  project: PortfolioProject
+  index: number
+  total: number
+  ratio: number
   band: [number, number]
   z: number
   progress: MotionValue<number>
 }) {
   const y = useTransform(progress, band, ['100%', '0%'], { clamp: true })
   return (
-    <motion.img
-      src={src}
-      alt=""
-      aria-hidden
-      draggable={false}
-      className="absolute inset-0 h-full w-full object-cover"
-      style={{ y, zIndex: z }}
-    />
+    <motion.div className="absolute inset-0" style={{ y, zIndex: z }}>
+      <PortfolioSlideContent
+        project={project}
+        index={index}
+        total={total}
+        ratio={ratio}
+      />
+    </motion.div>
   )
 }
