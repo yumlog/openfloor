@@ -52,7 +52,12 @@ export default function App() {
         progress: portfolioRoll,
         sensitivity: 0.0004,
       },
-      { index: 4, steps: MANIFESTO_STEPS, progress: rollProgress },
+      {
+        index: 4,
+        steps: MANIFESTO_STEPS,
+        progress: rollProgress,
+        sensitivity: 0.0008,
+      },
     ],
     [isMobile, philosophyRoll, portfolioRoll, rollProgress]
   )
