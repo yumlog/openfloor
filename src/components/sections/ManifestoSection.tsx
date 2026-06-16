@@ -1,5 +1,11 @@
-import { useLayoutEffect, useRef, useState } from 'react'
-import { motion, useTransform, type MotionValue } from 'motion/react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
 
@@ -82,6 +88,9 @@ const TRAVEL = LAST_INDEX + 2 * W
 // 작아 = 더 부드럽다(통과 스크롤이 늘어나는 대가).
 export const MANIFESTO_STEPS = 14
 
+// 마우스가 좌우 끝까지 갔을 때 드럼 좌우 회전 최대각(아주 미세하게).
+const MAX_TILT_DEG = 5
+
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v))
 
 interface DrumLineProps {
@@ -137,10 +146,26 @@ interface ManifestoSectionProps {
   progress: MotionValue<number>
 }
 
-export function ManifestoSection({ progress }: ManifestoSectionProps) {
+export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
   const frame = useFrameSize()
   // 글자는 너비 기준 유지(≥1440에서 88px).
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
+
+  // 정규화 마우스 X(-1..1) → rotateY(deg), 스프링으로 부드럽게.
+  const mouseX = useMotionValue(0)
+  const tiltTarget = useTransform(mouseX, [-1, 1], [-MAX_TILT_DEG, MAX_TILT_DEG])
+  const tiltY = useSpring(tiltTarget, { stiffness: 50, damping: 14, mass: 0.6 })
+  useEffect(() => {
+    if (!active) {
+      mouseX.set(0) // 비활성일 때 정면으로
+      return
+    }
+    const onMove = (e: PointerEvent) => {
+      mouseX.set((e.clientX / window.innerWidth) * 2 - 1)
+    }
+    window.addEventListener('pointermove', onMove)
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [active, mouseX])
 
   // 캔버스는 `ratio`로 스케일되므로, 이 높이의 캔버스는 정확히 100dvh로 렌더된다 —
   // H는 design px로 표현한 뷰포트 높이.
@@ -225,15 +250,16 @@ export function ManifestoSection({ progress }: ManifestoSectionProps) {
               transform: `scale(${fillScale})`,
             }}
           >
-            {/* 원통 면을 담는 3D 스테이지. */}
-            <div
+            {/* 원통 면을 담는 3D 스테이지. 마우스 X에 따라 perspective 안에서
+                rotateY로 아주 미세하게 좌우로 돈다(세로 롤과 독립 축). */}
+            <motion.div
               className="absolute inset-0"
-              style={{ transformStyle: 'preserve-3d' }}
+              style={{ rotateY: tiltY, transformStyle: 'preserve-3d' }}
             >
               {LINES.map((line, i) => (
                 <DrumLine key={i} rollPos={rollPos} index={i} text={line} />
               ))}
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
