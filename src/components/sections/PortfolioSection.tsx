@@ -28,7 +28,10 @@ export const TIME_EASE = [0.65, 0, 0.35, 1] as const
 /* reveal 구간 매핑(겹침이 핵심). */
 const TEXT_SPLIT_RANGE: [number, number] = [0, 0.6] // 텍스트가 위/아래로 벌어지는 구간
 const TEXT_FADE_RANGE: [number, number] = [0.35, 0.75] // 텍스트가 사라지는 구간(늦게 시작)
-const SLIDE_SCALE_RANGE: [number, number] = [0.25, 0.85] // 첫 슬라이드 확대(텍스트 보일 때 시작)
+// reveal 구간: 확대 시작 · 오버슈트 피크 · 안착
+const SLIDE_SCALE_IN: number[] = [0.25, 0.78, 0.9]
+// scale: 0 → 살짝 넘김(1.045) → 1.0 안착
+const SLIDE_SCALE_OUT: number[] = [0, 1.045, 1.0]
 
 /* 후속 슬라이드(2·3): REVEAL_END 직후부터 스크롤 연속 상승(데드존 제거). */
 const RISE_BANDS: [number, number][] = [
@@ -135,7 +138,7 @@ function PortfolioText({
   )
 }
 
-/** 첫 슬라이드: reveal의 SLIDE_SCALE_RANGE 구간에서 중앙 scale 0→1(텍스트 보일 때 시작). */
+/** 첫 슬라이드: reveal 구간에서 중앙 scale 0→1.045→1.0(살짝 부풀었다 톡 안착). */
 function PortfolioScaleSlide({
   src,
   z,
@@ -145,7 +148,9 @@ function PortfolioScaleSlide({
   z: number
   reveal: MotionValue<number>
 }) {
-  const scale = useTransform(reveal, SLIDE_SCALE_RANGE, [0, 1], { clamp: true })
+  const scale = useTransform(reveal, SLIDE_SCALE_IN, SLIDE_SCALE_OUT, {
+    clamp: true,
+  })
   return (
     <motion.img
       src={src}

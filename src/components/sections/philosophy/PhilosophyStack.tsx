@@ -19,7 +19,7 @@ const GAP = 20
 const STACK_OFFSET = 140
 const N = PHILOSOPHY_CARDS.length
 /** 진입 바운스 시작 y 오프셋(px) — 아래에서 통 튀어 올라온다. */
-const ENTRY_OFFSET = 40
+const ENTRY_OFFSET = 26
 
 /** 쌓임이 끝나는 progress(= 확대 시작 GROW_START 계산 기준). 임계값은 이 안에 둔다. */
 export const STACK_END = 0.55
@@ -143,17 +143,17 @@ function CardCell({
     <motion.div
       className="absolute left-0"
       style={{ top: stackedTop, width: CARD_W, height: CARD_H, zIndex: index + 1 }}
-      initial={{ opacity: 0, scale: 0.85, y: ENTRY_OFFSET }}
+      initial={{ opacity: 0, scale: 0.92, y: ENTRY_OFFSET }}
       animate={
         active
           ? { opacity: 1, scale: 1, y: 0 }
-          : { opacity: 0, scale: 0.85, y: ENTRY_OFFSET }
+          : { opacity: 0, scale: 0.92, y: ENTRY_OFFSET }
       }
       transition={{
         // 한 장씩 튀어나오는 스프링 바운스. delay로 통-통-통 stagger.
         type: 'spring',
         stiffness: 500,
-        damping: 14,
+        damping: 22,
         delay: active ? 0.08 + index * 0.12 : 0,
       }}
     >
