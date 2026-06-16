@@ -82,7 +82,6 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
             project={PORTFOLIO_PROJECTS[0]}
             index={0}
             total={PORTFOLIO_PROJECTS.length}
-            ratio={ratio}
             z={10}
             reveal={reveal01}
           />
@@ -94,7 +93,6 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
               project={p}
               index={i + 1}
               total={PORTFOLIO_PROJECTS.length}
-              ratio={ratio}
               band={RISE_BANDS[i]}
               z={10 * (i + 2)}
               progress={progress}
@@ -155,17 +153,16 @@ function PortfolioText({
 
 /** 슬라이드 한 장의 내용물: 배경 이미지 + 검정 dim + 텍스트 오버레이
     (브랜드/프로젝트/설명) + 우상단 로고 + 좌하단 Our Portfolio/페이지네이션.
-    모든 design px는 PortfolioText와 동일하게 ratio로 스케일. */
+    Hero식 반응형: 모든 design px를 clamp(바닥, (N/14.4)vw, 디자인px)로,
+    모바일(<768)은 max-md:로 풀폭 reflow + 더 큰 vw 글자. */
 function PortfolioSlideContent({
   project,
   index,
   total,
-  ratio,
 }: {
   project: PortfolioProject
   index: number
   total: number
-  ratio: number
 }) {
   return (
     <div className="absolute inset-0">
@@ -181,96 +178,51 @@ function PortfolioSlideContent({
       <div className="absolute inset-0 bg-black/40" />
 
       {/* 콘텐츠 */}
-      <div
-        className="absolute inset-0 flex flex-col justify-between"
-        style={{
-          paddingTop: 100 * ratio,
-          paddingRight: 64 * ratio,
-          paddingBottom: 72 * ratio,
-          paddingLeft: 64 * ratio,
-        }}
-      >
-        {/* 상단: 브랜드 / 프로젝트 / 설명 + 우상단 로고 */}
-        <div className="relative">
-          <img
-            src={project.logo}
-            alt={project.brand}
-            draggable={false}
-            className="absolute top-0 right-0 w-auto"
-            style={{ height: 28 * ratio }}
-          />
-          <p
-            style={{
-              fontFamily: 'var(--font-pretendard)',
-              fontSize: 24 * ratio,
-              fontWeight: 400,
-              lineHeight: 1.5,
-              color: '#ffffff',
-            }}
-          >
-            {project.brand}
-          </p>
-          <h3
-            style={{
-              fontFamily: 'var(--font-pretendard)',
-              fontSize: 56 * ratio,
-              fontWeight: 700,
-              lineHeight: 1.4,
-              color: '#ffffff',
-              marginTop: 24 * ratio,
-            }}
-          >
-            {project.project}
-          </h3>
-          <p
-            className="whitespace-pre-line"
-            style={{
-              fontFamily: 'var(--font-pretendard)',
-              fontSize: 24 * ratio,
-              fontWeight: 400,
-              lineHeight: 1.5,
-              color: '#ffffff',
-              marginTop: 24 * ratio,
-              maxWidth: 720 * ratio,
-            }}
-          >
-            {project.desc}
-          </p>
+      <div className="absolute inset-0 flex flex-col justify-between pt-[clamp(48px,6.94vw,100px)] pr-[clamp(32px,4.44vw,64px)] pb-[clamp(40px,5vw,72px)] pl-[clamp(32px,4.44vw,64px)] max-md:px-6 max-md:pt-20 max-md:pb-8">
+        {/* 로고: 데스크탑은 우상단(패딩만큼 인셋), 모바일은 우하단으로 이동.
+            콘텐츠 컨테이너 기준 절대배치라 flex 흐름엔 영향 없음. */}
+        <img
+          src={project.logo}
+          alt={project.brand}
+          draggable={false}
+          className="absolute top-[clamp(48px,6.94vw,100px)] right-[clamp(32px,4.44vw,64px)] h-[clamp(20px,1.94vw,28px)] w-auto max-md:top-auto max-md:right-6 max-md:bottom-8 max-md:h-6"
+        />
+        {/* 상단: 브랜드 / 프로젝트 / 설명 */}
+        <div>
+          {/* 텍스트 묶음: clamp 폭 안에서 줄바꿈(모바일은 풀폭) */}
+          <div className="max-w-[clamp(320px,34.72vw,500px)] max-md:max-w-none">
+            <p className="font-pretendard text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-white max-md:text-[clamp(16px,4.5vw,20px)]">
+              {project.brand}
+            </p>
+            <h3 className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty text-white max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]">
+              {project.project}
+            </h3>
+            <p className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-pretty text-white max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]">
+              {project.desc}
+            </p>
+          </div>
         </div>
 
         {/* 하단: Our Portfolio + 페이지네이션 */}
         <div>
-          <p
-            style={{
-              fontFamily: 'var(--font-montserrat)',
-              fontSize: 20 * ratio,
-              fontWeight: 700,
-              lineHeight: 1.0,
-              letterSpacing: '-0.04em',
-              color: '#ffffff',
-            }}
-          >
+          <p className="font-montserrat text-[clamp(14px,1.39vw,20px)] leading-[1.0] font-bold tracking-[-0.04em] text-white max-md:text-[16px]">
             Our Portfolio
           </p>
-          <div className="flex" style={{ gap: 20 * ratio, marginTop: 8 * ratio }}>
-            {Array.from({ length: total }, (_, i) => {
-              const current = i === index
-              return (
-                <span
-                  key={i}
-                  style={{
-                    fontFamily: 'var(--font-montserrat)',
-                    fontSize: 20 * ratio,
-                    lineHeight: 1.4,
-                    letterSpacing: '-0.04em',
-                    fontWeight: current ? 700 : 400,
-                    color: current ? '#ffffff' : '#d4d4d4',
-                  }}
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </span>
-              )
-            })}
+          <div className="mt-[clamp(6px,0.56vw,8px)] flex gap-[clamp(14px,1.39vw,20px)] max-md:mt-2 max-md:gap-4">
+            {Array.from({ length: total }, (_, n) => (
+              <span
+                key={n}
+                className={[
+                  'font-montserrat leading-[1.4] tracking-[-0.04em]',
+                  'text-[clamp(14px,1.39vw,20px)] max-md:text-[16px]',
+                  n === index
+                    ? 'font-bold text-white'
+                    : 'font-normal text-[#d4d4d4]',
+                ].join(' ')}
+              >
+                {String(n + 1).padStart(2, '0')}
+              </span>
+            ))}
           </div>
         </div>
       </div>
@@ -283,14 +235,12 @@ function PortfolioScaleSlide({
   project,
   index,
   total,
-  ratio,
   z,
   reveal,
 }: {
   project: PortfolioProject
   index: number
   total: number
-  ratio: number
   z: number
   reveal: MotionValue<number>
 }) {
@@ -298,16 +248,8 @@ function PortfolioScaleSlide({
     clamp: true,
   })
   return (
-    <motion.div
-      className="absolute inset-0"
-      style={{ scale, zIndex: z }}
-    >
-      <PortfolioSlideContent
-        project={project}
-        index={index}
-        total={total}
-        ratio={ratio}
-      />
+    <motion.div className="absolute inset-0" style={{ scale, zIndex: z }}>
+      <PortfolioSlideContent project={project} index={index} total={total} />
     </motion.div>
   )
 }
@@ -317,7 +259,6 @@ function PortfolioRiseSlide({
   project,
   index,
   total,
-  ratio,
   band,
   z,
   progress,
@@ -325,7 +266,6 @@ function PortfolioRiseSlide({
   project: PortfolioProject
   index: number
   total: number
-  ratio: number
   band: [number, number]
   z: number
   progress: MotionValue<number>
@@ -333,12 +273,7 @@ function PortfolioRiseSlide({
   const y = useTransform(progress, band, ['100%', '0%'], { clamp: true })
   return (
     <motion.div className="absolute inset-0" style={{ y, zIndex: z }}>
-      <PortfolioSlideContent
-        project={project}
-        index={index}
-        total={total}
-        ratio={ratio}
-      />
+      <PortfolioSlideContent project={project} index={index} total={total} />
     </motion.div>
   )
 }

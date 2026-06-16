@@ -17,7 +17,7 @@ export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
   {
     brand: '올리브영',
     project: '올영 샐리 개발 및 운영',
-    desc: '매장 직원들의 판매 활동을 돕기 위한 서비스로\n상품에 있는 성분, 원료 등의 상세 내용 및 고객\n피부 타입에 맞는 상품을 추천하기 위한 서비스',
+    desc: '매장 직원들의 판매 활동을 돕기 위한 서비스로 상품에 있는 성분, 원료 등의 상세 내용 및 고객 피부 타입에 맞는 상품을 추천하기 위한 서비스',
     image: '/images/slide-oliveyoung.png',
     logo: '/images/logo-oliveyoung.svg',
   },
@@ -31,7 +31,7 @@ export const PORTFOLIO_PROJECTS: PortfolioProject[] = [
   {
     brand: 'KIT 경남정보대학교',
     project: 'KIT 유학생 통합 관리 시스템',
-    desc: '유학생 전 주기를 통합 관리하기 위한 플랫폼으로\n학생·비자·학사·장학 등 분산된 정보를 하나의\n시스템에서 통합 관리하여 효율을 높일 수 있는 서비스',
+    desc: '유학생 전 주기를 통합 관리하기 위한 플랫폼으로 학생·비자·학사·장학 등 분산된 정보를 하나의 시스템에서 통합 관리하여 효율을 높일 수 있는 서비스',
     image: '/images/slide-kit.png',
     logo: '/images/logo-kit.svg',
   },
