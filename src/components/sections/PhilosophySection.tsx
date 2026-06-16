@@ -18,7 +18,6 @@ import {
   LAST_CARD_CENTER_FRAC,
   STACK_END,
 } from './philosophy/PhilosophyStack'
-import { PhilosophyMobile } from './philosophy/PhilosophyMobile'
 import { PHILOSOPHY_CARDS } from './philosophy/cards'
 
 const def = SLIDES[2]
@@ -63,6 +62,8 @@ export function PhilosophySection({
   const frame = useFrameSize()
   const isMobile = frame.w < 768
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
+  // 모바일 스택 캔버스 스케일(375 기준). 좁은 폰에서 카드가 넘치지 않게 축소.
+  const mobileScale = Math.min(1, frame.w / 375)
 
   // 확대 트리거: progress가 GROW_START를 "넘으면" 시간 기반으로 g:0→1 (쭉 커짐).
   // active와 무관하게 progress를 추적한다 → 포트폴리오로 나가도 philosophy progress는
@@ -70,11 +71,11 @@ export function PhilosophySection({
   // 즉시 덮은 채로 시작해 축소된다.
   const [growing, setGrowing] = useState(false)
   useEffect(() => {
-    const apply = (p: number) => setGrowing(p >= GROW_START)
+    const apply = (p: number) => setGrowing(!isMobile && p >= GROW_START)
     apply(progress.get())
     const unsub = progress.on('change', apply)
     return () => unsub()
-  }, [progress])
+  }, [progress, isMobile])
 
   const g = useMotionValue(0)
   useEffect(() => {
@@ -162,16 +163,13 @@ export function PhilosophySection({
           className="flex flex-1 flex-col items-center max-md:justify-center"
           style={{ paddingTop: isMobile ? undefined : TITLE_GAP * ratio }}
         >
-          {isMobile ? (
-            <PhilosophyMobile active={active} />
-          ) : (
-            <PhilosophyStack
-              active={active}
-              ratio={ratio}
-              progress={progress}
-              stageRef={stageRef}
-            />
-          )}
+          <PhilosophyStack
+            active={active}
+            ratio={isMobile ? mobileScale : ratio}
+            progress={progress}
+            stageRef={stageRef}
+            isMobile={isMobile}
+          />
         </div>
       </motion.div>
 

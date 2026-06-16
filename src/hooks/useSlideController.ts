@@ -45,6 +45,8 @@ interface Options {
   total: number
   /** 입력 처리 게이트(예: 로딩 화면이 떠 있는 동안). */
   enabled?: boolean
+  /** 모바일(<768): philosophy 확대 핸드오프가 없으므로 grow/역방향 seam 잠금을 끈다. */
+  isMobile?: boolean
   /**
    * 선택적 "스크롤 트랩" 목록: 현재 슬라이드가 어떤 트랩의 `index`와 같으면
    * 입력이 다음 섹션으로 스냅하는 대신 그 트랩의 `progress`(0..1)를 구동한다 —
@@ -84,6 +86,7 @@ export function useSlideController({
   total,
   enabled = true,
   traps,
+  isMobile = false,
 }: Options): SlideController {
   const slide = useMotionValue(0)
   const [index, setIndex] = useState(0)
@@ -173,7 +176,7 @@ export function useSlideController({
       // 역방향 portfolio→philosophy: 빨강 카드가 g 1→0으로 축소되는 GROW_DURATION 동안
       // 입력을 잠가, 역스크롤 잔여 모멘텀이 philosophyRoll을 마지막 카드 임계값(0.42)
       // 밑으로 끌어내려 카드가 풀리는 걸 막는다(정방향 확대 잠금과 대칭).
-      const isReverseSeam = from === PORT_IDX && next === PHILO_IDX
+      const isReverseSeam = !isMobile && from === PORT_IDX && next === PHILO_IDX
       // Philosophy 인접 seam이 아닌, 위쪽(Hero/About)에서 포트폴리오로 정방향 점프
       // 진입 — 착지 후 reveal을 자동재생해 통짜 텍스트에 멈춰 있지 않게 한다.
       const isPortJumpEntry =
@@ -297,7 +300,9 @@ export function useSlideController({
     // 스프링이 따라오기 전이라도 즉시 차단(목표를 세팅하는 그 입력 자체는 체크가
     // rollTo 이전이라 차단되지 않으므로 deadlock 없음).
     const philoGrowCommitted = () =>
-      currentRef.current === PHILO_IDX && rollTargetRef.current >= GROW_START
+      !isMobile &&
+      currentRef.current === PHILO_IDX &&
+      rollTargetRef.current >= GROW_START
 
     // 비례 드럼 롤을 재타깃한다. 속도를 이어받는 스프링이 목표를 추종해, 튕기는
     // 도중 재타깃해도 모멘텀이 유지되고(휘리릭) 작은 너지 하나는 살짝만 움직인다.
@@ -457,7 +462,7 @@ export function useSlideController({
       clearTimeout(reverseUnlockTimer)
       unsubPort?.()
     }
-  }, [enabled, total, slide, traps])
+  }, [enabled, total, slide, traps, isMobile])
 
   const goTo = useCallback((next: number) => goToRef.current(next), [])
 

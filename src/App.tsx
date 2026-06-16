@@ -35,17 +35,13 @@ export default function App() {
   const philosophyRoll = useMotionValue(0)
   const traps = useMemo(
     () => [
-      ...(isMobile
-        ? []
-        : [
-            {
-              index: 2,
-              steps: PHILOSOPHY_STEPS,
-              progress: philosophyRoll,
-              sensitivity: 0.0006,
-              reverseSeat: STACK_END,
-            },
-          ]),
+      {
+        index: 2,
+        steps: isMobile ? 3 : PHILOSOPHY_STEPS,
+        progress: philosophyRoll,
+        sensitivity: isMobile ? 0.0009 : 0.0006,
+        reverseSeat: isMobile ? 1 : STACK_END,
+      },
       {
         index: 3,
         steps: PORTFOLIO_STEPS,
@@ -64,6 +60,7 @@ export default function App() {
   const { slide, index, goTo, source, target } = useSlideController({
     total: TOTAL_SLIDES,
     traps,
+    isMobile,
   })
 
   // 배경은 슬라이드 설정에 따라 라이트 <-> 다크로 크로스페이드.

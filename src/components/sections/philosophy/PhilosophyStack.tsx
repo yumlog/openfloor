@@ -31,13 +31,40 @@ export const STAGE_H = STACK_OFFSET * (N - 1) + CARD_H // 560
 export const LAST_CARD_CENTER_FRAC =
   (STACK_OFFSET * (N - 1) + CARD_H / 2) / STAGE_H // 0.75
 
+/** 치수 세트(데스크탑/모바일). 모바일은 카드를 더 작고 정사각에 가깝게 리셰이프하고
+    임계값을 모바일 트랩(steps 3)에 맞춰 벌린다. */
+interface Dims {
+  CW: number
+  CH: number
+  OFFSET: number
+  GAP: number
+  THRESHOLDS: number[]
+}
+const DESKTOP: Dims = {
+  CW: CARD_W,
+  CH: CARD_H,
+  OFFSET: STACK_OFFSET,
+  GAP,
+  THRESHOLDS: STACK_THRESHOLDS,
+}
+const MOBILE: Dims = {
+  CW: 340,
+  CH: 340,
+  OFFSET: 70,
+  GAP: 16,
+  THRESHOLDS: [0, 0.34, 0.68],
+}
+
 /** 카드 비주얼(스택·확대 공용). contentOpacity는 확대 시 본문/따옴표 페이드용. */
 export function CardFace({
   card,
   contentOpacity,
+  compact = false,
 }: {
   card: PhilosophyCard
   contentOpacity?: MotionValue<number>
+  /** 모바일 compact: 패딩/글자/간격을 줄여 작은 카드에 맞춘다. */
+  compact?: boolean
 }) {
   return (
     <div
@@ -53,15 +80,35 @@ export function CardFace({
           alt=""
           aria-hidden
           draggable={false}
-          className="pointer-events-none absolute top-[48px] right-[40px] opacity-50"
-          style={{ width: 100, height: 68 }}
+          className={
+            compact
+              ? 'pointer-events-none absolute top-[28px] right-[24px] opacity-50'
+              : 'pointer-events-none absolute top-[48px] right-[40px] opacity-50'
+          }
+          style={
+            compact
+              ? { width: 64, height: 44 }
+              : { width: 100, height: 68 }
+          }
         />
-        <div className="px-[40px] pt-[48px]">
-          <div className="flex items-baseline gap-[16px] text-[24px] leading-[1.4] font-normal text-white">
+        <div className={compact ? 'px-[28px] pt-[32px]' : 'px-[40px] pt-[48px]'}>
+          <div
+            className={
+              compact
+                ? 'flex items-baseline gap-[12px] text-[20px] leading-[1.4] font-normal text-white'
+                : 'flex items-baseline gap-[16px] text-[24px] leading-[1.4] font-normal text-white'
+            }
+          >
             <span>{card.num}</span>
             <span>{card.name}</span>
           </div>
-          <p className="mt-[74px] text-[24px] leading-[1.6] font-bold break-keep whitespace-pre-line text-white">
+          <p
+            className={
+              compact
+                ? 'mt-[40px] text-[18px] leading-[1.6] font-bold break-keep whitespace-pre-line text-white'
+                : 'mt-[74px] text-[24px] leading-[1.6] font-bold break-keep whitespace-pre-line text-white'
+            }
+          >
             {card.body}
           </p>
         </div>
@@ -79,6 +126,8 @@ interface PhilosophyStackProps {
   progress: MotionValue<number>
   /** 확대 브릿지가 측정할 stage 루트 ref. */
   stageRef?: Ref<HTMLDivElement>
+  /** 모바일: compact 치수 + compact CardFace. */
+  isMobile?: boolean
 }
 
 export function PhilosophyStack({
@@ -86,14 +135,17 @@ export function PhilosophyStack({
   ratio,
   progress,
   stageRef,
+  isMobile = false,
 }: PhilosophyStackProps) {
+  const d = isMobile ? MOBILE : DESKTOP
+  const stageH = d.OFFSET * (N - 1) + d.CH
   return (
     <div
       ref={stageRef}
       className="relative shrink-0"
       style={{
-        width: CARD_W,
-        height: STAGE_H,
+        width: d.CW,
+        height: stageH,
         transform: `scale(${ratio})`,
         transformOrigin: 'top',
       }}
@@ -105,6 +157,8 @@ export function PhilosophyStack({
           index={i}
           active={active}
           progress={progress}
+          dims={d}
+          compact={isMobile}
         />
       ))}
     </div>
@@ -116,33 +170,42 @@ function CardCell({
   index,
   active,
   progress,
+  dims,
+  compact,
 }: {
   card: PhilosophyCard
   index: number
   active: boolean
   progress: MotionValue<number>
+  dims: Dims
+  compact: boolean
 }) {
   // progress가 임계값을 넘었는지만 본다(연속 추적 X) → 넘으면 시간 기반으로 안착.
   const [stacked, setStacked] = useState(index === 0)
   useEffect(() => {
     if (index === 0) return
-    const T = STACK_THRESHOLDS[index]
+    const T = dims.THRESHOLDS[index]
     const apply = (p: number) => setStacked(p >= T)
     apply(progress.get())
     const unsub = progress.on('change', apply)
     return () => unsub()
-  }, [progress, index])
+  }, [progress, index, dims])
 
   // 기준 위치 = 쌓임 위치(top 고정). 펼침은 그만큼 아래로 내려둔 y 오프셋.
-  const stackedTop = index * STACK_OFFSET // i*140
-  const spreadOffset = index * (CARD_H + GAP) - stackedTop // i*160
+  const stackedTop = index * dims.OFFSET
+  const spreadOffset = index * (dims.CH + dims.GAP) - stackedTop
 
   return (
     // 바깥: 진입 바운스(통 통 통) + 위치/z. z는 transform이 만드는 stacking
     // context와 같은 요소에 둔다 — 형제 순서는 zIndex로 정렬(뒤·빨강 index 2가 위로).
     <motion.div
       className="absolute left-0"
-      style={{ top: stackedTop, width: CARD_W, height: CARD_H, zIndex: index + 1 }}
+      style={{
+        top: stackedTop,
+        width: dims.CW,
+        height: dims.CH,
+        zIndex: index + 1,
+      }}
       initial={{ opacity: 0, scale: 0.92, y: ENTRY_OFFSET }}
       animate={
         active
@@ -167,7 +230,7 @@ function CardCell({
           y: { type: 'tween', duration: 0.65, ease: [0.22, 1, 0.36, 1] },
         }}
       >
-        <CardFace card={card} />
+        <CardFace card={card} compact={compact} />
       </motion.div>
     </motion.div>
   )
