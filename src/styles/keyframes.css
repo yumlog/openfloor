@@ -151,3 +151,33 @@
 .animate-spin-slow {
   animation: spin-slow 14s linear infinite;
 }
+
+/* ---------------------------------------------------------------------------
+   Manifesto 호버 색수차 — 깨끗한 글자 위에 겹친 복제 레이어. 타이틀과 동일한
+   청/적 분리 + 흰 halo text-shadow를 깔고, 커서 위치 중심의 radial-gradient
+   마스크로 창내어 '호버한 지점'에서만 색수차 가장자리가 드러난다. 마스크 중심
+   (--mx/--my)·반경(--spot)은 ManifestoSection이 줄 로컬좌표로 매 프레임 채운다. */
+.manifesto-chroma {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --mx: -9999px;
+  --my: -9999px;
+  --spot: 90px;
+  text-shadow:
+    0 0 4px rgba(255, 255, 255, 0.5),
+    -2px 0 4px #00ffff,
+    2px 0 4px #ff003c;
+  -webkit-mask-image: radial-gradient(
+    circle var(--spot) at var(--mx) var(--my),
+    #000 0%,
+    #000 35%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(
+    circle var(--spot) at var(--mx) var(--my),
+    #000 0%,
+    #000 35%,
+    transparent 78%
+  );
+}

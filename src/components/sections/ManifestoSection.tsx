@@ -91,6 +91,9 @@ export const MANIFESTO_STEPS = 14
 // 마우스가 좌우 끝까지 갔을 때 드럼 좌우 회전 최대각(아주 미세하게).
 const MAX_TILT_DEG = 5
 
+// 호버 색수차 스팟의 스크린 반경(px).
+const SPOT = 90
+
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v))
 
 interface DrumLineProps {
@@ -99,6 +102,8 @@ interface DrumLineProps {
   rollPos: MotionValue<number>
   index: number
   text: string
+  /** 색수차 복제 레이어 span 참조 — ManifestoSection이 마스크 변수를 갱신. */
+  chromaRef?: (el: HTMLSpanElement | null) => void
 }
 
 /**
@@ -108,7 +113,7 @@ interface DrumLineProps {
  * 크기를 정한다: 앞줄(각도 0)은 y=z=0(정확히 88px)에 놓이고, 멀어지는 줄은
  * 뒤로(z<0) 가며 perspective로 작아져 자연스러운 볼록감을 만든다.
  */
-function DrumLine({ rollPos, index, text }: DrumLineProps) {
+function DrumLine({ rollPos, index, text, chromaRef }: DrumLineProps) {
   // (rollPos - index): rollPos가 커질수록(스크롤 다운) 줄의 각도가 증가해, 정면
   // 위로 회전해 넘어가고 다음 줄이 아래에서 올라온다.
   const angle = useTransform(rollPos, (rp) => (rp - index) * STEP_ANG)
@@ -132,8 +137,19 @@ function DrumLine({ rollPos, index, text }: DrumLineProps) {
       className="absolute top-1/2 left-1/2 will-change-transform"
       style={{ transform, opacity, visibility, backfaceVisibility: 'hidden' }}
     >
-      <span className="text-title-on-dark text-[88px] leading-[1.4] font-bold tracking-normal whitespace-nowrap">
-        {text}
+      <span className="relative inline-block whitespace-nowrap">
+        {/* 깨끗한 글자 */}
+        <span className="text-title-on-dark text-[88px] leading-[1.4] font-bold tracking-normal">
+          {text}
+        </span>
+        {/* 호버 스팟에서만 드러나는 색수차 복제 레이어(정확히 겹침) */}
+        <span
+          ref={chromaRef}
+          aria-hidden
+          className="manifesto-chroma text-title-on-dark text-[88px] leading-[1.4] font-bold tracking-normal"
+        >
+          {text}
+        </span>
       </span>
     </motion.div>
   )
@@ -166,6 +182,42 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
     window.addEventListener('pointermove', onMove)
     return () => window.removeEventListener('pointermove', onMove)
   }, [active, mouseX])
+
+  // 호버 색수차: 각 chroma 레이어의 마스크 중심을 줄 로컬좌표로 갱신(active일 때만).
+  const chromaRefs = useRef<(HTMLElement | null)[]>([])
+  useEffect(() => {
+    if (!active) {
+      chromaRefs.current.forEach((el) => {
+        el?.style.setProperty('--mx', '-9999px')
+        el?.style.setProperty('--my', '-9999px')
+      })
+      return
+    }
+    let raf = 0
+    let cx = 0
+    let cy = 0
+    const update = () => {
+      chromaRefs.current.forEach((el) => {
+        if (!el) return
+        const r = el.getBoundingClientRect()
+        const s = el.offsetWidth ? r.width / el.offsetWidth : 1 // 누적 스케일 보정
+        el.style.setProperty('--mx', `${(cx - r.left) / s}px`)
+        el.style.setProperty('--my', `${(cy - r.top) / s}px`)
+        el.style.setProperty('--spot', `${SPOT / s}px`)
+      })
+    }
+    const onMove = (e: PointerEvent) => {
+      cx = e.clientX
+      cy = e.clientY
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(update)
+    }
+    window.addEventListener('pointermove', onMove)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      cancelAnimationFrame(raf)
+    }
+  }, [active])
 
   // 캔버스는 `ratio`로 스케일되므로, 이 높이의 캔버스는 정확히 100dvh로 렌더된다 —
   // H는 design px로 표현한 뷰포트 높이.
@@ -257,7 +309,15 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
               style={{ rotateY: tiltY, transformStyle: 'preserve-3d' }}
             >
               {LINES.map((line, i) => (
-                <DrumLine key={i} rollPos={rollPos} index={i} text={line} />
+                <DrumLine
+                  key={i}
+                  rollPos={rollPos}
+                  index={i}
+                  text={line}
+                  chromaRef={(el) => {
+                    chromaRefs.current[i] = el
+                  }}
+                />
               ))}
             </motion.div>
           </div>
