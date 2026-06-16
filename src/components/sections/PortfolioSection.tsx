@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
@@ -35,6 +36,12 @@ const TEXT_FADE_RANGE: [number, number] = [0.35, 0.75] // 텍스트가 사라지
 const SLIDE_SCALE_IN: number[] = [0.25, 0.78, 0.9]
 // scale: 0 → 살짝 넘김(1.045) → 1.0 안착
 const SLIDE_SCALE_OUT: number[] = [0, 1.045, 1.0]
+
+/** 첫 슬라이드 reveal01이 이 값 이상이면 '다 확대됨'으로 보고 dim/텍스트를 등장. */
+const REVEAL_SETTLE = 0.97
+/** dim/텍스트 등장 트랜지션(페이드+상승). 역방향은 짧게 사라지므로 별도. */
+const ENTER = (delay: number) =>
+  ({ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const, delay })
 
 /* 후속 슬라이드: 첫 장 제외한 N-1개를 [REVEAL_END, 1]에 균등 분할해 스크롤
    연속 상승(데드존 제거). 슬라이드 개수가 바뀌면 자동으로 재분할된다. */
@@ -159,10 +166,13 @@ function PortfolioSlideContent({
   project,
   index,
   total,
+  revealed,
 }: {
   project: PortfolioProject
   index: number
   total: number
+  /** 이미지는 항상 표시; dim·텍스트만 이 값으로 게이트해 순차 등장. */
+  revealed: boolean
 }) {
   return (
     <div className="absolute inset-0">
@@ -174,8 +184,13 @@ function PortfolioSlideContent({
         draggable={false}
         className="absolute inset-0 h-full w-full object-cover"
       />
-      {/* 검정 dim */}
-      <div className="absolute inset-0 bg-black/40" />
+      {/* 검정 dim — 슬라이드가 다 확대된 뒤 깔린다. */}
+      <motion.div
+        className="absolute inset-0 bg-black/40"
+        initial={false}
+        animate={{ opacity: revealed ? 1 : 0 }}
+        transition={{ duration: 0.4 }}
+      />
 
       {/* 콘텐츠 */}
       <div className="absolute inset-0 flex flex-col justify-between pt-[clamp(48px,6.94vw,100px)] pr-[clamp(32px,4.44vw,64px)] pb-[clamp(40px,5vw,72px)] pl-[clamp(32px,4.44vw,64px)] max-md:px-6 max-md:pt-20 max-md:pb-8">
@@ -191,24 +206,49 @@ function PortfolioSlideContent({
         <div>
           {/* 텍스트 묶음: clamp 폭 안에서 줄바꿈(모바일은 풀폭) */}
           <div className="max-w-[clamp(320px,34.72vw,500px)] max-md:max-w-none">
-            <p className="font-pretendard text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-white max-md:text-[clamp(16px,4.5vw,20px)]">
+            <motion.p
+              className="font-pretendard text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-white max-md:text-[clamp(16px,4.5vw,20px)]"
+              initial={false}
+              animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
+              transition={revealed ? ENTER(0.35) : { duration: 0.3 }}
+            >
               {project.brand}
-            </p>
-            <h3 className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty text-white max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]">
+            </motion.p>
+            <motion.h3
+              className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty text-white max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]"
+              initial={false}
+              animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
+              transition={revealed ? ENTER(0.47) : { duration: 0.3 }}
+            >
               {project.project}
-            </h3>
-            <p className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-pretty text-white max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]">
+            </motion.h3>
+            <motion.p
+              className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-pretty text-white max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]"
+              initial={false}
+              animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
+              transition={revealed ? ENTER(0.59) : { duration: 0.3 }}
+            >
               {project.desc}
-            </p>
+            </motion.p>
           </div>
         </div>
 
         {/* 하단: Our Portfolio + 페이지네이션 */}
         <div>
-          <p className="font-montserrat text-[clamp(14px,1.39vw,20px)] leading-[1.0] font-bold tracking-[-0.04em] text-white max-md:text-[16px]">
+          <motion.p
+            className="font-montserrat text-[clamp(14px,1.39vw,20px)] leading-[1.0] font-bold tracking-[-0.04em] text-white max-md:text-[16px]"
+            initial={false}
+            animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
+            transition={revealed ? ENTER(0.71) : { duration: 0.3 }}
+          >
             Our Portfolio
-          </p>
-          <div className="mt-[clamp(6px,0.56vw,8px)] flex gap-[clamp(14px,1.39vw,20px)] max-md:mt-2 max-md:gap-4">
+          </motion.p>
+          <motion.div
+            className="mt-[clamp(6px,0.56vw,8px)] flex gap-[clamp(14px,1.39vw,20px)] max-md:mt-2 max-md:gap-4"
+            initial={false}
+            animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
+            transition={revealed ? ENTER(0.83) : { duration: 0.3 }}
+          >
             {Array.from({ length: total }, (_, n) => (
               <span
                 key={n}
@@ -223,7 +263,7 @@ function PortfolioSlideContent({
                 {String(n + 1).padStart(2, '0')}
               </span>
             ))}
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
@@ -247,9 +287,23 @@ function PortfolioScaleSlide({
   const scale = useTransform(reveal, SLIDE_SCALE_IN, SLIDE_SCALE_OUT, {
     clamp: true,
   })
+  // reveal이 거의 끝났을 때(REVEAL_SETTLE↑) dim/텍스트 등장. 역방향으로 내려가면
+  // 다시 false가 되어 dim/텍스트가 먼저 사라진 뒤 이미지가 축소된다.
+  const [revealed, setRevealed] = useState(false)
+  useEffect(() => {
+    const apply = (v: number) => setRevealed(v >= REVEAL_SETTLE)
+    apply(reveal.get())
+    const unsub = reveal.on('change', apply)
+    return () => unsub()
+  }, [reveal])
   return (
     <motion.div className="absolute inset-0" style={{ scale, zIndex: z }}>
-      <PortfolioSlideContent project={project} index={index} total={total} />
+      <PortfolioSlideContent
+        project={project}
+        index={index}
+        total={total}
+        revealed={revealed}
+      />
     </motion.div>
   )
 }
@@ -273,7 +327,12 @@ function PortfolioRiseSlide({
   const y = useTransform(progress, band, ['100%', '0%'], { clamp: true })
   return (
     <motion.div className="absolute inset-0" style={{ y, zIndex: z }}>
-      <PortfolioSlideContent project={project} index={index} total={total} />
+      <PortfolioSlideContent
+        project={project}
+        index={index}
+        total={total}
+        revealed
+      />
     </motion.div>
   )
 }
