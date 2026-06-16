@@ -1,4 +1,4 @@
-import { Fragment, memo, Suspense, useMemo, useRef } from 'react'
+import { Fragment, memo, Suspense, useEffect, useMemo, useRef } from 'react'
 import { motion, type MotionValue } from 'motion/react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import {
@@ -34,12 +34,27 @@ const fresnelFragment = `
   void main(){ float f=pow(1.0-clamp(dot(normalize(vNormal),normalize(vView)),0.0,1.0),uPower);
     gl_FragColor=vec4(uColor*f*uIntensity,f); }`
 
+const MAX_TILT = 0.22 // 최대 기울기(rad ≈ 12.6°). "살짝".
+const TILT_SMOOTH = 4 // 커서를 따라오는 부드러움(클수록 빠르게 붙음).
+
 function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
   const { scene } = useGLTF('/models/crystal.glb')
   // 외곽 그룹: 부유(y) + 정규화 스케일.
   const groupRef = useRef<THREE.Group>(null)
-  // 내부 그룹: y축 자동 회전(원점 정렬된 지오메트리를 중심으로 돈다).
+  // 내부 그룹: 커서 방향 틸트(X·Y, 원점 정렬된 지오메트리를 중심으로 기운다).
   const spinRef = useRef<THREE.Group>(null)
+
+  // 정규화 커서(-1..1, 뷰포트 중심 기준). 캔버스가 pointer-events-none이라
+  // R3F state.pointer 대신 window에서 직접 추적한다.
+  const pointerRef = useRef({ x: 0, y: 0 })
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      pointerRef.current.x = (e.clientX / window.innerWidth) * 2 - 1
+      pointerRef.current.y = (e.clientY / window.innerHeight) * 2 - 1
+    }
+    window.addEventListener('pointermove', onMove)
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [])
 
   // 멀티 메시 대응: scene을 순회해 모든 mesh geometry를 모은다.
   const geometries = useMemo(() => {
@@ -121,13 +136,28 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
     []
   )
 
-  // 자동 모션만: 위아래 부유 + Y축 회전(기울임 없이 밑면 수평 유지).
+  // 자동 회전 제거 → 부유(y) + 커서 방향 살짝 틸트(X·Y).
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime
     if (groupRef.current) {
-      groupRef.current.position.y = Math.sin(t * 0.5) * 0.12
+      groupRef.current.position.y = Math.sin(t * 0.5) * 0.12 // 부유 유지
     }
-    if (spinRef.current) spinRef.current.rotation.y += delta * 0.12
+    if (spinRef.current) {
+      const p = pointerRef.current
+      const targetY = p.x * MAX_TILT
+      const targetX = -p.y * MAX_TILT // 커서 상하 → X축 틸트(반전이면 부호 제거)
+      const k = 1 - Math.exp(-TILT_SMOOTH * delta) // 프레임레이트 독립 댐핑
+      spinRef.current.rotation.y = THREE.MathUtils.lerp(
+        spinRef.current.rotation.y,
+        targetY,
+        k
+      )
+      spinRef.current.rotation.x = THREE.MathUtils.lerp(
+        spinRef.current.rotation.x,
+        targetX,
+        k
+      )
+    }
   })
 
   return (
