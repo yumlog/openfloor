@@ -19,6 +19,10 @@ export interface SlideController {
   index: number
   /** 프로그램으로 특정 섹션에 스냅(헤더 내비에서 사용). */
   goTo: (next: number) => void
+  /** 현재(마지막) 이동의 출발 섹션 인덱스. 포털 게이팅용. */
+  source: number
+  /** 현재(마지막) 이동의 도착 섹션 인덱스. 포털 게이팅용. */
+  target: number
 }
 
 interface TrapOptions {
@@ -83,6 +87,10 @@ export function useSlideController({
 }: Options): SlideController {
   const slide = useMotionValue(0)
   const [index, setIndex] = useState(0)
+  // 현재 이동의 출발/도착 섹션 — 포트폴리오 포털을 '포트폴리오가 끝점인 이동'에만
+  // 켜기 위해 reactive하게 노출(통과 깜빡임 제거).
+  const [source, setSource] = useState(0)
+  const [target, setTarget] = useState(0)
 
   const currentRef = useRef(0)
   const animatingRef = useRef(false)
@@ -119,10 +127,24 @@ export function useSlideController({
     const trapAt = (idx: number) => traps?.find((t) => t.index === idx)
     // 역방향 seam(portfolio→philosophy) 빨강 카드 축소 동안 입력 잠금 해제 타이머.
     let reverseUnlockTimer: ReturnType<typeof setTimeout>
+    // Portfolio reveal 자동 전진: 진입 후 REVEAL_HOLD 동안 통짜 텍스트(progress 0)로
+    // 멈췄다가 split, 끝나면 목표 동기화 + unlock. seam(즉시)·점프 진입(착지 후) 공용.
+    const playPortfolioReveal = (trap: TrapOptions) => {
+      animate(trap.progress, REVEAL_END, {
+        duration: REVEAL_DURATION,
+        delay: REVEAL_HOLD,
+        ease: TIME_EASE,
+        onComplete: () => {
+          rollTargetRef.current = REVEAL_END
+          animatingRef.current = false
+        },
+      })
+    }
     const goTo = (next: number) => {
       next = clamp(next, 0, total - 1)
       if (next === currentRef.current || animatingRef.current) return
       const from = currentRef.current
+      setSource(from)
       // 가둔 슬라이드로 진입: 드럼을 해당 끝에 seat 해서 위(아래로 진입)에서
       // 앞으로 굴리거나, 아래(위로 되돌아 진입)에서 거꾸로 굴리게 한다.
       const entering = trapAt(next)
@@ -136,6 +158,7 @@ export function useSlideController({
         rollAnimatingRef.current = false
       }
       currentRef.current = next
+      setTarget(next)
       animatingRef.current = true
       // philosophy↔portfolio 전환만 빠르게(빨강만 깔린 대기 구간 최소화), 그 외엔 기본.
       const isSeam =
@@ -151,11 +174,15 @@ export function useSlideController({
       // 입력을 잠가, 역스크롤 잔여 모멘텀이 philosophyRoll을 마지막 카드 임계값(0.42)
       // 밑으로 끌어내려 카드가 풀리는 걸 막는다(정방향 확대 잠금과 대칭).
       const isReverseSeam = from === PORT_IDX && next === PHILO_IDX
+      // Philosophy 인접 seam이 아닌, 위쪽(Hero/About)에서 포트폴리오로 정방향 점프
+      // 진입 — 착지 후 reveal을 자동재생해 통짜 텍스트에 멈춰 있지 않게 한다.
+      const isPortJumpEntry =
+        next === PORT_IDX && next > from && from !== PHILO_IDX
       animate(slide, next, {
         duration: isSeam ? SEAM_DURATION : SLIDE_DURATION,
         ease: SLIDE_EASE,
         onComplete: () => {
-          // 정방향: progress 자동 전진 onComplete가 unlock을 담당(여기선 아무것도 안 함).
+          // 정방향 seam: progress 자동 전진 onComplete가 unlock을 담당(여기선 아무것도 안 함).
           if (isForwardSeam) return
           // 역방향: 빨강 카드 축소(GROW_DURATION) 뒤 unlock.
           if (isReverseSeam) {
@@ -165,22 +192,17 @@ export function useSlideController({
             }, GROW_DURATION * 1000)
             return
           }
+          // 위쪽에서 포트폴리오로 점프 진입: 착지 후 reveal 재생(unlock은 reveal
+          // onComplete가 담당). 점프 동안 animatingRef가 계속 true라 입력이 끼어들지 못함.
+          if (isPortJumpEntry && entering) {
+            playPortfolioReveal(entering)
+            return
+          }
           animatingRef.current = false
         },
       })
-      if (isForwardSeam && entering) {
-        // 진입 후 REVEAL_HOLD 동안 progress=0(통짜 텍스트)으로 멈췄다가 split 시작.
-        animate(entering.progress, REVEAL_END, {
-          duration: REVEAL_DURATION,
-          delay: REVEAL_HOLD,
-          ease: TIME_EASE,
-          onComplete: () => {
-            // 잠금 해제 후 첫 스크롤이 progress를 0으로 되돌리지 않도록 목표를 동기화.
-            rollTargetRef.current = REVEAL_END
-            animatingRef.current = false
-          },
-        })
-      }
+      // seam: 빠른 전환과 겹쳐 즉시 재생(progress는 seat=0 → REVEAL_HOLD 후 split).
+      if (isForwardSeam && entering) playPortfolioReveal(entering)
     }
     goToRef.current = goTo
 
@@ -439,5 +461,5 @@ export function useSlideController({
 
   const goTo = useCallback((next: number) => goToRef.current(next), [])
 
-  return { slide, index, goTo }
+  return { slide, index, goTo, source, target }
 }

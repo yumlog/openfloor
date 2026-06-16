@@ -61,7 +61,7 @@ export default function App() {
     ],
     [isMobile, philosophyRoll, portfolioRoll, rollProgress]
   )
-  const { slide, index, goTo } = useSlideController({
+  const { slide, index, goTo, source, target } = useSlideController({
     total: TOTAL_SLIDES,
     traps,
   })
@@ -122,7 +122,10 @@ export default function App() {
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
         <AboutSection active={index === 1} />
         <PhilosophySection active={index === 2} progress={philosophyRoll} slide={slide} goTo={goTo} />
-        <PortfolioSection active={index === 3} progress={portfolioRoll} />
+        <PortfolioSection
+          active={index === 3 && (target === 3 || source === 3)}
+          progress={portfolioRoll}
+        />
         <ManifestoSection active={index === 4} progress={rollProgress} />
         <ContactSection active={index === 5} />
       </Slides>
