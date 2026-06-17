@@ -108,7 +108,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           너비(flex-1) 좌측 정렬 3컬럼, 양쪽 130px 간격의 1px 세로선으로 구분.
           모바일: 세로로 쌓고 세로선 제거. */}
       <Container className="pb-[clamp(71px,8.61vw,124px)] max-md:pb-[48px]">
-        <div className="flex items-start gap-[clamp(74px,9.03vw,130px)] max-md:flex-col max-md:gap-6">
+        <div className="flex items-start gap-[clamp(74px,9.03vw,130px)] max-md:flex-col max-md:gap-4">
           {STATS.map((stat, i) => (
             <Fragment key={stat.label}>
               {i > 0 && (
@@ -162,7 +162,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
 
   return (
     <div className="flex flex-col items-start md:min-w-0 md:flex-1">
-      <span className="font-num text-title-on-dark text-[80px] leading-[1.2] font-bold tracking-normal tabular-nums max-md:text-[40px]">
+      <span className="font-num text-title-on-dark text-[80px] leading-[1.2] font-bold tracking-normal tabular-nums max-md:text-[32px]">
         <span ref={numRef}>0</span>
         {stat.suffix}
       </span>
@@ -171,7 +171,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
         initial="hidden"
         animate={active ? 'show' : 'hidden'}
         transition={entryTransition(base)}
-        className="text-title-on-dark mt-[16px] text-[20px] leading-[1.4] font-normal tracking-[-0.04em]"
+        className="text-title-on-dark mt-[16px] text-[20px] leading-[1.4] font-normal tracking-[-0.04em] max-md:mt-[8px] max-md:text-[16px]"
       >
         {stat.label}
       </motion.span>
@@ -180,7 +180,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
         initial="hidden"
         animate={active ? 'show' : 'hidden'}
         transition={entryTransition(base + 0.12)}
-        className="text-text-on-dark mt-[4px] text-[16px] leading-[1.4] font-normal tracking-[-0.04em]"
+        className="text-text-on-dark mt-[4px] text-[16px] leading-[1.4] font-normal tracking-[-0.04em] max-md:text-[14px]"
       >
         {stat.caption}
       </motion.span>
