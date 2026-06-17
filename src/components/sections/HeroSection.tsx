@@ -45,7 +45,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
       >
         {/* 상단: 헤드라인 + CTA(좌), 소개문(우). pt가 헤더 공간을 확보.
             모바일(<768): 세로로 쌓음 — 헤드라인 → CONTACT → 소개문. */}
-        <Container className="flex justify-between pt-16.25 max-md:flex-col max-md:gap-6 max-md:pt-19">
+        <Container className="flex justify-between pt-16.25 max-md:flex-col max-md:gap-6 max-md:pt-[34vh]">
           <div className="mt-[clamp(82px,9.86vw,142px)] max-md:mt-0">
             <RevealText
               as="h1"
