@@ -71,11 +71,11 @@ export function AboutSection({ active }: AboutSectionProps) {
   return (
     <section
       id={def.id}
-      className="relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden"
+      className="relative flex h-dvh w-full flex-col justify-between overflow-hidden"
     >
       {/* 상단 블록(좌). 내비 포함 슬라이드 위에서 124px.
           라벨이 먼저, 헤드라인 reveal, 소개문이 뒤따른다. */}
-      <Container className="pt-[clamp(71px,8.61vw,124px)] max-md:pt-[88px]">
+      <Container className="pt-[clamp(71px,8.61vw,124px)] max-md:pt-22">
         <motion.p
           variants={RISE}
           initial="hidden"
@@ -90,7 +90,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           as="h2"
           active={active}
           lines={HEADLINE_LINES}
-          className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-[1.5] font-bold tracking-normal max-md:text-[22px]"
+          className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-normal font-bold tracking-normal max-md:text-[22px]"
         />
 
         <motion.p
@@ -98,7 +98,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           initial="hidden"
           animate={active ? 'show' : 'hidden'}
           transition={entryTransition(INTRO_DELAY)}
-          className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-[1.5] font-normal whitespace-pre-line max-md:text-[14px]"
+          className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-normal font-normal whitespace-pre-line max-md:text-[14px]"
         >
           {INTRO}
         </motion.p>
@@ -107,7 +107,7 @@ export function AboutSection({ active }: AboutSectionProps) {
       {/* 통계 행(하단). 슬라이드 아래에서 124px; 전체 프레임을 차지하는 동일
           너비(flex-1) 좌측 정렬 3컬럼, 양쪽 130px 간격의 1px 세로선으로 구분.
           모바일: 세로로 쌓고 세로선 제거. */}
-      <Container className="pb-[clamp(71px,8.61vw,124px)] max-md:pb-[48px]">
+      <Container className="pb-[clamp(71px,8.61vw,124px)] max-md:pb-12">
         <div className="flex items-start gap-[clamp(74px,9.03vw,130px)] max-md:flex-col max-md:gap-4">
           {STATS.map((stat, i) => (
             <Fragment key={stat.label}>
@@ -171,7 +171,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
         initial="hidden"
         animate={active ? 'show' : 'hidden'}
         transition={entryTransition(base)}
-        className="text-title-on-dark mt-[16px] text-[20px] leading-[1.4] font-normal tracking-[-0.04em] max-md:mt-[8px] max-md:text-[16px]"
+        className="text-title-on-dark mt-4 text-[20px] leading-[1.4] font-normal tracking-[-0.04em] max-md:mt-2 max-md:text-[16px]"
       >
         {stat.label}
       </motion.span>
@@ -180,7 +180,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
         initial="hidden"
         animate={active ? 'show' : 'hidden'}
         transition={entryTransition(base + 0.12)}
-        className="text-text-on-dark mt-[4px] text-[16px] leading-[1.4] font-normal tracking-[-0.04em] max-md:text-[14px]"
+        className="text-text-on-dark mt-1 text-[16px] leading-[1.4] font-normal tracking-[-0.04em] max-md:text-[14px]"
       >
         {stat.caption}
       </motion.span>

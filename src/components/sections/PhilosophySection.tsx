@@ -131,14 +131,14 @@ export function PhilosophySection({
     <section
       ref={sectionRef}
       id={def.id}
-      className="relative flex h-[100dvh] w-full flex-col overflow-hidden"
+      className="relative flex h-dvh w-full flex-col overflow-hidden"
     >
       {/* 타이틀 + 스택 — 확대 진행에 따라 함께 페이드. */}
       <motion.div
         className="flex flex-1 flex-col"
         style={{ opacity: isMobile ? 1 : stageOpacity }}
       >
-        <Container className="pt-[clamp(58px,6.94vw,100px)] max-md:pt-[88px]">
+        <Container className="pt-[clamp(58px,6.94vw,100px)] max-md:pt-22">
           <motion.p
             variants={RISE}
             initial="hidden"
@@ -236,12 +236,9 @@ function PhilosophyGrow({
 
   // 오버레이 가시성 — philosophy(2)~전환 구간에서 1, portfolio(3) 직전(빨강 배경)에서만
   // 페이드. 양방향 seam을 덮는다.
-  const overlayOpacity = useTransform(
-    slide,
-    [1.8, 2, 2.97, 3],
-    [0, 1, 1, 0],
-    { clamp: true }
-  )
+  const overlayOpacity = useTransform(slide, [1.8, 2, 2.97, 3], [0, 1, 1, 0], {
+    clamp: true,
+  })
 
   // 확대 패널(빨강 카드) 투명도는 g(스케일 진행)에 묶는다 — 역방향 축소(g 1→0)에도
   // 끝까지 보이다 g≈0에서만 사라져 흰 배경이 새지 않는다.
@@ -249,7 +246,7 @@ function PhilosophyGrow({
 
   return (
     <motion.div
-      className="pointer-events-none fixed inset-0 z-[40] overflow-hidden"
+      className="pointer-events-none fixed inset-0 z-40 overflow-hidden"
       style={{ opacity: overlayOpacity }}
     >
       <motion.div

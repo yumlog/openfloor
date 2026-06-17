@@ -26,7 +26,7 @@ export function HeroGhost({ slide, active }: HeroGhostProps) {
     <motion.div
       aria-hidden
       style={{ y, opacity }}
-      className="pointer-events-none absolute inset-0 flex h-[100dvh] flex-col justify-end"
+      className="pointer-events-none absolute inset-0 flex h-dvh flex-col justify-end"
     >
       <Container className="mb-[clamp(58px,6.94vw,100px)] max-md:mb-8">
         <motion.h2

@@ -37,7 +37,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
   return (
     <section
       id={def.id}
-      className="relative flex h-[100dvh] w-full flex-col justify-between overflow-hidden"
+      className="relative flex h-dvh w-full flex-col justify-between overflow-hidden"
     >
       <motion.div
         style={{ opacity }}
@@ -45,13 +45,13 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
       >
         {/* 상단: 헤드라인 + CTA(좌), 소개문(우). pt가 헤더 공간을 확보.
             모바일(<768): 세로로 쌓음 — 헤드라인 → CONTACT → 소개문. */}
-        <Container className="flex justify-between pt-[65px] max-md:flex-col max-md:gap-6 max-md:pt-[76px]">
+        <Container className="flex justify-between pt-16.25 max-md:flex-col max-md:gap-6 max-md:pt-19">
           <div className="mt-[clamp(82px,9.86vw,142px)] max-md:mt-0">
             <RevealText
               as="h1"
               active={active}
               lines={HEADLINE_LINES}
-              className="text-title-on-dark text-[clamp(36px,4.17vw,60px)] leading-[1.5] font-bold tracking-normal max-md:text-[clamp(26px,7vw,34px)]"
+              className="text-title-on-dark text-[clamp(36px,4.17vw,60px)] leading-normal font-bold tracking-normal max-md:text-[clamp(26px,7vw,34px)]"
             />
 
             <motion.div
@@ -64,7 +64,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
               <button
                 type="button"
                 onClick={() => goTo(CONTACT_INDEX)}
-                className="group border-accent text-accent hover:bg-accent inline-flex items-center gap-2 rounded-full border-2 py-[clamp(8px,0.83vw,12px)] pr-[clamp(8px,0.83vw,12px)] pl-[clamp(12px,1.11vw,16px)] text-[clamp(12px,1.39vw,20px)] leading-[1.2] font-bold tracking-[-0.04em] transition-colors hover:text-title-on-dark"
+                className="group border-accent text-accent hover:bg-accent hover:text-title-on-dark inline-flex items-center gap-2 rounded-full border-2 py-[clamp(8px,0.83vw,12px)] pr-[clamp(8px,0.83vw,12px)] pl-[clamp(12px,1.11vw,16px)] text-[clamp(12px,1.39vw,20px)] leading-[1.2] font-bold tracking-[-0.04em] transition-colors"
               >
                 CONTACT
                 <ArrowUpRight
@@ -80,7 +80,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
             initial="hidden"
             animate={active ? 'show' : 'hidden'}
             transition={{ delay: 0.65, duration: 0.6, ease: SLIDE_EASE }}
-            className="text-text-on-dark mt-[clamp(93px,11.11vw,160px)] max-w-[clamp(213px,27.78vw,402px)] text-[clamp(12px,1.11vw,16px)] leading-[1.5] font-medium whitespace-pre-line max-md:mt-0 max-md:max-w-none max-md:text-[14px]"
+            className="text-text-on-dark mt-[clamp(93px,11.11vw,160px)] max-w-[clamp(213px,27.78vw,402px)] text-[clamp(12px,1.11vw,16px)] leading-normal font-medium whitespace-pre-line max-md:mt-0 max-md:max-w-none max-md:text-[14px]"
           >
             {INTRO}
           </motion.p>

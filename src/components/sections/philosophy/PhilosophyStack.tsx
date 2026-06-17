@@ -62,12 +62,12 @@ function CardContent({
   compact?: boolean
 }) {
   return (
-    <div className={compact ? 'px-[28px] pt-[32px]' : 'px-[40px] pt-[48px]'}>
+    <div className={compact ? 'px-7 pt-8' : 'px-10 pt-12'}>
       <div
         className={
           compact
-            ? 'flex items-baseline gap-[12px] text-[20px] leading-[1.4] font-normal text-title-on-dark'
-            : 'flex items-baseline gap-[16px] text-[24px] leading-[1.4] font-normal text-title-on-dark'
+            ? 'text-title-on-dark flex items-baseline gap-3 text-[20px] leading-[1.4] font-normal'
+            : 'text-title-on-dark flex items-baseline gap-4 text-[24px] leading-[1.4] font-normal'
         }
       >
         <span>{card.num}</span>
@@ -76,8 +76,8 @@ function CardContent({
       <p
         className={
           compact
-            ? 'mt-[40px] text-[18px] leading-[1.6] font-bold break-keep whitespace-pre-line text-title-on-dark'
-            : 'mt-[74px] text-[24px] leading-[1.6] font-bold break-keep whitespace-pre-line text-title-on-dark'
+            ? 'text-title-on-dark mt-10 text-[18px] leading-[1.6] font-bold break-keep whitespace-pre-line'
+            : 'text-title-on-dark mt-18.5 text-[24px] leading-[1.6] font-bold break-keep whitespace-pre-line'
         }
       >
         {card.body}
@@ -98,7 +98,7 @@ export function CardFace({
 }) {
   return (
     <div
-      className="relative h-full w-full overflow-hidden rounded-[12px]"
+      className="relative h-full w-full overflow-hidden rounded-xl"
       style={{ backgroundColor: card.bg }}
     >
       <motion.div
@@ -112,10 +112,12 @@ export function CardFace({
           draggable={false}
           className={
             compact
-              ? 'pointer-events-none absolute top-[28px] right-[24px] opacity-50'
-              : 'pointer-events-none absolute top-[48px] right-[40px] opacity-50'
+              ? 'pointer-events-none absolute top-7 right-6 opacity-50'
+              : 'pointer-events-none absolute top-12 right-10 opacity-50'
           }
-          style={compact ? { width: 64, height: 44 } : { width: 100, height: 68 }}
+          style={
+            compact ? { width: 64, height: 44 } : { width: 100, height: 68 }
+          }
         />
         <CardContent card={card} compact={compact} />
       </motion.div>
@@ -189,7 +191,8 @@ export function PhilosophyStack({
         <div
           ref={measureRef}
           aria-hidden
-          className="invisible absolute top-0 -left-[99999px]"
+          className="invisible absolute top-0"
+          style={{ left: -99999 }}
         >
           {PHILOSOPHY_CARDS.map((card) => (
             <div key={card.id} style={{ width: d.CW }}>

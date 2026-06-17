@@ -7,8 +7,14 @@ import { CentralCrystal } from '@/components/layout/CentralCrystal'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { HeroGhost } from '@/components/sections/hero/HeroGhost'
 import { AboutSection } from '@/components/sections/AboutSection'
-import { PhilosophySection, PHILOSOPHY_STEPS } from '@/components/sections/PhilosophySection'
-import { PortfolioSection, PORTFOLIO_STEPS } from '@/components/sections/PortfolioSection'
+import {
+  PhilosophySection,
+  PHILOSOPHY_STEPS,
+} from '@/components/sections/PhilosophySection'
+import {
+  PortfolioSection,
+  PORTFOLIO_STEPS,
+} from '@/components/sections/PortfolioSection'
 import { STACK_END } from '@/components/sections/philosophy/PhilosophyStack'
 import {
   ManifestoSection,
@@ -119,7 +125,12 @@ export default function App() {
       <Slides trackY={trackY}>
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
         <AboutSection active={index === 1} />
-        <PhilosophySection active={index === 2} progress={philosophyRoll} slide={slide} goTo={goTo} />
+        <PhilosophySection
+          active={index === 2}
+          progress={philosophyRoll}
+          slide={slide}
+          goTo={goTo}
+        />
         <PortfolioSection
           active={index === 3 && (target === 3 || source === 3)}
           progress={portfolioRoll}

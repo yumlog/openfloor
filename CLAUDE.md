@@ -47,10 +47,22 @@
   *콘텐츠*만 프레임 안에 둔다. 콘텐츠에는 `<Container>`를 쓰고, 배경은 그 바깥에
   둔다.
 - **각 섹션은 정확히 한 화면 높이.** `100dvh` / `svh`(모바일 주소창 안전)를 쓰고,
-  절대 `vh`를 쓰지 않는다.
+  절대 `vh`를 쓰지 않는다. 단 클래스는 정규형 `h-dvh`(= `h-[100dvh]`)를 쓴다.
 - **토큰만 사용.** 색·간격·폰트는 `@theme` 토큰 / Tailwind 유틸리티에서 온다 —
   컴포넌트에 hex/px 하드코딩 금지. (JS 엔진이 필요로 하는 raw 색/너비 상수는
   `src/config/slides.ts`에 미러링되어 있으니 토큰과 동기화할 것.)
+- **정규형 유틸리티 우선(arbitrary 값 지양).** 스케일에 정확히 대응하는 값은
+  `[..]` 임의값 대신 정규 클래스를 쓴다 — `h-[100dvh]`→`h-dvh`,
+  `mt-[16px]`→`mt-4`, `gap-[42px]`→`gap-10.5`, `pt-[88px]`→`pt-22`,
+  `size-[56px]`→`size-14`, `z-[40]`→`z-40`, `rounded-[12px]`→`rounded-xl`,
+  `leading-[1.5]`→`leading-normal`, `leading-[1]`→`leading-none`,
+  `bg-…/[0.08]`→`bg-…/8`, `decoration-[2px]`→`decoration-2`. (px→스케일은 ÷4:
+  `[24px]`→`6`, `[42px]`→`10.5`, `[65px]`→`16.25` 식으로 소수도 가능.) 이렇게
+  하면 Tailwind IntelliSense의 "can be written as …"(suggestCanonicalClasses)
+  경고가 사라진다. **예외:** `clamp()`·커스텀 `em`(`tracking-[-0.04em]`)·임의
+  `font-size`(`text-[44px]`)·정규형이 없는 line-height(`leading-[1.4]`)·
+  화면밖 측정 오프셋(`left: -99999`는 인라인 style) 등 정규형이 없는 값은 그대로
+  둔다.
 - **긴 Tailwind 클래스 묶음은 컴포넌트로 추출.**
 - **Keyframe 애니메이션**(블록 reveal 등)은 Tailwind 유틸리티 체인에 욱여넣지 말고
   `src/styles/keyframes.css`에 둔다.

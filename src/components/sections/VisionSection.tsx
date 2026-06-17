@@ -10,8 +10,25 @@ import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
 const def = SLIDES[4]
 
 /* --- 트리 데이터 (좌표 = 원 중심, 트리 박스 기준 디자인 px) --- */
-type NodeId = 'root' | 'gen' | 'llm' | 'doc' | 'qa' | 'img' | 'motion' | 'sllm' | 'ir' | 'rfp' | 'eval'
-interface VNode { id: NodeId; title: string; desc: string; x: number; y: number }
+type NodeId =
+  | 'root'
+  | 'gen'
+  | 'llm'
+  | 'doc'
+  | 'qa'
+  | 'img'
+  | 'motion'
+  | 'sllm'
+  | 'ir'
+  | 'rfp'
+  | 'eval'
+interface VNode {
+  id: NodeId
+  title: string
+  desc: string
+  x: number
+  y: number
+}
 
 const TREE_W = 1312
 const TREE_H = 660
@@ -19,24 +36,95 @@ const R = 28 // 원 반지름
 
 // 컬럼 x: root=28, 중간=580, 오른쪽=940 / y: 중간 4개 164 간격, 오른쪽 6개 균등 배치
 const NODES: VNode[] = [
-  { id: 'root',   title: '통제 가능한 실전 AI',          desc: 'AI 신뢰성과 제어력을 핵심 축',     x: 28,  y: 356 },
-  { id: 'gen',    title: '생성형 비주얼',                desc: '이미지·영상 생성 기술',           x: 490, y: 110 },
-  { id: 'llm',    title: '로컬 LLM·파인튜닝',            desc: '온프레미스 모델 최적화',          x: 490, y: 274 },
-  { id: 'doc',    title: '문서 분석 자동화',             desc: '비정형 데이터 처리 파이프라인',    x: 490, y: 438 },
-  { id: 'qa',     title: 'AI 품질 검증',                desc: '성능 평가·회귀 방어',            x: 490, y: 602 },
-  { id: 'img',    title: '이미지 생성 파이프라인',        desc: '자체 R&D·구축 운영',            x: 940, y: 55  },
-  { id: 'motion', title: '영상 모션 전이·페이스스왑',      desc: '고객 프로젝트·전략 평가',         x: 940, y: 165 },
-  { id: 'sllm',   title: '도메인 특화 sLLM 파인튜닝',     desc: '고객 프로젝트·전략 평가',         x: 940, y: 274 },
-  { id: 'ir',     title: '금융 IR 텍스트·감성 분석 엔진',  desc: '고객 프로젝트·구축 운영',         x: 940, y: 383 },
-  { id: 'rfp',    title: '공공조달 RFP 분석 파이프라인',   desc: '자체 R&D·구축 운영',            x: 940, y: 493 },
-  { id: 'eval',   title: 'AI평가·회귀 검증 방법론',       desc: '자체 R&D·설계',                x: 940, y: 602 },
+  {
+    id: 'root',
+    title: '통제 가능한 실전 AI',
+    desc: 'AI 신뢰성과 제어력을 핵심 축',
+    x: 28,
+    y: 356,
+  },
+  {
+    id: 'gen',
+    title: '생성형 비주얼',
+    desc: '이미지·영상 생성 기술',
+    x: 490,
+    y: 110,
+  },
+  {
+    id: 'llm',
+    title: '로컬 LLM·파인튜닝',
+    desc: '온프레미스 모델 최적화',
+    x: 490,
+    y: 274,
+  },
+  {
+    id: 'doc',
+    title: '문서 분석 자동화',
+    desc: '비정형 데이터 처리 파이프라인',
+    x: 490,
+    y: 438,
+  },
+  {
+    id: 'qa',
+    title: 'AI 품질 검증',
+    desc: '성능 평가·회귀 방어',
+    x: 490,
+    y: 602,
+  },
+  {
+    id: 'img',
+    title: '이미지 생성 파이프라인',
+    desc: '자체 R&D·구축 운영',
+    x: 940,
+    y: 55,
+  },
+  {
+    id: 'motion',
+    title: '영상 모션 전이·페이스스왑',
+    desc: '고객 프로젝트·전략 평가',
+    x: 940,
+    y: 165,
+  },
+  {
+    id: 'sllm',
+    title: '도메인 특화 sLLM 파인튜닝',
+    desc: '고객 프로젝트·전략 평가',
+    x: 940,
+    y: 274,
+  },
+  {
+    id: 'ir',
+    title: '금융 IR 텍스트·감성 분석 엔진',
+    desc: '고객 프로젝트·구축 운영',
+    x: 940,
+    y: 383,
+  },
+  {
+    id: 'rfp',
+    title: '공공조달 RFP 분석 파이프라인',
+    desc: '자체 R&D·구축 운영',
+    x: 940,
+    y: 493,
+  },
+  {
+    id: 'eval',
+    title: 'AI평가·회귀 검증 방법론',
+    desc: '자체 R&D·설계',
+    x: 940,
+    y: 602,
+  },
 ]
 
 const EDGES: [NodeId, NodeId][] = [
-  ['root', 'gen'], ['root', 'llm'], ['root', 'doc'], ['root', 'qa'],
-  ['gen', 'img'], ['gen', 'motion'],
+  ['root', 'gen'],
+  ['root', 'llm'],
+  ['root', 'doc'],
+  ['root', 'qa'],
+  ['gen', 'img'],
+  ['gen', 'motion'],
   ['llm', 'sllm'],
-  ['doc', 'ir'], ['doc', 'rfp'],
+  ['doc', 'ir'],
+  ['doc', 'rfp'],
   ['qa', 'eval'],
 ]
 
@@ -46,18 +134,43 @@ const CHILDREN: Record<NodeId, NodeId[]> = {
   llm: ['sllm'],
   doc: ['ir', 'rfp'],
   qa: ['eval'],
-  img: [], motion: [], sllm: [], ir: [], rfp: [], eval: [],
+  img: [],
+  motion: [],
+  sllm: [],
+  ir: [],
+  rfp: [],
+  eval: [],
 }
 const PARENT: Partial<Record<NodeId, NodeId>> = {
-  gen: 'root', llm: 'root', doc: 'root', qa: 'root',
-  img: 'gen', motion: 'gen', sllm: 'llm', ir: 'doc', rfp: 'doc', eval: 'qa',
+  gen: 'root',
+  llm: 'root',
+  doc: 'root',
+  qa: 'root',
+  img: 'gen',
+  motion: 'gen',
+  sllm: 'llm',
+  ir: 'doc',
+  rfp: 'doc',
+  eval: 'qa',
 }
 const DEPTH: Record<NodeId, number> = {
-  root: 0, gen: 1, llm: 1, doc: 1, qa: 1,
-  img: 2, motion: 2, sllm: 2, ir: 2, rfp: 2, eval: 2,
+  root: 0,
+  gen: 1,
+  llm: 1,
+  doc: 1,
+  qa: 1,
+  img: 2,
+  motion: 2,
+  sllm: 2,
+  ir: 2,
+  rfp: 2,
+  eval: 2,
 }
 
-const byId = Object.fromEntries(NODES.map((n) => [n.id, n])) as Record<NodeId, VNode>
+const byId = Object.fromEntries(NODES.map((n) => [n.id, n])) as Record<
+  NodeId,
+  VNode
+>
 
 const MID_IDS: NodeId[] = ['gen', 'llm', 'doc', 'qa']
 const RIGHT_IDS: NodeId[] = ['img', 'motion', 'sllm', 'ir', 'rfp', 'eval']
@@ -140,7 +253,8 @@ export function VisionSection({ active }: VisionSectionProps) {
     const s = byId[sid]
     const t = byId[tid]
     const GAP = 24
-    const x1 = (MID_IDS.includes(sid) ? midExit : s.x - R + (widths[sid] ?? 220)) + GAP // 노드~선 간격
+    const x1 =
+      (MID_IDS.includes(sid) ? midExit : s.x - R + (widths[sid] ?? 220)) + GAP // 노드~선 간격
     const y1 = effY(s.y)
     const x2 = effX(tid) - R // 타겟 아이콘 좌측(붙임)
     const y2 = effY(t.y)
@@ -157,15 +271,21 @@ export function VisionSection({ active }: VisionSectionProps) {
 
   const TitleBlock = (
     <div>
-      <motion.p {...rise(0)} className="text-[20px] font-bold leading-[1.4] tracking-[-0.04em] text-accent max-md:text-[14px]">
+      <motion.p
+        {...rise(0)}
+        className="text-accent text-[20px] leading-[1.4] font-bold tracking-[-0.04em] max-md:text-[14px]"
+      >
         OUR VISION
       </motion.p>
       <RevealText
         as="p"
         active={active}
-        lines={['AI와 함께 일하는 방식이 바뀌는 시대,', '우리는 그 변화를 가장 깊이 만들어갑니다.']}
+        lines={[
+          'AI와 함께 일하는 방식이 바뀌는 시대,',
+          '우리는 그 변화를 가장 깊이 만들어갑니다.',
+        ]}
         baseDelay={0.1}
-        className="mt-[16px] text-[44px] font-bold leading-[1.5] tracking-normal text-title-on-dark max-md:mt-3 max-md:text-[clamp(16px,4.8vw,22px)] max-md:leading-[1.35]"
+        className="text-title-on-dark mt-4 text-[44px] leading-normal font-bold tracking-normal max-md:mt-3 max-md:text-[clamp(16px,4.8vw,22px)] max-md:leading-[1.35]"
       />
     </div>
   )
@@ -188,7 +308,14 @@ export function VisionSection({ active }: VisionSectionProps) {
     }
 
     const renderRow = (
-      row: { id: NodeId; depth: number; isLast: boolean; parentLast: boolean; open: boolean; index?: number },
+      row: {
+        id: NodeId
+        depth: number
+        isLast: boolean
+        parentLast: boolean
+        open: boolean
+        index?: number
+      },
       onToggle?: () => void
     ) => {
       const node = byId[row.id]
@@ -207,25 +334,45 @@ export function VisionSection({ active }: VisionSectionProps) {
 
       const inner = (
         <>
-          <div className={`flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-accent bg-accent/20' : 'border-title-on-dark/50 bg-title-on-dark/[0.08]'}`}>
-            <Bot className={`size-5 transition-colors duration-200 ${isRed ? 'text-accent' : 'text-text-on-dark/80'}`} />
+          <div
+            className={`flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-accent bg-accent/20' : 'border-title-on-dark/50 bg-title-on-dark/8'}`}
+          >
+            <Bot
+              className={`size-5 transition-colors duration-200 ${isRed ? 'text-accent' : 'text-text-on-dark/80'}`}
+            />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[14px] font-bold leading-tight text-title-on-dark">{node.title}</p>
-            <p className="mt-[4px] truncate text-[14px] leading-tight text-text-on-dark">{node.desc}</p>
+            <p className="text-title-on-dark truncate text-[14px] leading-tight font-bold">
+              {node.title}
+            </p>
+            <p className="text-text-on-dark mt-1 truncate text-[14px] leading-tight">
+              {node.desc}
+            </p>
           </div>
           {isMid && (
-            <ChevronDown className={`size-4 shrink-0 transition-transform duration-200 ${row.open ? 'rotate-180 text-accent' : 'text-muted'}`} />
+            <ChevronDown
+              className={`size-4 shrink-0 transition-transform duration-200 ${row.open ? 'text-accent rotate-180' : 'text-muted'}`}
+            />
           )}
         </>
       )
 
       return (
-        <div key={row.id} className="relative flex items-stretch" style={{ height: ROW_H }}>
+        <div
+          key={row.id}
+          className="relative flex items-stretch"
+          style={{ height: ROW_H }}
+        >
           {d === 0 && (
             <motion.span
               className="absolute"
-              style={{ left: ICON_R - 1, top: cy + ICON_R, width: 2, height: ROW_H - (cy + ICON_R), background: openIdx >= 0 ? RED : GRAY }}
+              style={{
+                left: ICON_R - 1,
+                top: cy + ICON_R,
+                width: 2,
+                height: ROW_H - (cy + ICON_R),
+                background: openIdx >= 0 ? RED : GRAY,
+              }}
               initial={{ opacity: 0 }}
               animate={{ opacity: active ? 1 : 0 }}
               transition={{ duration: 0.4, ease: 'easeOut', delay: entryDelay }}
@@ -234,45 +381,125 @@ export function VisionSection({ active }: VisionSectionProps) {
 
           {d > 0 && (
             <motion.svg
-              width={gutterW} height={ROW_H} className="shrink-0" style={{ overflow: 'visible' }}
+              width={gutterW}
+              height={ROW_H}
+              className="shrink-0"
+              style={{ overflow: 'visible' }}
               initial={d < 2 ? { opacity: 0 } : false}
               animate={d < 2 ? { opacity: active ? 1 : 0 } : undefined}
-              transition={d < 2 ? { duration: 0.4, ease: 'easeOut', delay: entryDelay } : undefined}
+              transition={
+                d < 2
+                  ? { duration: 0.4, ease: 'easeOut', delay: entryDelay }
+                  : undefined
+              }
             >
               {/* ===== 회색 먼저(아래 레이어) ===== */}
               {d === 1 && onPathAbove && (
-                <path d={elbowD} fill="none" stroke={GRAY} strokeWidth={1.5} strokeLinecap="round" />
+                <path
+                  d={elbowD}
+                  fill="none"
+                  stroke={GRAY}
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                />
               )}
               {d === 1 && isOpenMid && !row.isLast && (
-                <line x1={ICON_R} y1={cy - CR} x2={ICON_R} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
+                <line
+                  x1={ICON_R}
+                  y1={cy - CR}
+                  x2={ICON_R}
+                  y2={ROW_H}
+                  stroke={GRAY}
+                  strokeWidth={1.5}
+                />
               )}
               {isPlainGray && (
                 <>
-                  <line x1={ICON_R} y1={0} x2={ICON_R} y2={row.isLast ? cy - CR : ROW_H} stroke={GRAY} strokeWidth={1.5} />
-                  <path d={elbowD} fill="none" stroke={GRAY} strokeWidth={1.5} strokeLinecap="round" />
+                  <line
+                    x1={ICON_R}
+                    y1={0}
+                    x2={ICON_R}
+                    y2={row.isLast ? cy - CR : ROW_H}
+                    stroke={GRAY}
+                    strokeWidth={1.5}
+                  />
+                  <path
+                    d={elbowD}
+                    fill="none"
+                    stroke={GRAY}
+                    strokeWidth={1.5}
+                    strokeLinecap="round"
+                  />
                 </>
               )}
               {d === 2 && !row.parentLast && (
-                <line x1={ICON_R} y1={0} x2={ICON_R} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
+                <line
+                  x1={ICON_R}
+                  y1={0}
+                  x2={ICON_R}
+                  y2={ROW_H}
+                  stroke={GRAY}
+                  strokeWidth={1.5}
+                />
               )}
 
               {/* ===== 빨강 나중(위 레이어) ===== */}
               {d === 1 && onPathAbove && (
-                <line x1={ICON_R} y1={0} x2={ICON_R} y2={ROW_H} stroke={RED} strokeWidth={2} />
+                <line
+                  x1={ICON_R}
+                  y1={0}
+                  x2={ICON_R}
+                  y2={ROW_H}
+                  stroke={RED}
+                  strokeWidth={2}
+                />
               )}
               {d === 1 && isOpenMid && (
                 <>
-                  <line x1={ICON_R} y1={0} x2={ICON_R} y2={cy - CR} stroke={RED} strokeWidth={2} />
-                  <path d={elbowD} fill="none" stroke={RED} strokeWidth={2} strokeLinecap="round" />
+                  <line
+                    x1={ICON_R}
+                    y1={0}
+                    x2={ICON_R}
+                    y2={cy - CR}
+                    stroke={RED}
+                    strokeWidth={2}
+                  />
+                  <path
+                    d={elbowD}
+                    fill="none"
+                    stroke={RED}
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                  />
                 </>
               )}
               {d === 1 && row.open && (
-                <line x1={SLOT_W + ICON_R} y1={cy + ICON_R} x2={SLOT_W + ICON_R} y2={ROW_H} stroke={RED} strokeWidth={2} />
+                <line
+                  x1={SLOT_W + ICON_R}
+                  y1={cy + ICON_R}
+                  x2={SLOT_W + ICON_R}
+                  y2={ROW_H}
+                  stroke={RED}
+                  strokeWidth={2}
+                />
               )}
               {d === 2 && (
                 <>
-                  <line x1={ex} y1={0} x2={ex} y2={row.isLast ? cy - CR : ROW_H} stroke={RED} strokeWidth={2} />
-                  <path d={elbowD} fill="none" stroke={RED} strokeWidth={2} strokeLinecap="round" />
+                  <line
+                    x1={ex}
+                    y1={0}
+                    x2={ex}
+                    y2={row.isLast ? cy - CR : ROW_H}
+                    stroke={RED}
+                    strokeWidth={2}
+                  />
+                  <path
+                    d={elbowD}
+                    fill="none"
+                    stroke={RED}
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                  />
                 </>
               )}
             </motion.svg>
@@ -280,12 +507,20 @@ export function VisionSection({ active }: VisionSectionProps) {
 
           {isMid ? (
             <motion.button
-              type="button" onClick={onToggle}
+              type="button"
+              onClick={onToggle}
               className="flex flex-1 items-center gap-3 text-left"
               style={{ transformOrigin: 'left center' }}
               initial={{ opacity: 0, scale: 0.85 }}
-              animate={active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 22, delay: entryDelay }}
+              animate={
+                active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }
+              }
+              transition={{
+                type: 'spring',
+                stiffness: 500,
+                damping: 22,
+                delay: entryDelay,
+              }}
             >
               {inner}
             </motion.button>
@@ -294,8 +529,23 @@ export function VisionSection({ active }: VisionSectionProps) {
               className="flex flex-1 items-center gap-3"
               style={{ transformOrigin: 'left center' }}
               initial={d < 2 ? { opacity: 0, scale: 0.85 } : false}
-              animate={d < 2 ? (active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }) : undefined}
-              transition={d < 2 ? { type: 'spring', stiffness: 500, damping: 22, delay: entryDelay } : undefined}
+              animate={
+                d < 2
+                  ? active
+                    ? { opacity: 1, scale: 1 }
+                    : { opacity: 0, scale: 0.85 }
+                  : undefined
+              }
+              transition={
+                d < 2
+                  ? {
+                      type: 'spring',
+                      stiffness: 500,
+                      damping: 22,
+                      delay: entryDelay,
+                    }
+                  : undefined
+              }
             >
               {inner}
             </motion.div>
@@ -305,18 +555,37 @@ export function VisionSection({ active }: VisionSectionProps) {
     }
 
     return (
-      <section id={def.id} className="relative flex h-[100dvh] w-full flex-col overflow-hidden">
-        <Container className="flex h-full flex-col pt-[88px] pb-[24px]">
+      <section
+        id={def.id}
+        className="relative flex h-dvh w-full flex-col overflow-hidden"
+      >
+        <Container className="flex h-full flex-col pt-22 pb-6">
           {TitleBlock}
 
           <div className="mt-6 flex flex-col">
-            {renderRow({ id: 'root', depth: 0, isLast: true, parentLast: true, open: false })}
+            {renderRow({
+              id: 'root',
+              depth: 0,
+              isLast: true,
+              parentLast: true,
+              open: false,
+            })}
             {MID_IDS.map((mid, i) => {
               const midLast = i === MID_IDS.length - 1
               const open = openId === mid
               return (
                 <div key={mid}>
-                  {renderRow({ id: mid, depth: 1, isLast: midLast, parentLast: true, open, index: i }, () => setOpenId(open ? null : mid))}
+                  {renderRow(
+                    {
+                      id: mid,
+                      depth: 1,
+                      isLast: midLast,
+                      parentLast: true,
+                      open,
+                      index: i,
+                    },
+                    () => setOpenId(open ? null : mid)
+                  )}
                   <AnimatePresence initial={false}>
                     {open && (
                       <motion.div
@@ -327,7 +596,13 @@ export function VisionSection({ active }: VisionSectionProps) {
                         className="overflow-hidden"
                       >
                         {CHILDREN[mid].map((kid, j) =>
-                          renderRow({ id: kid, depth: 2, isLast: j === CHILDREN[mid].length - 1, parentLast: midLast, open: false })
+                          renderRow({
+                            id: kid,
+                            depth: 2,
+                            isLast: j === CHILDREN[mid].length - 1,
+                            parentLast: midLast,
+                            open: false,
+                          })
                         )}
                       </motion.div>
                     )}
@@ -342,14 +617,23 @@ export function VisionSection({ active }: VisionSectionProps) {
   }
 
   return (
-    <section id={def.id} className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden">
-      <div className="relative shrink-0" style={{ width: DESIGN_WIDTH, height: H, transform: `scale(${ratio})` }}>
-        <div className="flex h-full flex-col justify-between py-[100px] px-[64px]">
+    <section
+      id={def.id}
+      className="relative flex h-dvh w-full items-center justify-center overflow-hidden"
+    >
+      <div
+        className="relative shrink-0"
+        style={{ width: DESIGN_WIDTH, height: H, transform: `scale(${ratio})` }}
+      >
+        <div className="flex h-full flex-col justify-between px-16 py-25">
           {TitleBlock}
 
           {/* 파이프라인 트리 */}
           <div style={{ height: TREE_H * vScale }}>
-            <div className="relative" style={{ width: TREE_W, height: TREE_H * vScale }}>
+            <div
+              className="relative"
+              style={{ width: TREE_W, height: TREE_H * vScale }}
+            >
               {/* 곡선 커넥터 (노드 뒤) */}
               <svg
                 className="absolute inset-0 overflow-visible"
@@ -369,7 +653,11 @@ export function VisionSection({ active }: VisionSectionProps) {
                     strokeLinecap="round"
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: active ? 1 : 0 }}
-                    transition={{ duration: 0.7, ease: 'easeInOut', delay: (sid === 'root' ? 0.25 : 0.75) + i * 0.04 }}
+                    transition={{
+                      duration: 0.7,
+                      ease: 'easeInOut',
+                      delay: (sid === 'root' ? 0.25 : 0.75) + i * 0.04,
+                    }}
                   />
                 ))}
                 {/* 빨강 오버레이 — 전부 나중(위 레이어). opacity로 비호버 시 점 숨김 */}
@@ -384,8 +672,15 @@ export function VisionSection({ active }: VisionSectionProps) {
                       strokeWidth={2}
                       strokeLinecap="round"
                       initial={{ pathLength: 0, opacity: 0 }}
-                      animate={{ pathLength: hot ? 1 : 0, opacity: hot ? 1 : 0 }}
-                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], opacity: { duration: 0.2 } }}
+                      animate={{
+                        pathLength: hot ? 1 : 0,
+                        opacity: hot ? 1 : 0,
+                      }}
+                      transition={{
+                        duration: 0.55,
+                        ease: [0.22, 1, 0.36, 1],
+                        opacity: { duration: 0.2 },
+                      }}
                     />
                   )
                 })}
@@ -394,29 +689,48 @@ export function VisionSection({ active }: VisionSectionProps) {
               {/* 노드 */}
               {NODES.map((n, i) => {
                 const hot = redSet.has(n.id)
-                const delay = (n.x < 100 ? 0 : n.x < 700 ? 0.45 : 0.95) + i * 0.03
+                const delay =
+                  (n.x < 100 ? 0 : n.x < 700 ? 0.45 : 0.95) + i * 0.03
                 return (
                   <motion.div
                     key={n.id}
-                    ref={(el) => { nodeRefs.current[n.id] = el }}
+                    ref={(el) => {
+                      nodeRefs.current[n.id] = el
+                    }}
                     onMouseEnter={() => setHovered(n.id)}
                     onMouseLeave={() => setHovered(null)}
                     className="absolute flex cursor-default items-center"
                     style={{ left: effX(n.id) - R, top: effY(n.y) - R }}
                     initial={{ opacity: 0, scale: 0.92 }}
-                    animate={active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.92 }}
-                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay }}
+                    animate={
+                      active
+                        ? { opacity: 1, scale: 1 }
+                        : { opacity: 0, scale: 0.92 }
+                    }
+                    transition={{
+                      duration: 0.5,
+                      ease: [0.22, 1, 0.36, 1],
+                      delay,
+                    }}
                   >
                     <div
-                      className={`flex size-[56px] shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
-                        hot ? 'border-accent bg-accent/20' : 'border-title-on-dark/50 bg-title-on-dark/[0.08]'
+                      className={`flex size-14 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
+                        hot
+                          ? 'border-accent bg-accent/20'
+                          : 'border-title-on-dark/50 bg-title-on-dark/8'
                       }`}
                     >
-                      <Bot className={`size-7 transition-colors duration-200 ${hot ? 'text-accent' : 'text-text-on-dark/80'}`} />
+                      <Bot
+                        className={`size-7 transition-colors duration-200 ${hot ? 'text-accent' : 'text-text-on-dark/80'}`}
+                      />
                     </div>
-                    <div className="ml-[24px]">
-                      <p className="whitespace-nowrap text-[20px] font-bold leading-[1.5] text-title-on-dark">{n.title}</p>
-                      <p className="mt-[4px] whitespace-nowrap text-[16px] font-normal leading-[1.5] text-text-on-dark">{n.desc}</p>
+                    <div className="ml-6">
+                      <p className="text-title-on-dark text-[20px] leading-normal font-bold whitespace-nowrap">
+                        {n.title}
+                      </p>
+                      <p className="text-text-on-dark mt-1 text-[16px] leading-normal font-normal whitespace-nowrap">
+                        {n.desc}
+                      </p>
                     </div>
                   </motion.div>
                 )

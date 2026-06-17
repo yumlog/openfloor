@@ -3,10 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, useTransform, type MotionValue } from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH } from '@/config/slides'
-import {
-  PORTFOLIO_PROJECTS,
-  type PortfolioProject,
-} from './portfolio/projects'
+import { PORTFOLIO_PROJECTS, type PortfolioProject } from './portfolio/projects'
 
 /* ---------------------------------------------------------------------------
    Portfolio (슬라이드 3). 빨강 배경 + 흰 PORTFOLIO 텍스트.
@@ -40,16 +37,22 @@ const SLIDE_SCALE_OUT: number[] = [0, 1.045, 1.0]
 /** 첫 슬라이드 reveal01이 이 값 이상이면 '다 확대됨'으로 보고 dim/텍스트를 등장. */
 const REVEAL_SETTLE = 0.97
 /** dim/텍스트 등장 트랜지션(페이드+상승). 역방향은 짧게 사라지므로 별도. */
-const ENTER = (delay: number) =>
-  ({ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const, delay })
+const ENTER = (delay: number) => ({
+  duration: 0.5,
+  ease: [0.22, 1, 0.36, 1] as const,
+  delay,
+})
 
 /* 후속 슬라이드: 첫 장 제외한 N-1개를 [REVEAL_END, 1]에 균등 분할해 스크롤
    연속 상승(데드존 제거). 슬라이드 개수가 바뀌면 자동으로 재분할된다. */
 const FOLLOW = PORTFOLIO_PROJECTS.length - 1
-const RISE_BANDS: [number, number][] = Array.from({ length: FOLLOW }, (_, i) => {
-  const span = (1 - REVEAL_END) / FOLLOW
-  return [REVEAL_END + i * span, REVEAL_END + (i + 1) * span]
-})
+const RISE_BANDS: [number, number][] = Array.from(
+  { length: FOLLOW },
+  (_, i) => {
+    const span = (1 - REVEAL_END) / FOLLOW
+    return [REVEAL_END + i * span, REVEAL_END + (i + 1) * span]
+  }
+)
 
 interface PortfolioSectionProps {
   active: boolean
@@ -62,15 +65,17 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
 
   // reveal을 trap progress로 직접 구동(0→REVEAL_END에서 0→1). 정/역/재진입 모두
   // progress만 따르므로 클럭/히스테리시스가 불필요.
-  const reveal01 = useTransform(progress, [0, REVEAL_END], [0, 1], { clamp: true })
+  const reveal01 = useTransform(progress, [0, REVEAL_END], [0, 1], {
+    clamp: true,
+  })
 
   return (
     <>
-      <section id="portfolio" className="h-[100dvh] w-full" />
+      <section id="portfolio" className="h-dvh w-full" />
 
       {createPortal(
         <motion.div
-          className="pointer-events-none fixed inset-0 z-[40] overflow-hidden"
+          className="pointer-events-none fixed inset-0 z-40 overflow-hidden"
           initial={false}
           animate={{ opacity: active ? 1 : 0 }}
           transition={{
@@ -80,7 +85,7 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
           }}
         >
           {/* 솔리드 빨강 배경. */}
-          <div className="absolute inset-0 bg-accent" />
+          <div className="bg-accent absolute inset-0" />
 
           <PortfolioText reveal={reveal01} ratio={ratio} frameH={frame.h} />
 
@@ -207,7 +212,7 @@ function PortfolioSlideContent({
           {/* 텍스트 묶음: clamp 폭 안에서 줄바꿈(모바일은 풀폭) */}
           <div className="max-w-[clamp(320px,34.72vw,500px)] max-md:max-w-none">
             <motion.p
-              className="font-pretendard text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-title-on-dark max-md:text-[clamp(16px,4.5vw,20px)]"
+              className="font-pretendard text-title-on-dark text-[clamp(16px,1.67vw,24px)] leading-normal font-normal max-md:text-[clamp(16px,4.5vw,20px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.35) : { duration: 0.3 }}
@@ -215,7 +220,7 @@ function PortfolioSlideContent({
               {project.brand}
             </motion.p>
             <motion.h3
-              className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty text-title-on-dark max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]"
+              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.47) : { duration: 0.3 }}
@@ -223,7 +228,7 @@ function PortfolioSlideContent({
               {project.project}
             </motion.h3>
             <motion.p
-              className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-pretty text-title-on-dark max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]"
+              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-normal font-normal text-pretty max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.59) : { duration: 0.3 }}
@@ -236,7 +241,7 @@ function PortfolioSlideContent({
         {/* 하단: Our Portfolio + 페이지네이션 */}
         <div>
           <motion.p
-            className="font-montserrat text-[clamp(14px,1.39vw,20px)] leading-[1.0] font-bold tracking-[-0.04em] text-title-on-dark max-md:text-[16px]"
+            className="font-montserrat text-title-on-dark text-[clamp(14px,1.39vw,20px)] leading-none font-bold tracking-[-0.04em] max-md:text-[16px]"
             initial={false}
             animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
             transition={revealed ? ENTER(0.71) : { duration: 0.3 }}
@@ -256,8 +261,8 @@ function PortfolioSlideContent({
                   'font-montserrat leading-[1.4] tracking-[-0.04em]',
                   'text-[clamp(14px,1.39vw,20px)] max-md:text-[16px]',
                   n === index
-                    ? 'font-bold text-title-on-dark'
-                    : 'font-normal text-text-nav',
+                    ? 'text-title-on-dark font-bold'
+                    : 'text-text-nav font-normal',
                 ].join(' ')}
               >
                 {String(n + 1).padStart(2, '0')}
@@ -300,7 +305,10 @@ function PortfolioScaleSlide({
     return () => unsub()
   }, [reveal])
   return (
-    <motion.div className="absolute inset-0" style={{ scale, opacity, zIndex: z }}>
+    <motion.div
+      className="absolute inset-0"
+      style={{ scale, opacity, zIndex: z }}
+    >
       <PortfolioSlideContent
         project={project}
         index={index}

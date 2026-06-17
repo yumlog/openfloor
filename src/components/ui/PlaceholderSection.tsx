@@ -23,7 +23,7 @@ export function PlaceholderSection({
   return (
     <section
       id={id}
-      className="relative flex h-[100dvh] w-full items-center justify-center"
+      className="relative flex h-dvh w-full items-center justify-center"
     >
       <h2
         className={cn(

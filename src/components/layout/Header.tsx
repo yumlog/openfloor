@@ -28,7 +28,7 @@ export function Header({ goTo }: HeaderProps) {
 
   return (
     <header className="absolute inset-x-0 top-0 z-30">
-      <Container className="flex h-[65px] items-center justify-between">
+      <Container className="flex h-16.25 items-center justify-between">
         <button
           type="button"
           onClick={() => navigate(0)}
@@ -70,7 +70,7 @@ export function Header({ goTo }: HeaderProps) {
       {/* 모바일 풀스크린 오버레이 메뉴. */}
       {menuOpen && (
         <div className="bg-bg-dark fixed inset-0 z-40 flex flex-col md:hidden">
-          <Container className="flex h-[65px] shrink-0 items-center justify-end">
+          <Container className="flex h-16.25 shrink-0 items-center justify-end">
             <button
               type="button"
               onClick={() => setMenuOpen(false)}

@@ -169,7 +169,11 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
 
   // 정규화 마우스 X(-1..1) → rotateY(deg), 스프링으로 부드럽게.
   const mouseX = useMotionValue(0)
-  const tiltTarget = useTransform(mouseX, [-1, 1], [-MAX_TILT_DEG, MAX_TILT_DEG])
+  const tiltTarget = useTransform(
+    mouseX,
+    [-1, 1],
+    [-MAX_TILT_DEG, MAX_TILT_DEG]
+  )
   const tiltY = useSpring(tiltTarget, { stiffness: 50, damping: 14, mass: 0.6 })
   useEffect(() => {
     if (!active) {
@@ -257,14 +261,15 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
   return (
     <section
       id={def.id}
-      className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden"
+      className="relative flex h-dvh w-full items-center justify-center overflow-hidden"
     >
       {/* 숨겨진 너비 프로브 — 각 줄을 base 88px로, 스케일 없이(캔버스 바깥) 둬서
           offsetWidth가 진짜 design-px 줄 너비가 되게 한다. */}
       <div
         ref={measureRef}
         aria-hidden
-        className="invisible absolute top-0 -left-[99999px]"
+        className="invisible absolute top-0"
+        style={{ left: -99999 }}
       >
         {LINES.map((line, i) => (
           <span
