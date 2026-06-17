@@ -157,7 +157,7 @@ export function VisionSection({ active }: VisionSectionProps) {
 
   const TitleBlock = (
     <div>
-      <motion.p {...rise(0)} className="text-[20px] font-bold leading-[1.4] tracking-[-0.04em] text-[#FB3640]">
+      <motion.p {...rise(0)} className="text-[20px] font-bold leading-[1.4] tracking-[-0.04em] text-[#FB3640] max-md:text-[14px]">
         OUR VISION
       </motion.p>
       <RevealText
@@ -165,7 +165,7 @@ export function VisionSection({ active }: VisionSectionProps) {
         active={active}
         lines={['AI와 함께 일하는 방식이 바뀌는 시대,', '우리는 그 변화를 가장 깊이 만들어갑니다.']}
         baseDelay={0.1}
-        className="mt-[16px] text-[44px] font-bold leading-[1.5] tracking-normal text-white"
+        className="mt-[16px] text-[44px] font-bold leading-[1.5] tracking-normal text-white max-md:mt-3 max-md:text-[clamp(16px,4.8vw,22px)] max-md:leading-[1.35]"
       />
     </div>
   )
@@ -279,12 +279,7 @@ export function VisionSection({ active }: VisionSectionProps) {
     return (
       <section id={def.id} className="relative flex h-[100dvh] w-full flex-col overflow-hidden">
         <Container className="flex h-full flex-col pt-[88px] pb-[24px]">
-          <motion.p {...rise(0)} className="text-[14px] font-bold leading-[1.4] tracking-[-0.04em] text-[#FB3640]">
-            OUR VISION
-          </motion.p>
-          <motion.p {...rise(0.06)} className="mt-3 text-[clamp(20px,5.5vw,28px)] font-bold leading-[1.35] text-white">
-            AI와 함께 일하는 방식이 바뀌는 시대, 우리는 그 변화를 가장 깊이 만들어갑니다.
-          </motion.p>
+          {TitleBlock}
 
           <motion.div {...rise(0.12)} className="mt-6 flex flex-col">
             {renderRow({ id: 'root', depth: 0, isLast: true, parentLast: true, open: false })}
