@@ -5,7 +5,9 @@ import {
   REVEAL_DURATION,
   REVEAL_END,
   REVEAL_HOLD,
+  REVEAL_REVERSE_DURATION,
   TIME_EASE,
+  TIME_EASE_REVERSE,
 } from '@/components/sections/PortfolioSection'
 import {
   GROW_DURATION,
@@ -235,8 +237,8 @@ export function useSlideController({
       rollAnimatingRef.current = false
       rollTargetRef.current = 0
       animate(portTrap.progress, 0, {
-        duration: REVEAL_DURATION,
-        ease: TIME_EASE,
+        duration: REVEAL_REVERSE_DURATION,
+        ease: TIME_EASE_REVERSE,
         onComplete: () => {
           regathering = false
           animatingRef.current = false // 아래 goTo 가드 통과용
