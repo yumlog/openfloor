@@ -15,6 +15,7 @@ import {
   MANIFESTO_STEPS,
 } from '@/components/sections/ManifestoSection'
 import { ContactSection } from '@/components/sections/ContactSection'
+import { VisionSection } from '@/components/sections/VisionSection'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { useSlideController } from '@/hooks/useSlideController'
 import {
@@ -49,7 +50,7 @@ export default function App() {
         sensitivity: 0.0004,
       },
       {
-        index: 4,
+        index: 5,
         steps: MANIFESTO_STEPS,
         progress: rollProgress,
         sensitivity: 0.0008,
@@ -123,8 +124,9 @@ export default function App() {
           active={index === 3 && (target === 3 || source === 3)}
           progress={portfolioRoll}
         />
-        <ManifestoSection active={index === 4} progress={rollProgress} />
-        <ContactSection active={index === 5} />
+        <VisionSection active={index === 4} />
+        <ManifestoSection active={index === 5} progress={rollProgress} />
+        <ContactSection active={index === 6} />
       </Slides>
 
       <Header index={index} goTo={goTo} />

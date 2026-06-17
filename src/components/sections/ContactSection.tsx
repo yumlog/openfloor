@@ -6,12 +6,12 @@ import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
 
 /* ---------------------------------------------------------------------------
-   Contact — 슬라이드 5, 다크(#171717). 배경은 Frame 크로스페이드가 칠하므로
+   Contact — 슬라이드 6, 다크(#171717). 배경은 Frame 크로스페이드가 칠하므로
    섹션은 투명하다. 데스크탑은 1440 design-px 캔버스를 `ratio`로 스케일해 모든
    너비에서 같은 비율로 렌더(내부 요소는 절대 배치); 모바일(<768)은 한 컬럼 reflow.
 --------------------------------------------------------------------------- */
 
-const def = SLIDES[5]
+const def = SLIDES[6]
 
 const BADGES = ['R&D', 'Research', 'UXUI', 'Development', 'AI Platform']
 const INFO = {

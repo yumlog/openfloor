@@ -10,7 +10,7 @@ import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
 
 /* ---------------------------------------------------------------------------
-   Manifesto — 슬라이드 4, 다크(#171717). 아홉 줄을 3D 원통("드럼")에 감아 두고,
+   Manifesto — 슬라이드 5, 다크(#171717). 아홉 줄을 3D 원통("드럼")에 감아 두고,
    스크롤하면 위로 굴러간다. 스크롤 엔진이 이 슬라이드를 "가두며"(useSlide
    controller의 `trap` 참조), 0..1 `progress` motion value를 먹여 이 섹션이 롤
    위치로 변환한다; 드럼이 끝에 닿아야만 추가 제스처가 슬라이드를 떠난다.
@@ -22,7 +22,7 @@ import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
    처리해 볼록감이 자연스럽고 앞줄은 정확히 88px을 유지한다.
 --------------------------------------------------------------------------- */
 
-const def = SLIDES[4]
+const def = SLIDES[5]
 
 const LINES = [
   '우리는 결과물만',
