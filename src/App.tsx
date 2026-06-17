@@ -54,6 +54,7 @@ export default function App() {
         steps: PORTFOLIO_STEPS,
         progress: portfolioRoll,
         sensitivity: 0.0004,
+        snap: true,
       },
       {
         index: 5,

@@ -15,10 +15,10 @@ import { PORTFOLIO_PROJECTS, type PortfolioProject } from './portfolio/projects'
    풀블리드라 body로 포털.
 --------------------------------------------------------------------------- */
 
-export const PORTFOLIO_STEPS = 4
+export const PORTFOLIO_STEPS = 5
 
 /** reveal이 완료되는 progress 지점. 컨트롤러가 정방향 진입 시 progress를 0→여기로 전진. */
-export const REVEAL_END = 0.3
+export const REVEAL_END = 0.2
 /** reveal 자동 전진 시간(s). 컨트롤러가 이 값으로 progress를 전진시킨다. */
 export const REVEAL_DURATION = 2.55
 /** 진입 후 텍스트가 합쳐진 채 멈춰 있는 시간(s) — 컨트롤러가 자동 전진 delay로 참조. */

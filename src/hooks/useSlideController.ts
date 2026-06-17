@@ -38,6 +38,8 @@ interface TrapOptions {
       STACK_END로 앉혀 되돌아오는 즉시 growing=false가 되어 확대 카드가 자동 축소(g 1→0)되고
       카드가 스택 상태로 정착한다. */
   reverseSeat?: number
+  /** true면 휠/터치도 비례 스크럽 대신 노치 스텝(한 제스처 = 한 칸). */
+  snap?: boolean
 }
 
 interface Options {
@@ -343,7 +345,7 @@ export function useSlideController({
 
       // 가둔 슬라이드: 드럼을 관성으로 비례 롤. 끝에 핀 채로 계속 밀 때만
       // 누적 버스트가 밖으로 advance.
-      if (inTrap()) {
+      if (inTrap() && !trapAt(currentRef.current)?.snap) {
         // 확대 커밋 후 정방향 휠은 무시(조기 portfolio advance 방지).
         if (philoGrowCommitted() && e.deltaY > 0) {
           resetWheel()
@@ -407,6 +409,7 @@ export function useSlideController({
       const dy = touchPrevY - y
       touchPrevY = y
       if (inTrap()) {
+        if (trapAt(currentRef.current)?.snap) return // ← 스냅은 end에서 판정
         // 확대 커밋 후 정방향 터치는 무시(조기 portfolio advance 방지).
         if (philoGrowCommitted() && dy > 0) return
         const sens = trapAt(currentRef.current)?.sensitivity ?? ROLL_SENSITIVITY
@@ -421,6 +424,11 @@ export function useSlideController({
       // 가둔 동안: 손가락이 이미 드럼을 굴렸으니, 끝에 핀 상태에서의 결정적
       // 스와이프만 밖으로 advance.
       if (inTrap()) {
+        if (trapAt(currentRef.current)?.snap) {
+          if (delta > TOUCH_THRESHOLD) step(1)
+          else if (delta < -TOUCH_THRESHOLD) step(-1)
+          return
+        }
         const t = rollTargetRef.current
         if (delta > TOUCH_THRESHOLD && t >= 1 - ROLL_EPS) step(1)
         else if (delta < -TOUCH_THRESHOLD && t <= ROLL_EPS) step(-1)
