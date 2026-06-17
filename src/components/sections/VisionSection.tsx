@@ -58,6 +58,9 @@ const DEPTH: Record<NodeId, number> = {
 
 const byId = Object.fromEntries(NODES.map((n) => [n.id, n])) as Record<NodeId, VNode>
 
+const MID_IDS: NodeId[] = ['gen', 'llm', 'doc', 'qa']
+const RIGHT_IDS: NodeId[] = ['img', 'motion', 'sllm', 'ir', 'rfp', 'eval']
+
 interface VisionSectionProps {
   active: boolean
 }
@@ -107,10 +110,35 @@ export function VisionSection({ active }: VisionSectionProps) {
   // 가용 높이에 맞춰 트리 축소 (타이틀≈176 + 패딩200 + 여백 고려)
   const treeScale = Math.min(1, (H - 420) / TREE_H)
 
-  const edgePath = (s: VNode, t: VNode) => {
-    const x1 = s.x - R + (widths[s.id] ?? 220) // 소스 우측 끝(텍스트 뒤)
+  // 2뎁스 라인 공통 시작 x = 가장 긴 2뎁스 노드의 우측 끝
+  const midExit = useMemo(() => {
+    let m = 0
+    for (const id of MID_IDS) {
+      const w = widths[id]
+      if (w) m = Math.max(m, byId[id].x - R + w)
+    }
+    return m || 760
+  }, [widths])
+
+  // 3뎁스 컬럼 x = 가장 긴 3뎁스 노드 우측이 트리 우측 끝(=우측 패딩 64)에 닿도록
+  const maxRightW = useMemo(() => {
+    let m = 0
+    for (const id of RIGHT_IDS) {
+      const w = widths[id]
+      if (w) m = Math.max(m, w)
+    }
+    return m || 380
+  }, [widths])
+  const rightX = TREE_W - maxRightW + R
+
+  const effX = (id: NodeId) => (RIGHT_IDS.includes(id) ? rightX : byId[id].x)
+
+  const edgePath = (sid: NodeId, tid: NodeId) => {
+    const s = byId[sid]
+    const t = byId[tid]
+    const x1 = MID_IDS.includes(sid) ? midExit : s.x - R + (widths[sid] ?? 220) // 2뎁스는 공통, root는 자기 텍스트 끝
     const y1 = s.y
-    const x2 = t.x - R                          // 타겟 아이콘 좌측
+    const x2 = effX(tid) - R // 타겟 아이콘 좌측
     const y2 = t.y
     const k = Math.max(40, (x2 - x1) * 0.5)
     return `M ${x1} ${y1} C ${x1 + k} ${y1}, ${x2 - k} ${y2}, ${x2} ${y2}`
@@ -172,19 +200,33 @@ export function VisionSection({ active }: VisionSectionProps) {
                 fill="none"
               >
                 {EDGES.map(([sid, tid], i) => {
-                  const hot = redSet.has(sid) && redSet.has(tid) // 양 끝이 모두 빨강일 때만 선 빨강
+                  const d = edgePath(sid, tid)
+                  const hot = redSet.has(sid) && redSet.has(tid)
                   return (
-                    <motion.path
-                      key={`${sid}-${tid}`}
-                      d={edgePath(byId[sid], byId[tid])}
-                      fill="none"
-                      stroke={hot ? '#FB3640' : '#525252'}
-                      strokeWidth={hot ? 2 : 1.5}
-                      strokeLinecap="round"
-                      initial={{ pathLength: 0 }}
-                      animate={{ pathLength: active ? 1 : 0 }}
-                      transition={{ duration: 0.7, ease: 'easeInOut', delay: (sid === 'root' ? 0.25 : 0.75) + i * 0.04 }}
-                    />
+                    <g key={`${sid}-${tid}`}>
+                      {/* 베이스(회색) — 등장 시 그려짐 */}
+                      <motion.path
+                        d={d}
+                        fill="none"
+                        stroke="#525252"
+                        strokeWidth={1.5}
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: active ? 1 : 0 }}
+                        transition={{ duration: 0.7, ease: 'easeInOut', delay: (sid === 'root' ? 0.25 : 0.75) + i * 0.04 }}
+                      />
+                      {/* 빨강 오버레이 — 호버 시 선을 따라 채워지며 흐름 */}
+                      <motion.path
+                        d={d}
+                        fill="none"
+                        stroke="#FB3640"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: hot ? 1 : 0 }}
+                        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                      />
+                    </g>
                   )
                 })}
               </svg>
@@ -200,7 +242,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                     onMouseEnter={() => setHovered(n.id)}
                     onMouseLeave={() => setHovered(null)}
                     className="absolute flex cursor-default items-center"
-                    style={{ left: n.x - R, top: n.y - R }}
+                    style={{ left: effX(n.id) - R, top: n.y - R }}
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.92 }}
                     transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay }}
@@ -214,7 +256,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                     </div>
                     <div className="ml-[24px]">
                       <p className="whitespace-nowrap text-[20px] font-bold leading-[1.5] text-white">{n.title}</p>
-                      <p className="mt-[4px] whitespace-nowrap text-[18px] font-normal leading-[1.5] text-neutral-400">{n.desc}</p>
+                      <p className="mt-[4px] whitespace-nowrap text-[14px] font-normal leading-[1.5] text-neutral-400">{n.desc}</p>
                     </div>
                   </motion.div>
                 )
