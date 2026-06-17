@@ -342,7 +342,7 @@ export function VisionSection({ active }: VisionSectionProps) {
             />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-title-on-dark truncate text-[14px] leading-tight font-bold">
+            <p className="text-title-on-dark truncate text-[14px] leading-tight font-medium">
               {node.title}
             </p>
             <p className="text-text-on-dark mt-1 truncate text-[14px] leading-tight">
@@ -725,7 +725,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                       />
                     </div>
                     <div className="ml-6">
-                      <p className="text-title-on-dark text-[20px] leading-normal font-bold whitespace-nowrap">
+                      <p className="text-title-on-dark text-[20px] leading-normal font-medium whitespace-nowrap">
                         {n.title}
                       </p>
                       <p className="text-text-on-dark mt-1 text-[16px] leading-normal font-normal whitespace-nowrap">

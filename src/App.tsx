@@ -133,7 +133,10 @@ export default function App() {
           goTo={goTo}
         />
         <PortfolioSection
-          active={index === 3 && (target === 3 || source === 3)}
+          active={
+            (index === 3 && (target === 3 || source === 3)) ||
+            (source === 2 && target === 3)
+          }
           progress={portfolioRoll}
         />
         <VisionSection active={index === 4} />
