@@ -202,6 +202,8 @@ export function VisionSection({ active }: VisionSectionProps) {
       const onPathAbove = openIdx >= 0 && i < openIdx
       const isOpenMid = openIdx >= 0 && i === openIdx
       const isPlainGray = d === 1 && !onPathAbove && !isOpenMid
+      const entryIdx = d === 0 ? 0 : (row.index ?? 0) + 1
+      const entryDelay = active ? 0.1 + entryIdx * 0.1 : 0
 
       const inner = (
         <>
@@ -221,11 +223,22 @@ export function VisionSection({ active }: VisionSectionProps) {
       return (
         <div key={row.id} className="relative flex items-stretch" style={{ height: ROW_H }}>
           {d === 0 && (
-            <span className="absolute" style={{ left: ICON_R - 1, top: cy + ICON_R, width: 2, height: ROW_H - (cy + ICON_R), background: openIdx >= 0 ? RED : GRAY }} />
+            <motion.span
+              className="absolute"
+              style={{ left: ICON_R - 1, top: cy + ICON_R, width: 2, height: ROW_H - (cy + ICON_R), background: openIdx >= 0 ? RED : GRAY }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: active ? 1 : 0 }}
+              transition={{ duration: 0.4, ease: 'easeOut', delay: entryDelay }}
+            />
           )}
 
           {d > 0 && (
-            <svg width={gutterW} height={ROW_H} className="shrink-0" style={{ overflow: 'visible' }}>
+            <motion.svg
+              width={gutterW} height={ROW_H} className="shrink-0" style={{ overflow: 'visible' }}
+              initial={d < 2 ? { opacity: 0 } : false}
+              animate={d < 2 ? { opacity: active ? 1 : 0 } : undefined}
+              transition={d < 2 ? { duration: 0.4, ease: 'easeOut', delay: entryDelay } : undefined}
+            >
               {/* ===== 회색 먼저(아래 레이어) ===== */}
               {d === 1 && onPathAbove && (
                 <path d={elbowD} fill="none" stroke={GRAY} strokeWidth={1.5} strokeLinecap="round" />
@@ -262,15 +275,30 @@ export function VisionSection({ active }: VisionSectionProps) {
                   <path d={elbowD} fill="none" stroke={RED} strokeWidth={2} strokeLinecap="round" />
                 </>
               )}
-            </svg>
+            </motion.svg>
           )}
 
           {isMid ? (
-            <button type="button" onClick={onToggle} className="flex flex-1 items-center gap-3 text-left">
+            <motion.button
+              type="button" onClick={onToggle}
+              className="flex flex-1 items-center gap-3 text-left"
+              style={{ transformOrigin: 'left center' }}
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 22, delay: entryDelay }}
+            >
               {inner}
-            </button>
+            </motion.button>
           ) : (
-            <div className="flex flex-1 items-center gap-3">{inner}</div>
+            <motion.div
+              className="flex flex-1 items-center gap-3"
+              style={{ transformOrigin: 'left center' }}
+              initial={d < 2 ? { opacity: 0, scale: 0.85 } : false}
+              animate={d < 2 ? (active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.85 }) : undefined}
+              transition={d < 2 ? { type: 'spring', stiffness: 500, damping: 22, delay: entryDelay } : undefined}
+            >
+              {inner}
+            </motion.div>
           )}
         </div>
       )
@@ -281,7 +309,7 @@ export function VisionSection({ active }: VisionSectionProps) {
         <Container className="flex h-full flex-col pt-[88px] pb-[24px]">
           {TitleBlock}
 
-          <motion.div {...rise(0.12)} className="mt-6 flex flex-col">
+          <div className="mt-6 flex flex-col">
             {renderRow({ id: 'root', depth: 0, isLast: true, parentLast: true, open: false })}
             {MID_IDS.map((mid, i) => {
               const midLast = i === MID_IDS.length - 1
@@ -307,7 +335,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                 </div>
               )
             })}
-          </motion.div>
+          </div>
         </Container>
       </section>
     )
