@@ -69,7 +69,7 @@ export function ContactSection({ active }: ContactSectionProps) {
               <p className="text-text-nav text-[14px] leading-[1.3] font-normal tracking-[-0.04em]">
                 Address
               </p>
-              <p className="text-text-on-dark mt-2 text-[16px] leading-none font-normal tracking-normal">
+              <p className="text-title-on-dark mt-2 text-[16px] leading-none font-normal tracking-normal">
                 {INFO.address}
               </p>
             </div>
@@ -77,7 +77,7 @@ export function ContactSection({ active }: ContactSectionProps) {
               <p className="text-text-nav text-[14px] leading-[1.3] font-normal tracking-[-0.04em]">
                 Phone Number
               </p>
-              <p className="text-text-on-dark mt-2 text-[16px] leading-none font-normal tracking-normal">
+              <p className="text-title-on-dark mt-2 text-[16px] leading-none font-normal tracking-normal">
                 {INFO.phone}
               </p>
             </div>
@@ -106,7 +106,7 @@ export function ContactSection({ active }: ContactSectionProps) {
           <div className="mt-auto">
             <motion.p
               {...fade(0.1)}
-              className="text-accent text-[clamp(52px,15vw,104px)] leading-none font-bold tracking-[-0.04em]"
+              className="text-title-on-dark text-[clamp(52px,15vw,104px)] leading-none font-bold tracking-[-0.04em]"
             >
               CONTACT
             </motion.p>

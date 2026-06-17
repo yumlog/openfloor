@@ -80,7 +80,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
             initial="hidden"
             animate={active ? 'show' : 'hidden'}
             transition={{ delay: 0.65, duration: 0.6, ease: SLIDE_EASE }}
-            className="text-text-on-dark mt-[clamp(93px,11.11vw,160px)] max-w-[clamp(213px,27.78vw,402px)] text-[clamp(12px,1.11vw,16px)] leading-normal font-medium whitespace-pre-line max-md:mt-0 max-md:max-w-none max-md:text-[14px]"
+            className="text-text-on-dark mt-[clamp(93px,11.11vw,160px)] max-w-[clamp(213px,27.78vw,402px)] text-[clamp(12px,1.11vw,16px)] leading-normal font-medium whitespace-pre-line max-md:whitespace-normal max-md:text-pretty max-md:mt-0 max-md:max-w-none max-md:text-[14px]"
           >
             {INTRO}
           </motion.p>
