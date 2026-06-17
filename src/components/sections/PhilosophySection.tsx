@@ -36,7 +36,7 @@ const DWELL = 0.1
     쓰도록 useSlideController가 import 한다. */
 export const GROW_START = STACK_END + DWELL // 0.65
 /** 확대 글라이드 시간(s). 역방향 축소 중 입력 잠금(useSlideController)이 참조하므로 export. */
-export const GROW_DURATION = 0.7
+export const GROW_DURATION = 1.0
 const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
 const GCW = 800 // 확대 카드 design 너비
 const GCH = 280 // 확대 카드 design 높이
@@ -81,7 +81,10 @@ export function PhilosophySection({
   useEffect(() => {
     const controls = animate(g, growing ? 1 : 0, {
       duration: GROW_DURATION,
-      delay: 0,
+      // 역방향(축소)만: 시작 전 빨강을 SEAM_DURATION(0.4)만큼 유지 → 정방향 grow가
+      // 만드는 "빨강만" 구간을 역방향에도 대칭으로 만든다(텍스트 사라진 뒤 잠깐 빨강).
+      // 0.4로 두면 컨트롤러 역방향 잠금(seam 0.4 + GROW_DURATION)과 딱 맞물린다.
+      delay: growing ? 0 : 0.4,
       ease: growing ? [0.22, 1, 0.36, 1] : [0.4, 0, 1, 1],
       // 확대가 끝나면 트랩을 1.0까지 더 굴리는 죽은 스크롤 없이 곧장 portfolio로 넘긴다.
       // 정방향 확대 완료에서만(아직 philosophy일 때) 발동 — 역방향 재진입은 growing이
