@@ -20,19 +20,19 @@ export const PORTFOLIO_STEPS = 4
 /** reveal이 완료되는 progress 지점. 컨트롤러가 정방향 진입 시 progress를 0→여기로 전진. */
 export const REVEAL_END = 0.25
 /** reveal 자동 전진 시간(s). 컨트롤러가 이 값으로 progress를 전진시킨다. */
-export const REVEAL_DURATION = 2.55
+export const REVEAL_DURATION = 1.6
 /** 진입 후 텍스트가 합쳐진 채 멈춰 있는 시간(s) — 컨트롤러가 자동 전진 delay로 참조. */
-export const REVEAL_HOLD = 1.0
+export const REVEAL_HOLD = 0.45
 /** reveal 자동 전진 이징(컨트롤러가 참조). */
-export const TIME_EASE = [0.65, 0, 0.35, 1] as const
+export const TIME_EASE = [0.22, 1, 0.36, 1] as const
 
 /* reveal 구간 매핑(겹침이 핵심). */
 const TEXT_SPLIT_RANGE: [number, number] = [0, 0.6] // 텍스트가 위/아래로 벌어지는 구간
 const TEXT_FADE_RANGE: [number, number] = [0.35, 0.75] // 텍스트가 사라지는 구간(늦게 시작)
 // reveal 구간: 확대 시작 · 오버슈트 피크 · 안착
 const SLIDE_SCALE_IN: number[] = [0.25, 0.78, 0.9]
-// scale: 0 → 살짝 넘김(1.045) → 1.0 안착
-const SLIDE_SCALE_OUT: number[] = [0, 1.045, 1.0]
+// scale: 0 → 살짝 넘김(1.07) → 1.0 안착
+const SLIDE_SCALE_OUT: number[] = [0, 1.07, 1.0]
 
 /** 첫 슬라이드 reveal01이 이 값 이상이면 '다 확대됨'으로 보고 dim/텍스트를 등장. */
 const REVEAL_SETTLE = 0.97

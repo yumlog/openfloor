@@ -36,7 +36,7 @@ const DWELL = 0.1
     쓰도록 useSlideController가 import 한다. */
 export const GROW_START = STACK_END + DWELL // 0.65
 /** 확대 글라이드 시간(s). 역방향 축소 중 입력 잠금(useSlideController)이 참조하므로 export. */
-export const GROW_DURATION = 1.5
+export const GROW_DURATION = 1.1
 const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
 const GCW = 800 // 확대 카드 design 너비
 const GCH = 280 // 확대 카드 design 높이
@@ -82,7 +82,7 @@ export function PhilosophySection({
     const controls = animate(g, growing ? 1 : 0, {
       duration: GROW_DURATION,
       delay: 0,
-      ease: growing ? [0.4, 0, 0.2, 1] : [0.4, 0, 1, 1],
+      ease: growing ? [0.22, 1, 0.36, 1] : [0.4, 0, 1, 1],
       // 확대가 끝나면 트랩을 1.0까지 더 굴리는 죽은 스크롤 없이 곧장 portfolio로 넘긴다.
       // 정방향 확대 완료에서만(아직 philosophy일 때) 발동 — 역방향 재진입은 growing이
       // true로 유지돼 애니메이션이 재시작되지 않으므로 onComplete가 다시 불리지 않는다.
