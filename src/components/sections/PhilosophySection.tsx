@@ -154,7 +154,7 @@ export function PhilosophySection({
             initial="hidden"
             animate={active ? 'show' : 'hidden'}
             transition={entryTransition(LABEL_DELAY)}
-            className="text-accent text-center text-[clamp(12px,1.39vw,20px)] leading-[1.4] font-bold tracking-[-0.04em] max-md:text-[15px]"
+            className="text-accent text-center text-[clamp(12px,1.39vw,20px)] leading-[1.4] font-bold tracking-[-0.04em] max-md:text-[14px]"
           >
             OUR PHILOSOPHY
           </motion.p>
@@ -164,7 +164,7 @@ export function PhilosophySection({
             active={active}
             lines={HEADLINE_LINES}
             baseDelay={HEADLINE_DELAY}
-            className="text-title-on-dark mt-[clamp(7px,0.83vw,12px)] flex flex-col items-center text-[clamp(26px,3.06vw,44px)] leading-[1.4] font-bold tracking-normal max-md:text-[24px]"
+            className="text-title-on-dark mt-[clamp(7px,0.83vw,12px)] flex flex-col items-center text-[clamp(26px,3.06vw,44px)] leading-[1.4] font-bold tracking-normal max-md:text-[20px]"
           />
         </Container>
 

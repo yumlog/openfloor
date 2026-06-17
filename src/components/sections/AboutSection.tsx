@@ -81,7 +81,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           initial="hidden"
           animate={active ? 'show' : 'hidden'}
           transition={entryTransition(0)}
-          className="text-accent text-[clamp(12px,1.39vw,20px)] leading-[1.4] font-bold tracking-[-0.04em] max-md:text-[15px]"
+          className="text-accent text-[clamp(12px,1.39vw,20px)] leading-[1.4] font-bold tracking-[-0.04em] max-md:text-[14px]"
         >
           ABOUT US
         </motion.p>
@@ -90,7 +90,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           as="h2"
           active={active}
           lines={HEADLINE_LINES}
-          className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-normal font-bold tracking-normal max-md:text-[22px]"
+          className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-normal font-bold tracking-normal max-md:text-[20px]"
         />
 
         <motion.p
@@ -98,7 +98,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           initial="hidden"
           animate={active ? 'show' : 'hidden'}
           transition={entryTransition(INTRO_DELAY)}
-          className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-normal font-normal whitespace-pre-line max-md:text-[14px]"
+          className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-normal font-normal whitespace-pre-line max-md:text-[12px]"
         >
           {INTRO}
         </motion.p>
