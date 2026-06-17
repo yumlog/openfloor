@@ -139,10 +139,10 @@ export function VisionSection({ active }: VisionSectionProps) {
   const edgePath = (sid: NodeId, tid: NodeId) => {
     const s = byId[sid]
     const t = byId[tid]
-    const GAP = 14
+    const GAP = 24
     const x1 = (MID_IDS.includes(sid) ? midExit : s.x - R + (widths[sid] ?? 220)) + GAP // 노드~선 간격
     const y1 = effY(s.y)
-    const x2 = effX(tid) - R - GAP // 타겟 아이콘 좌측 + 간격
+    const x2 = effX(tid) - R // 타겟 아이콘 좌측(붙임)
     const y2 = effY(t.y)
     const k = Math.max(40, (x2 - x1) * 0.5)
     return `M ${x1} ${y1} C ${x1 + k} ${y1}, ${x2 - k} ${y2}, ${x2} ${y2}`
@@ -209,8 +209,8 @@ export function VisionSection({ active }: VisionSectionProps) {
             <Bot className={`size-4 transition-colors duration-200 ${isRed ? 'text-[#FB3640]' : 'text-neutral-400/80'}`} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-bold leading-tight text-white">{node.title}</p>
-            <p className="truncate text-[11px] leading-tight text-neutral-400">{node.desc}</p>
+            <p className="truncate text-[16px] font-bold leading-tight text-white">{node.title}</p>
+            <p className="truncate text-[14px] leading-tight text-neutral-400">{node.desc}</p>
           </div>
           {isMid && (
             <ChevronDown className={`size-4 shrink-0 transition-transform duration-200 ${row.open ? 'rotate-180 text-[#FB3640]' : 'text-neutral-500'}`} />
