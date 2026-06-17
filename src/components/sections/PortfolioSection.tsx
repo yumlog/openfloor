@@ -226,7 +226,7 @@ function PortfolioSlideContent({
               {project.brand}
             </motion.p>
             <motion.h3
-              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]"
+              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty break-keep max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.47) : { duration: 0.3 }}
@@ -234,7 +234,7 @@ function PortfolioSlideContent({
               {project.project}
             </motion.h3>
             <motion.p
-              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-normal font-normal text-pretty max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]"
+              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-normal font-normal text-pretty break-keep max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.59) : { duration: 0.3 }}

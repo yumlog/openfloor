@@ -164,7 +164,7 @@ export function PhilosophySection({
             active={active}
             lines={HEADLINE_LINES}
             baseDelay={HEADLINE_DELAY}
-            className="text-title-on-dark mt-[clamp(7px,0.83vw,12px)] flex flex-col items-center text-[clamp(26px,3.06vw,44px)] leading-[1.4] font-bold tracking-normal max-md:text-[20px]"
+            className="text-title-on-dark mt-[clamp(7px,0.83vw,12px)] flex flex-col items-center text-[clamp(26px,3.06vw,44px)] leading-[1.4] font-bold tracking-normal break-keep max-md:text-[20px]"
           />
         </Container>
 

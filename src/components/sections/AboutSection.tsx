@@ -90,7 +90,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           as="h2"
           active={active}
           lines={HEADLINE_LINES}
-          className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-normal font-bold tracking-normal max-md:text-[20px]"
+          className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-normal font-bold tracking-normal break-keep max-md:text-[20px]"
         />
 
         <motion.p
