@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, useTransform, type MotionValue } from 'motion/react'
+import { motion, useTransform, easeOut, type MotionValue } from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH } from '@/config/slides'
 import { PORTFOLIO_PROJECTS, type PortfolioProject } from './portfolio/projects'
@@ -295,8 +295,11 @@ function PortfolioScaleSlide({
   z: number
   reveal: MotionValue<number>
 }) {
+  // easeOut으로 보간 — reveal(easeIn)이 끝에서 빨라도 scale은 1.0에 부드럽게 감속·안착
+  // (스냅 없이 settle = 고급감). 작게 시작해 점점 커지는 것은 유지.
   const scale = useTransform(reveal, SLIDE_SCALE_IN, SLIDE_SCALE_OUT, {
     clamp: true,
+    ease: easeOut,
   })
   // scale 시작(0.25)부터 페이드 인 — 안착 직전(0.58)에 100% 도달. 작고 흐릿하게
   // 나타나 커지며 또렷해진다(역방향은 자동 대칭으로 흐려지며 작아짐).
