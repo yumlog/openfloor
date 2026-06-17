@@ -35,10 +35,10 @@ export const TIME_EASE_REVERSE = [0.5, 0, 0.85, 0.25] as const
 /* reveal 구간 매핑(겹침이 핵심). */
 const TEXT_SPLIT_RANGE: [number, number] = [0, 0.85] // 텍스트가 위/아래로 벌어지는 구간
 const TEXT_FADE_RANGE: [number, number] = [0.42, 0.85] // 텍스트가 사라지는 구간(늦게 시작)
-// reveal 구간: 확대 시작 · 오버슈트 피크 · 안착
-const SLIDE_SCALE_IN: number[] = [0.25, 0.78, 0.9]
-// scale: 0 → 살짝 넘김(1.07) → 1.0 안착
-const SLIDE_SCALE_OUT: number[] = [0, 1.07, 1.0]
+// reveal 구간: 페이드/스케일 시작 · 안착
+const SLIDE_SCALE_IN: number[] = [0.25, 0.9]
+// scale: 살짝 줌(1.04) → 1.0 안착. 오버슈트(바운스) 없이 차분히 가라앉는다.
+const SLIDE_SCALE_OUT: number[] = [1.04, 1.0]
 
 /** 첫 슬라이드 reveal01이 이 값 이상이면 '다 확대됨'으로 보고 dim/텍스트를 등장. */
 const REVEAL_SETTLE = 0.97
