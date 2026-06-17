@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Bot, ChevronDown } from 'lucide-react'
 import { Container } from '@/components/layout/Container'
+import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
@@ -108,8 +109,9 @@ export function VisionSection({ active }: VisionSectionProps) {
     document.fonts?.ready.then(measure)
   }, [isMobile])
 
-  // 가용 높이에 맞춰 트리 축소 (타이틀≈176 + 패딩200 + 여백 고려)
-  const treeScale = Math.min(1, (H - 420) / TREE_H)
+  // 세로(y)만 압축해 가용 높이에 맞춤 — 가로는 풀폭 유지(좌우 패딩 64px 고정)
+  const vScale = Math.min(1, (H - 400) / TREE_H)
+  const effY = (y: number) => y * vScale
 
   // 2뎁스 라인 공통 시작 x = 가장 긴 2뎁스 노드의 우측 끝
   const midExit = useMemo(() => {
@@ -137,10 +139,11 @@ export function VisionSection({ active }: VisionSectionProps) {
   const edgePath = (sid: NodeId, tid: NodeId) => {
     const s = byId[sid]
     const t = byId[tid]
-    const x1 = MID_IDS.includes(sid) ? midExit : s.x - R + (widths[sid] ?? 220) // 2뎁스는 공통, root는 자기 텍스트 끝
-    const y1 = s.y
-    const x2 = effX(tid) - R // 타겟 아이콘 좌측
-    const y2 = t.y
+    const GAP = 14
+    const x1 = (MID_IDS.includes(sid) ? midExit : s.x - R + (widths[sid] ?? 220)) + GAP // 노드~선 간격
+    const y1 = effY(s.y)
+    const x2 = effX(tid) - R - GAP // 타겟 아이콘 좌측 + 간격
+    const y2 = effY(t.y)
     const k = Math.max(40, (x2 - x1) * 0.5)
     return `M ${x1} ${y1} C ${x1 + k} ${y1}, ${x2 - k} ${y2}, ${x2} ${y2}`
   }
@@ -157,10 +160,13 @@ export function VisionSection({ active }: VisionSectionProps) {
       <motion.p {...rise(0)} className="text-[20px] font-bold leading-[1.4] tracking-[-0.04em] text-[#FB3640]">
         OUR VISION
       </motion.p>
-      <motion.p {...rise(0.06)} className="mt-[16px] text-[44px] font-bold leading-[1.5] tracking-normal text-white">
-        AI와 함께 일하는 방식이 바뀌는 시대,<br />
-        우리는 그 변화를 가장 깊이 만들어갑니다.
-      </motion.p>
+      <RevealText
+        as="p"
+        active={active}
+        lines={['AI와 함께 일하는 방식이 바뀌는 시대,', '우리는 그 변화를 가장 깊이 만들어갑니다.']}
+        baseDelay={0.1}
+        className="mt-[16px] text-[44px] font-bold leading-[1.5] tracking-normal text-white"
+      />
     </div>
   )
 
@@ -319,17 +325,14 @@ export function VisionSection({ active }: VisionSectionProps) {
           {TitleBlock}
 
           {/* 파이프라인 트리 */}
-          <div className="flex justify-center" style={{ height: TREE_H * treeScale }}>
-            <div
-              className="relative"
-              style={{ width: TREE_W, height: TREE_H, transform: `scale(${treeScale})`, transformOrigin: 'top center' }}
-            >
+          <div style={{ height: TREE_H * vScale }}>
+            <div className="relative" style={{ width: TREE_W, height: TREE_H * vScale }}>
               {/* 곡선 커넥터 (노드 뒤) */}
               <svg
                 className="absolute inset-0 overflow-visible"
                 width={TREE_W}
-                height={TREE_H}
-                viewBox={`0 0 ${TREE_W} ${TREE_H}`}
+                height={TREE_H * vScale}
+                viewBox={`0 0 ${TREE_W} ${TREE_H * vScale}`}
                 fill="none"
               >
                 {/* 회색 베이스 — 전부 먼저(아래 레이어) */}
@@ -376,7 +379,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                     onMouseEnter={() => setHovered(n.id)}
                     onMouseLeave={() => setHovered(null)}
                     className="absolute flex cursor-default items-center"
-                    style={{ left: effX(n.id) - R, top: n.y - R }}
+                    style={{ left: effX(n.id) - R, top: effY(n.y) - R }}
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={active ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.92 }}
                     transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay }}
@@ -390,7 +393,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                     </div>
                     <div className="ml-[24px]">
                       <p className="whitespace-nowrap text-[20px] font-bold leading-[1.5] text-white">{n.title}</p>
-                      <p className="mt-[4px] whitespace-nowrap text-[14px] font-normal leading-[1.5] text-neutral-400">{n.desc}</p>
+                      <p className="mt-[4px] whitespace-nowrap text-[16px] font-normal leading-[1.5] text-neutral-400">{n.desc}</p>
                     </div>
                   </motion.div>
                 )
