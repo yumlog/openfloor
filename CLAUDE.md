@@ -87,11 +87,27 @@
 | `--color-accent`         | `#FB3640`               | `text-accent`         |
 | `--color-title-on-dark`  | `#ffffff`               | `text-title-on-dark`  |
 | `--color-text-on-dark`   | `#a3a3a3`               | `text-text-on-dark`   |
+| `--color-text-nav`       | `#d4d4d4`               | `text-text-nav`       |
+| `--color-ghost-on-dark`  | `#262626`               | `text-ghost-on-dark`  |
 | `--color-title-on-light` | `#111111`               | `text-title-on-light` |
 | `--color-text-on-light`  | `#666666`               | `text-text-on-light`  |
+| `--color-card-name`      | `#333333`               | `text-card-name`      |
+| `--color-line`           | `#525252`               | `stroke`/`bg-line`    |
+| `--color-muted`          | `#737373`               | `text-muted`          |
+| `--color-card-deep`      | `#404040`               | `bg-card-deep`        |
 | `--font-sans`            | Montserrat → Pretendard | `font-sans`           |
 | `--container-frame`      | `1440px`                | `max-w-frame`         |
 
+- **색은 항상 토큰으로.** 컴포넌트·데이터 파일에 hex/`rgb()`/Tailwind 표준 팔레트
+  색(`text-white`, `text-neutral-400` 등)을 하드코딩하지 말고 `@theme` 토큰에서 온
+  유틸리티(`text-title-on-dark`, `bg-accent` …)를 쓴다. 새 색이 필요하면 먼저
+  `index.css`의 `@theme`에 토큰을 추가한 뒤 그 유틸리티를 쓴다. 불투명도가 필요하면
+  `bg-title-on-dark/[0.08]`처럼 토큰에 opacity 수식어를 붙인다.
+- **JS에서 색이 필요할 때:** DOM 인라인 스타일(`style={{ color: 'var(--color-…)' }}`)·
+  SVG `stroke`/`fill`은 `var(--color-…)`로 토큰을 참조한다.
+- **예외(토큰화 대상 아님):** three.js 머티리얼/라이트 색(`CentralCrystal`, 셰이더라
+  CSS 변수 불가), `keyframes.css`의 RevealText 색수차/마스크, `slides.ts`의 raw 미러
+  상수(`BG_DARK`/`BG_LIGHT` — 엔진용이며 토큰과 동기화 유지).
 - **폰트:** Latin은 Montserrat(Google Fonts), 한글은 Pretendard(jsDelivr CDN).
   둘 다 `index.html`에 링크. 기본 스택은 Montserrat → Pretendard.
 - `::selection`은 accent 색을 쓴다.

@@ -64,7 +64,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
               <button
                 type="button"
                 onClick={() => goTo(CONTACT_INDEX)}
-                className="group border-accent text-accent hover:bg-accent inline-flex items-center gap-2 rounded-full border-2 py-[clamp(8px,0.83vw,12px)] pr-[clamp(8px,0.83vw,12px)] pl-[clamp(12px,1.11vw,16px)] text-[clamp(12px,1.39vw,20px)] leading-[1.2] font-bold tracking-[-0.04em] transition-colors hover:text-white"
+                className="group border-accent text-accent hover:bg-accent inline-flex items-center gap-2 rounded-full border-2 py-[clamp(8px,0.83vw,12px)] pr-[clamp(8px,0.83vw,12px)] pl-[clamp(12px,1.11vw,16px)] text-[clamp(12px,1.39vw,20px)] leading-[1.2] font-bold tracking-[-0.04em] transition-colors hover:text-title-on-dark"
               >
                 CONTACT
                 <ArrowUpRight

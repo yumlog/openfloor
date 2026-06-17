@@ -66,8 +66,8 @@ function CardContent({
       <div
         className={
           compact
-            ? 'flex items-baseline gap-[12px] text-[20px] leading-[1.4] font-normal text-white'
-            : 'flex items-baseline gap-[16px] text-[24px] leading-[1.4] font-normal text-white'
+            ? 'flex items-baseline gap-[12px] text-[20px] leading-[1.4] font-normal text-title-on-dark'
+            : 'flex items-baseline gap-[16px] text-[24px] leading-[1.4] font-normal text-title-on-dark'
         }
       >
         <span>{card.num}</span>
@@ -76,8 +76,8 @@ function CardContent({
       <p
         className={
           compact
-            ? 'mt-[40px] text-[18px] leading-[1.6] font-bold break-keep whitespace-pre-line text-white'
-            : 'mt-[74px] text-[24px] leading-[1.6] font-bold break-keep whitespace-pre-line text-white'
+            ? 'mt-[40px] text-[18px] leading-[1.6] font-bold break-keep whitespace-pre-line text-title-on-dark'
+            : 'mt-[74px] text-[24px] leading-[1.6] font-bold break-keep whitespace-pre-line text-title-on-dark'
         }
       >
         {card.body}

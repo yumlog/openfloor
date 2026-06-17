@@ -157,7 +157,7 @@ export function VisionSection({ active }: VisionSectionProps) {
 
   const TitleBlock = (
     <div>
-      <motion.p {...rise(0)} className="text-[20px] font-bold leading-[1.4] tracking-[-0.04em] text-[#FB3640] max-md:text-[14px]">
+      <motion.p {...rise(0)} className="text-[20px] font-bold leading-[1.4] tracking-[-0.04em] text-accent max-md:text-[14px]">
         OUR VISION
       </motion.p>
       <RevealText
@@ -165,7 +165,7 @@ export function VisionSection({ active }: VisionSectionProps) {
         active={active}
         lines={['AI와 함께 일하는 방식이 바뀌는 시대,', '우리는 그 변화를 가장 깊이 만들어갑니다.']}
         baseDelay={0.1}
-        className="mt-[16px] text-[44px] font-bold leading-[1.5] tracking-normal text-white max-md:mt-3 max-md:text-[clamp(16px,4.8vw,22px)] max-md:leading-[1.35]"
+        className="mt-[16px] text-[44px] font-bold leading-[1.5] tracking-normal text-title-on-dark max-md:mt-3 max-md:text-[clamp(16px,4.8vw,22px)] max-md:leading-[1.35]"
       />
     </div>
   )
@@ -176,8 +176,8 @@ export function VisionSection({ active }: VisionSectionProps) {
     const cy = ROW_H / 2 // 26
     const ICON_R = 16
     const CR = 12
-    const GRAY = '#525252'
-    const RED = '#FB3640'
+    const GRAY = 'var(--color-line)'
+    const RED = 'var(--color-accent)'
 
     const openIdx = openId ? MID_IDS.indexOf(openId) : -1
 
@@ -207,15 +207,15 @@ export function VisionSection({ active }: VisionSectionProps) {
 
       const inner = (
         <>
-          <div className={`flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-[#FB3640] bg-[#FB3640]/20' : 'border-white/50 bg-white/[0.08]'}`}>
-            <Bot className={`size-5 transition-colors duration-200 ${isRed ? 'text-[#FB3640]' : 'text-neutral-400/80'}`} />
+          <div className={`flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-accent bg-accent/20' : 'border-title-on-dark/50 bg-title-on-dark/[0.08]'}`}>
+            <Bot className={`size-5 transition-colors duration-200 ${isRed ? 'text-accent' : 'text-text-on-dark/80'}`} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[14px] font-bold leading-tight text-white">{node.title}</p>
-            <p className="mt-[4px] truncate text-[14px] leading-tight text-neutral-400">{node.desc}</p>
+            <p className="truncate text-[14px] font-bold leading-tight text-title-on-dark">{node.title}</p>
+            <p className="mt-[4px] truncate text-[14px] leading-tight text-text-on-dark">{node.desc}</p>
           </div>
           {isMid && (
-            <ChevronDown className={`size-4 shrink-0 transition-transform duration-200 ${row.open ? 'rotate-180 text-[#FB3640]' : 'text-neutral-500'}`} />
+            <ChevronDown className={`size-4 shrink-0 transition-transform duration-200 ${row.open ? 'rotate-180 text-accent' : 'text-muted'}`} />
           )}
         </>
       )
@@ -364,7 +364,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                     key={`base-${sid}-${tid}`}
                     d={edgePath(sid, tid)}
                     fill="none"
-                    stroke="#525252"
+                    stroke="var(--color-line)"
                     strokeWidth={1.5}
                     strokeLinecap="round"
                     initial={{ pathLength: 0 }}
@@ -380,7 +380,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                       key={`red-${sid}-${tid}`}
                       d={edgePath(sid, tid)}
                       fill="none"
-                      stroke="#FB3640"
+                      stroke="var(--color-accent)"
                       strokeWidth={2}
                       strokeLinecap="round"
                       initial={{ pathLength: 0, opacity: 0 }}
@@ -409,14 +409,14 @@ export function VisionSection({ active }: VisionSectionProps) {
                   >
                     <div
                       className={`flex size-[56px] shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
-                        hot ? 'border-[#FB3640] bg-[#FB3640]/20' : 'border-white/50 bg-white/[0.08]'
+                        hot ? 'border-accent bg-accent/20' : 'border-title-on-dark/50 bg-title-on-dark/[0.08]'
                       }`}
                     >
-                      <Bot className={`size-7 transition-colors duration-200 ${hot ? 'text-[#FB3640]' : 'text-neutral-400/80'}`} />
+                      <Bot className={`size-7 transition-colors duration-200 ${hot ? 'text-accent' : 'text-text-on-dark/80'}`} />
                     </div>
                     <div className="ml-[24px]">
-                      <p className="whitespace-nowrap text-[20px] font-bold leading-[1.5] text-white">{n.title}</p>
-                      <p className="mt-[4px] whitespace-nowrap text-[16px] font-normal leading-[1.5] text-neutral-400">{n.desc}</p>
+                      <p className="whitespace-nowrap text-[20px] font-bold leading-[1.5] text-title-on-dark">{n.title}</p>
+                      <p className="mt-[4px] whitespace-nowrap text-[16px] font-normal leading-[1.5] text-text-on-dark">{n.desc}</p>
                     </div>
                   </motion.div>
                 )

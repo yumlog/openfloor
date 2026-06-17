@@ -30,6 +30,13 @@
   /* 카드 이름 라벨(Philosophy 덱) */
   --color-card-name: #333333;
 
+  /* 가는 커넥터·구분선(Vision 트리) */
+  --color-line: #525252;
+  /* 보조 아이콘 / 중간 회색 카드면(Vision Chevron, Philosophy 카드2) */
+  --color-muted: #737373;
+  /* 진회색 카드면(Philosophy 카드1) */
+  --color-card-deep: #404040;
+
   /* 글꼴: Latin 먼저, 그다음 한글 폴백 */
   --font-sans: 'Montserrat', 'Pretendard', sans-serif;
 
@@ -59,6 +66,6 @@
 
   ::selection {
     background-color: var(--color-accent);
-    color: #fff;
+    color: var(--color-title-on-dark);
   }
 }

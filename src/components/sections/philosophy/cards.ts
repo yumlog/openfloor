@@ -21,20 +21,20 @@ export const PHILOSOPHY_CARDS: PhilosophyCard[] = [
     num: '01',
     name: '결과물에 대한 자존심',
     body: '부끄럽지 않은 결과물을 만들고 싶다는 것이 우리가 일하는 이유입니다.\n완결성이 곧 기준입니다.',
-    bg: '#404040',
+    bg: 'var(--color-card-deep)',
   },
   {
     id: 'collab',
     num: '02',
     name: '열린 협업 구조',
     body: '역할은 나누지만 정보를 닫아두지 않습니다. 좋은 결과물은 각자의 전문성보다 맥락이 연결될 때 만들어집니다.',
-    bg: '#737373',
+    bg: 'var(--color-muted)',
   },
   {
     id: 'system',
     num: '03',
     name: '연결된 시스템',
     body: '한 명이 모든 걸 해결하는 조직이 아닙니다.\n누가 빠져도 흐름이 유지되는 구조를 만듭니다.',
-    bg: '#FB3640',
+    bg: 'var(--color-accent)',
   },
 ]

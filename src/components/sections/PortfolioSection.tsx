@@ -80,7 +80,7 @@ export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
           }}
         >
           {/* 솔리드 빨강 배경. */}
-          <div className="absolute inset-0 bg-[#FB3640]" />
+          <div className="absolute inset-0 bg-accent" />
 
           <PortfolioText reveal={reveal01} ratio={ratio} frameH={frame.h} />
 
@@ -132,7 +132,7 @@ function PortfolioText({
     fontWeight: 700,
     lineHeight: 1.2,
     letterSpacing: '-0.04em',
-    color: '#ffffff',
+    color: 'var(--color-title-on-dark)',
     fontSize: 224 * ratio,
     whiteSpace: 'nowrap' as const,
   }
@@ -207,7 +207,7 @@ function PortfolioSlideContent({
           {/* 텍스트 묶음: clamp 폭 안에서 줄바꿈(모바일은 풀폭) */}
           <div className="max-w-[clamp(320px,34.72vw,500px)] max-md:max-w-none">
             <motion.p
-              className="font-pretendard text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-white max-md:text-[clamp(16px,4.5vw,20px)]"
+              className="font-pretendard text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-title-on-dark max-md:text-[clamp(16px,4.5vw,20px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.35) : { duration: 0.3 }}
@@ -215,7 +215,7 @@ function PortfolioSlideContent({
               {project.brand}
             </motion.p>
             <motion.h3
-              className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty text-white max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]"
+              className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty text-title-on-dark max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.47) : { duration: 0.3 }}
@@ -223,7 +223,7 @@ function PortfolioSlideContent({
               {project.project}
             </motion.h3>
             <motion.p
-              className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-pretty text-white max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]"
+              className="font-pretendard mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-[1.5] font-normal text-pretty text-title-on-dark max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.59) : { duration: 0.3 }}
@@ -236,7 +236,7 @@ function PortfolioSlideContent({
         {/* 하단: Our Portfolio + 페이지네이션 */}
         <div>
           <motion.p
-            className="font-montserrat text-[clamp(14px,1.39vw,20px)] leading-[1.0] font-bold tracking-[-0.04em] text-white max-md:text-[16px]"
+            className="font-montserrat text-[clamp(14px,1.39vw,20px)] leading-[1.0] font-bold tracking-[-0.04em] text-title-on-dark max-md:text-[16px]"
             initial={false}
             animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
             transition={revealed ? ENTER(0.71) : { duration: 0.3 }}
@@ -256,8 +256,8 @@ function PortfolioSlideContent({
                   'font-montserrat leading-[1.4] tracking-[-0.04em]',
                   'text-[clamp(14px,1.39vw,20px)] max-md:text-[16px]',
                   n === index
-                    ? 'font-bold text-white'
-                    : 'font-normal text-[#d4d4d4]',
+                    ? 'font-bold text-title-on-dark'
+                    : 'font-normal text-text-nav',
                 ].join(' ')}
               >
                 {String(n + 1).padStart(2, '0')}

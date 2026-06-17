@@ -54,30 +54,30 @@ export function ContactSection({ active }: ContactSectionProps) {
         <Container className="flex h-full flex-col pt-[88px] pb-[48px]">
           <motion.p
             {...rise(0)}
-            className="text-[15px] leading-[1.3] font-normal tracking-[-0.04em] text-[#d4d4d4]"
+            className="text-[15px] leading-[1.3] font-normal tracking-[-0.04em] text-text-on-dark"
           >
             Ready to start?
           </motion.p>
           <motion.p
             {...rise(0.06)}
-            className="mt-5 text-[clamp(26px,7.5vw,38px)] leading-[1] font-bold tracking-normal text-white"
+            className="mt-5 text-[clamp(26px,7.5vw,38px)] leading-[1] font-bold tracking-normal text-title-on-dark"
           >
             {INFO.email}
           </motion.p>
-          <motion.div {...rise(0.12)} className="mt-6 flex gap-8">
+          <motion.div {...rise(0.12)} className="mt-6 flex flex-col gap-4">
             <div>
-              <p className="text-[14px] leading-[1.3] font-normal tracking-[-0.04em] text-[#d4d4d4]">
+              <p className="text-[14px] leading-[1.3] font-normal tracking-[-0.04em] text-text-nav">
                 Address
               </p>
-              <p className="mt-2 text-[16px] leading-[1] font-bold tracking-normal text-white">
+              <p className="mt-2 text-[16px] leading-[1] font-normal tracking-normal text-text-on-dark">
                 {INFO.address}
               </p>
             </div>
             <div>
-              <p className="text-[14px] leading-[1.3] font-normal tracking-[-0.04em] text-[#d4d4d4]">
+              <p className="text-[14px] leading-[1.3] font-normal tracking-[-0.04em] text-text-nav">
                 Phone Number
               </p>
-              <p className="mt-2 text-[16px] leading-[1] font-bold tracking-normal text-white">
+              <p className="mt-2 text-[16px] leading-[1] font-normal tracking-normal text-text-on-dark">
                 {INFO.phone}
               </p>
             </div>
@@ -85,7 +85,7 @@ export function ContactSection({ active }: ContactSectionProps) {
           <motion.button
             type="button"
             {...rise(0.18)}
-            className="group border-accent text-accent hover:bg-accent mt-6 inline-flex items-center gap-2 self-start rounded-full border-2 py-2.5 pr-2.5 pl-3.5 text-[16px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors hover:text-white"
+            className="group border-accent text-accent hover:bg-accent mt-6 inline-flex items-center gap-2 self-start rounded-full border-2 py-2.5 pr-2.5 pl-3.5 text-[16px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors hover:text-title-on-dark"
           >
             GET IN TOUCH
             <ArrowUpRight strokeWidth={2} className="size-5 shrink-0" />
@@ -96,7 +96,7 @@ export function ContactSection({ active }: ContactSectionProps) {
               <motion.span
                 key={b}
                 {...rise(0.1 + i * 0.05)}
-                className="rounded-full border border-white px-3 py-2 text-[14px] leading-[1.2] font-normal tracking-[-0.04em] text-white"
+                className="rounded-full border border-text-on-dark px-3 text-[14px] leading-[1.2] font-normal tracking-[-0.04em] text-text-on-dark inline-flex h-9 items-center"
               >
                 {b}
               </motion.span>
@@ -106,7 +106,7 @@ export function ContactSection({ active }: ContactSectionProps) {
           <div className="mt-auto">
             <motion.p
               {...fade(0.1)}
-              className="text-[clamp(52px,15vw,104px)] leading-[1] font-bold tracking-[-0.04em] text-white"
+              className="text-[clamp(52px,15vw,104px)] leading-[1] font-bold tracking-[-0.04em] text-accent"
             >
               CONTACT
             </motion.p>
@@ -140,30 +140,30 @@ export function ContactSection({ active }: ContactSectionProps) {
         <div className="absolute" style={{ left: 64, top: 100 }}>
           <motion.p
             {...rise(0)}
-            className="text-[20px] leading-[1.3] font-normal tracking-[-0.04em] text-[#d4d4d4]"
+            className="text-[20px] leading-[1.3] font-normal tracking-[-0.04em] text-text-on-dark"
           >
             Ready to start?
           </motion.p>
           <motion.p
             {...rise(0.06)}
-            className="mt-[36px] text-[44px] leading-[1] font-bold tracking-normal text-white"
+            className="mt-[36px] text-[44px] leading-[1] font-bold tracking-normal text-title-on-dark"
           >
             {INFO.email}
           </motion.p>
           <motion.div {...rise(0.12)} className="mt-[40px] flex gap-[42px]">
             <div>
-              <p className="text-[20px] leading-[1.3] font-normal tracking-[-0.04em] text-[#d4d4d4]">
+              <p className="text-[20px] leading-[1.3] font-normal tracking-[-0.04em] text-text-nav">
                 Address
               </p>
-              <p className="mt-[12px] text-[20px] leading-[1] font-bold tracking-normal text-white">
+              <p className="mt-[12px] text-[20px] leading-[1] font-normal tracking-normal text-text-on-dark">
                 {INFO.address}
               </p>
             </div>
             <div>
-              <p className="text-[20px] leading-[1.3] font-normal tracking-[-0.04em] text-[#d4d4d4]">
+              <p className="text-[20px] leading-[1.3] font-normal tracking-[-0.04em] text-text-nav">
                 Phone Number
               </p>
-              <p className="mt-[12px] text-[20px] leading-[1] font-bold tracking-normal text-white">
+              <p className="mt-[12px] text-[20px] leading-[1] font-normal tracking-normal text-text-on-dark">
                 {INFO.phone}
               </p>
             </div>
@@ -171,7 +171,7 @@ export function ContactSection({ active }: ContactSectionProps) {
           <motion.button
             type="button"
             {...rise(0.18)}
-            className="group border-accent text-accent hover:bg-accent mt-[36px] inline-flex items-center gap-2 rounded-full border-2 py-3 pr-3 pl-4 text-[20px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors hover:text-white"
+            className="group border-accent text-accent hover:bg-accent mt-[36px] inline-flex items-center gap-2 rounded-full border-2 py-3 pr-3 pl-4 text-[20px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors hover:text-title-on-dark"
           >
             GET IN TOUCH
             <ArrowUpRight strokeWidth={2} className="size-6 shrink-0" />
@@ -187,7 +187,7 @@ export function ContactSection({ active }: ContactSectionProps) {
             <motion.span
               key={b}
               {...rise(0.1 + i * 0.06)}
-              className="rounded-full border border-white px-[16px] py-[12px] text-[20px] leading-[1.2] font-normal tracking-[-0.04em] text-white"
+              className="rounded-full border border-text-on-dark px-[16px] text-[20px] leading-[1.2] font-normal tracking-[-0.04em] text-text-on-dark inline-flex h-12 items-center"
             >
               {b}
             </motion.span>
@@ -197,7 +197,7 @@ export function ContactSection({ active }: ContactSectionProps) {
         {/* 좌하단 CONTACT */}
         <motion.p
           {...fade(0.1)}
-          className="absolute text-[136px] leading-[1] font-bold tracking-[-0.04em] text-white"
+          className="absolute text-[136px] leading-[1] font-bold tracking-[-0.04em] text-accent"
           style={{ left: 64, bottom: 100 }}
         >
           CONTACT
