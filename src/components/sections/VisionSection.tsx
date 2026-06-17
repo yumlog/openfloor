@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Bot, ChevronDown } from 'lucide-react'
 import { Container } from '@/components/layout/Container'
 import { RISE, entryTransition } from '@/lib/motion'
@@ -168,30 +168,90 @@ export function VisionSection({ active }: VisionSectionProps) {
     const SLOT_W = 32
     const ROW_H = 52
     const cy = ROW_H / 2 // 26
+    const ICON_R = 16 // 아이콘 반지름(size-8=32)
     const CR = 12 // 코너 반지름
     const GRAY = '#525252'
     const RED = '#FB3640'
 
-    // 활성(빨강): root는 항상 + 열린 2뎁스와 그 자식
     const mRed = new Set<NodeId>(['root'])
     if (openId) {
       mRed.add(openId)
       CHILDREN[openId].forEach((c) => mRed.add(c))
     }
 
-    // 보이는 행 구성
-    type TreeRow = { id: NodeId; depth: number; isLast: boolean; parentLast: boolean; open: boolean }
-    const rows: TreeRow[] = [{ id: 'root', depth: 0, isLast: true, parentLast: true, open: false }]
-    MID_IDS.forEach((mid, i) => {
-      const midLast = i === MID_IDS.length - 1
-      const open = openId === mid
-      rows.push({ id: mid, depth: 1, isLast: midLast, parentLast: true, open })
-      if (open) {
-        CHILDREN[mid].forEach((kid, j) => {
-          rows.push({ id: kid, depth: 2, isLast: j === CHILDREN[mid].length - 1, parentLast: midLast, open: false })
-        })
-      }
-    })
+    const renderRow = (
+      row: { id: NodeId; depth: number; isLast: boolean; parentLast: boolean; open: boolean },
+      onToggle?: () => void
+    ) => {
+      const node = byId[row.id]
+      const d = row.depth
+      const isRed = mRed.has(row.id)
+      const gutterW = d * SLOT_W
+      const ex = d * SLOT_W - SLOT_W / 2
+      const elbowRed = d === 2 || row.open
+      const isMid = d === 1
+
+      const inner = (
+        <>
+          <div className={`flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-[#FB3640] bg-[#FB3640]/20' : 'border-white/50 bg-white/[0.08]'}`}>
+            <Bot className={`size-4 transition-colors duration-200 ${isRed ? 'text-[#FB3640]' : 'text-neutral-400/80'}`} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[13px] font-bold leading-tight text-white">{node.title}</p>
+            <p className="truncate text-[11px] leading-tight text-neutral-400">{node.desc}</p>
+          </div>
+          {isMid && (
+            <ChevronDown className={`size-4 shrink-0 transition-transform duration-200 ${row.open ? 'rotate-180 text-[#FB3640]' : 'text-neutral-500'}`} />
+          )}
+        </>
+      )
+
+      return (
+        <div key={row.id} className="relative flex items-stretch" style={{ height: ROW_H }}>
+          {/* root 하강 스텁(회색) — 아이콘 하단에서 시작 */}
+          {d === 0 && (
+            <span className="absolute" style={{ left: SLOT_W / 2 - 1, top: cy + ICON_R, width: 2, height: ROW_H - (cy + ICON_R), background: GRAY }} />
+          )}
+
+          {d > 0 && (
+            <svg width={gutterW} height={ROW_H} className="shrink-0" style={{ overflow: 'visible' }}>
+              {/* 루트 트렁크 세로(회색) — 막내는 곡선 시작점(cy-CR)에서 끝 */}
+              {d === 1 && (
+                <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={row.isLast ? cy - CR : ROW_H} stroke={GRAY} strokeWidth={1.5} />
+              )}
+              {/* 3뎁스: 부모 트렁크 통과(회색, 부모가 막내 아닐 때) */}
+              {d === 2 && !row.parentLast && (
+                <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
+              )}
+              {/* 3뎁스: 자식 서브트렁크 세로(빨강) — 막내는 cy-CR에서 끝 */}
+              {d === 2 && (
+                <line x1={ex} y1={0} x2={ex} y2={row.isLast ? cy - CR : ROW_H} stroke={RED} strokeWidth={2} />
+              )}
+              {/* 엘보 곡선 */}
+              <path
+                d={`M ${ex} ${cy - CR} Q ${ex} ${cy} ${ex + CR} ${cy} H ${gutterW}`}
+                fill="none"
+                stroke={elbowRed ? RED : GRAY}
+                strokeWidth={elbowRed ? 2 : 1.5}
+                strokeLinecap="round"
+              />
+              {/* 열린 2뎁스: 자식으로 내려가는 빨강 스텁(아이콘 하단에서 시작, x48) */}
+              {d === 1 && row.open && (
+                <line x1={SLOT_W + SLOT_W / 2} y1={cy + ICON_R} x2={SLOT_W + SLOT_W / 2} y2={ROW_H} stroke={RED} strokeWidth={2} />
+              )}
+            </svg>
+          )}
+
+          {isMid ? (
+            <button type="button" onClick={onToggle} className="flex flex-1 items-center gap-3 text-left">
+              {inner}
+            </button>
+          ) : (
+            <div className="flex flex-1 items-center gap-3">{inner}</div>
+          )}
+        </div>
+      )
+    }
 
     return (
       <section id={def.id} className="relative flex h-[100dvh] w-full flex-col overflow-hidden">
@@ -203,83 +263,29 @@ export function VisionSection({ active }: VisionSectionProps) {
             AI와 함께 일하는 방식이 바뀌는 시대, 우리는 그 변화를 가장 깊이 만들어갑니다.
           </motion.p>
 
-          {/* 세로 트리 + 좌측 곡선 커넥터 */}
           <motion.div {...rise(0.12)} className="mt-6 flex flex-col">
-            {rows.map((row) => {
-              const node = byId[row.id]
-              const d = row.depth
-              const isRed = mRed.has(row.id)
-              const gutterW = d * SLOT_W
-              const ex = d * SLOT_W - SLOT_W / 2 // 엘보/서브트렁크 x (16, 48)
-              const elbowRed = d === 2 || row.open
-              const isMid = d === 1
-
-              const NodeInner = (
-                <>
-                  <div
-                    className={`flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
-                      isRed ? 'border-[#FB3640] bg-[#FB3640]/20' : 'border-white/50 bg-white/[0.08]'
-                    }`}
-                  >
-                    <Bot className={`size-4 transition-colors duration-200 ${isRed ? 'text-[#FB3640]' : 'text-neutral-400/80'}`} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-bold leading-tight text-white">{node.title}</p>
-                    <p className="truncate text-[11px] leading-tight text-neutral-400">{node.desc}</p>
-                  </div>
-                  {isMid && (
-                    <ChevronDown
-                      className={`size-4 shrink-0 transition-transform duration-200 ${row.open ? 'rotate-180 text-[#FB3640]' : 'text-neutral-500'}`}
-                    />
-                  )}
-                </>
-              )
-
+            {renderRow({ id: 'root', depth: 0, isLast: true, parentLast: true, open: false })}
+            {MID_IDS.map((mid, i) => {
+              const midLast = i === MID_IDS.length - 1
+              const open = openId === mid
               return (
-                <div key={row.id} className="relative flex items-stretch" style={{ height: ROW_H }}>
-                  {/* root 하강 스텁(회색) */}
-                  {d === 0 && (
-                    <span className="absolute" style={{ left: SLOT_W / 2 - 1, top: cy, width: 2, height: ROW_H - cy, background: GRAY }} />
-                  )}
-
-                  {/* 커넥터 거터 */}
-                  {d > 0 && (
-                    <svg width={gutterW} height={ROW_H} className="shrink-0" style={{ overflow: 'visible' }}>
-                      {/* 루트 트렁크 세로(회색) */}
-                      {d === 1 && (
-                        <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={row.isLast ? cy : ROW_H} stroke={GRAY} strokeWidth={1.5} />
-                      )}
-                      {/* 3뎁스: 부모 트렁크 통과(회색, 부모가 막내 아닐 때만) */}
-                      {d === 2 && !row.parentLast && (
-                        <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
-                      )}
-                      {/* 3뎁스: 자식 서브트렁크 세로(빨강) */}
-                      {d === 2 && (
-                        <line x1={ex} y1={0} x2={ex} y2={row.isLast ? cy : ROW_H} stroke={RED} strokeWidth={2} />
-                      )}
-                      {/* 엘보 곡선 */}
-                      <path
-                        d={`M ${ex} ${cy - CR} Q ${ex} ${cy} ${ex + CR} ${cy} H ${gutterW}`}
-                        fill="none"
-                        stroke={elbowRed ? RED : GRAY}
-                        strokeWidth={elbowRed ? 2 : 1.5}
-                        strokeLinecap="round"
-                      />
-                      {/* 열린 2뎁스: 자식으로 내려가는 빨강 스텁(자기 아이콘 아래 x48) */}
-                      {d === 1 && row.open && (
-                        <line x1={SLOT_W + SLOT_W / 2} y1={cy} x2={SLOT_W + SLOT_W / 2} y2={ROW_H} stroke={RED} strokeWidth={2} />
-                      )}
-                    </svg>
-                  )}
-
-                  {/* 노드 내용 */}
-                  {isMid ? (
-                    <button type="button" onClick={() => setOpenId(row.open ? null : row.id)} className="flex flex-1 items-center gap-3 text-left">
-                      {NodeInner}
-                    </button>
-                  ) : (
-                    <div className="flex flex-1 items-center gap-3">{NodeInner}</div>
-                  )}
+                <div key={mid}>
+                  {renderRow({ id: mid, depth: 1, isLast: midLast, parentLast: true, open }, () => setOpenId(open ? null : mid))}
+                  <AnimatePresence initial={false}>
+                    {open && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        {CHILDREN[mid].map((kid, j) =>
+                          renderRow({ id: kid, depth: 2, isLast: j === CHILDREN[mid].length - 1, parentLast: midLast, open: false })
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )
             })}
