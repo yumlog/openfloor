@@ -172,7 +172,6 @@ export function VisionSection({ active }: VisionSectionProps) {
     const CR = 12
     const GRAY = '#525252'
     const RED = '#FB3640'
-    const STUB_GAP = ROW_H - (cy + ICON_R) // 10 (아이콘 하단~행 하단)
 
     const openIdx = openId ? MID_IDS.indexOf(openId) : -1
 
@@ -191,11 +190,12 @@ export function VisionSection({ active }: VisionSectionProps) {
       const isRed = mRed.has(row.id)
       const gutterW = d * SLOT_W
       const ex = d * SLOT_W - SLOT_W / 2
-      const elbowRed = d === 2 || row.open
+      const elbowD = `M ${ex} ${cy - CR} Q ${ex} ${cy} ${ex + CR} ${cy} H ${gutterW}`
       const isMid = d === 1
       const i = row.index ?? 0
-      const onPathAbove = openIdx >= 0 && i < openIdx // 열린 미드 위쪽: 트렁크 전체 빨강
-      const isOpenMid = openIdx >= 0 && i === openIdx // 열린 미드 본체
+      const onPathAbove = openIdx >= 0 && i < openIdx
+      const isOpenMid = openIdx >= 0 && i === openIdx
+      const isPlainGray = d === 1 && !onPathAbove && !isOpenMid
 
       const inner = (
         <>
@@ -214,38 +214,48 @@ export function VisionSection({ active }: VisionSectionProps) {
 
       return (
         <div key={row.id} className="relative flex items-stretch" style={{ height: ROW_H }}>
-          {/* root 하강 스텁 — 열린 게 있으면 빨강(경로 시작) */}
           {d === 0 && (
-            <span className="absolute" style={{ left: SLOT_W / 2 - 1, top: cy + ICON_R, width: 2, height: STUB_GAP, background: openIdx >= 0 ? RED : GRAY }} />
+            <span className="absolute" style={{ left: SLOT_W / 2 - 1, top: cy + ICON_R, width: 2, height: ROW_H - (cy + ICON_R), background: openIdx >= 0 ? RED : GRAY }} />
           )}
 
           {d > 0 && (
             <svg width={gutterW} height={ROW_H} className="shrink-0" style={{ overflow: 'visible' }}>
-              {/* 2뎁스 루트 트렁크 — 경로 색칠 */}
+              {/* ===== 회색 먼저(아래 레이어) ===== */}
+              {d === 1 && onPathAbove && (
+                <path d={elbowD} fill="none" stroke={GRAY} strokeWidth={1.5} strokeLinecap="round" />
+              )}
+              {d === 1 && isOpenMid && !row.isLast && (
+                <line x1={SLOT_W / 2} y1={cy - CR} x2={SLOT_W / 2} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
+              )}
+              {isPlainGray && (
+                <>
+                  <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={row.isLast ? cy - CR : ROW_H} stroke={GRAY} strokeWidth={1.5} />
+                  <path d={elbowD} fill="none" stroke={GRAY} strokeWidth={1.5} strokeLinecap="round" />
+                </>
+              )}
+              {d === 2 && !row.parentLast && (
+                <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
+              )}
+
+              {/* ===== 빨강 나중(위 레이어) ===== */}
               {d === 1 && onPathAbove && (
                 <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={ROW_H} stroke={RED} strokeWidth={2} />
               )}
               {d === 1 && isOpenMid && (
                 <>
-                  <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={row.isLast ? cy - CR : cy} stroke={RED} strokeWidth={2} />
-                  {!row.isLast && <line x1={SLOT_W / 2} y1={cy} x2={SLOT_W / 2} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />}
+                  <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={cy - CR} stroke={RED} strokeWidth={2} />
+                  <path d={elbowD} fill="none" stroke={RED} strokeWidth={2} strokeLinecap="round" />
                 </>
               )}
-              {d === 1 && !onPathAbove && !isOpenMid && (
-                <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={row.isLast ? cy - CR : ROW_H} stroke={GRAY} strokeWidth={1.5} />
+              {d === 1 && row.open && (
+                <line x1={SLOT_W + SLOT_W / 2} y1={cy + ICON_R} x2={SLOT_W + SLOT_W / 2} y2={ROW_H} stroke={RED} strokeWidth={2} />
               )}
-              {/* 3뎁스: 부모 트렁크 통과(회색, 부모가 막내 아닐 때) — 서브트렁크는 컨테이너 스파인이 담당 */}
-              {d === 2 && !row.parentLast && (
-                <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
+              {d === 2 && (
+                <>
+                  <line x1={ex} y1={0} x2={ex} y2={row.isLast ? cy - CR : ROW_H} stroke={RED} strokeWidth={2} />
+                  <path d={elbowD} fill="none" stroke={RED} strokeWidth={2} strokeLinecap="round" />
+                </>
               )}
-              {/* 엘보 곡선 */}
-              <path
-                d={`M ${ex} ${cy - CR} Q ${ex} ${cy} ${ex + CR} ${cy} H ${gutterW}`}
-                fill="none"
-                stroke={elbowRed ? RED : GRAY}
-                strokeWidth={elbowRed ? 2 : 1.5}
-                strokeLinecap="round"
-              />
             </svg>
           )}
 
@@ -275,8 +285,6 @@ export function VisionSection({ active }: VisionSectionProps) {
             {MID_IDS.map((mid, i) => {
               const midLast = i === MID_IDS.length - 1
               const open = openId === mid
-              const kids = CHILDREN[mid]
-              const spineH = (kids.length - 1) * ROW_H + (cy - CR)
               return (
                 <div key={mid}>
                   {renderRow({ id: mid, depth: 1, isLast: midLast, parentLast: true, open, index: i }, () => setOpenId(open ? null : mid))}
@@ -287,13 +295,10 @@ export function VisionSection({ active }: VisionSectionProps) {
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        className="relative overflow-hidden"
-                        style={{ marginTop: -STUB_GAP }}
+                        className="overflow-hidden"
                       >
-                        {/* 빨강 스파인: 미드 아이콘 하단 → 자식 전체(함께 접/펼) */}
-                        <span className="absolute" style={{ left: SLOT_W + SLOT_W / 2 - 1, top: 0, width: 2, height: spineH, background: RED }} />
-                        {kids.map((kid, j) =>
-                          renderRow({ id: kid, depth: 2, isLast: j === kids.length - 1, parentLast: midLast, open: false })
+                        {CHILDREN[mid].map((kid, j) =>
+                          renderRow({ id: kid, depth: 2, isLast: j === CHILDREN[mid].length - 1, parentLast: midLast, open: false })
                         )}
                       </motion.div>
                     )}
