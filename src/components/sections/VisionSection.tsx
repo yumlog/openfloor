@@ -172,7 +172,7 @@ export function VisionSection({ active }: VisionSectionProps) {
 
   if (isMobile) {
     const SLOT_W = 32
-    const ROW_H = 52
+    const ROW_H = 58
     const cy = ROW_H / 2 // 26
     const ICON_R = 21
     const CR = 10
@@ -210,7 +210,7 @@ export function VisionSection({ active }: VisionSectionProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[16px] font-bold leading-tight text-white">{node.title}</p>
-            <p className="truncate text-[14px] leading-tight text-neutral-400">{node.desc}</p>
+            <p className="mt-[2px] truncate text-[14px] leading-tight text-neutral-400">{node.desc}</p>
           </div>
           {isMid && (
             <ChevronDown className={`size-4 shrink-0 transition-transform duration-200 ${row.open ? 'rotate-180 text-[#FB3640]' : 'text-neutral-500'}`} />
