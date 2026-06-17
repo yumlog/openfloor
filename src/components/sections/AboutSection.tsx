@@ -98,7 +98,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           initial="hidden"
           animate={active ? 'show' : 'hidden'}
           transition={entryTransition(INTRO_DELAY)}
-          className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-normal font-normal whitespace-pre-line max-md:whitespace-normal max-md:text-pretty max-md:text-[12px]"
+          className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-normal font-normal whitespace-pre-line max-md:whitespace-normal max-md:text-pretty max-md:break-keep max-md:text-[12px]"
         >
           {INTRO}
         </motion.p>

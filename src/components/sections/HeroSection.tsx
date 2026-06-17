@@ -45,7 +45,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
       >
         {/* 상단: 헤드라인 + CTA(좌), 소개문(우). pt가 헤더 공간을 확보.
             모바일(<768): 세로로 쌓음 — 헤드라인 → CONTACT → 소개문. */}
-        <Container className="flex justify-between pt-16.25 max-md:flex-col max-md:gap-6 max-md:pt-[34vh]">
+        <Container className="flex justify-between pt-16.25 max-md:flex-col max-md:gap-6 max-md:pt-[39vh]">
           <div className="mt-[clamp(82px,9.86vw,142px)] max-md:mt-0">
             <RevealText
               as="h1"
@@ -80,7 +80,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
             initial="hidden"
             animate={active ? 'show' : 'hidden'}
             transition={{ delay: 0.65, duration: 0.6, ease: SLIDE_EASE }}
-            className="text-text-on-dark mt-[clamp(93px,11.11vw,160px)] max-w-[clamp(213px,27.78vw,402px)] text-[clamp(12px,1.11vw,16px)] leading-normal font-medium whitespace-pre-line max-md:whitespace-normal max-md:text-pretty max-md:mt-0 max-md:max-w-none max-md:text-[14px]"
+            className="text-text-on-dark mt-[clamp(93px,11.11vw,160px)] max-w-[clamp(213px,27.78vw,402px)] text-[clamp(12px,1.11vw,16px)] leading-normal font-medium whitespace-pre-line max-md:whitespace-normal max-md:text-pretty max-md:break-keep max-md:mt-0 max-md:max-w-none max-md:text-[14px]"
           >
             {INTRO}
           </motion.p>

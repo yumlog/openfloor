@@ -92,7 +92,7 @@ export default function App() {
   const ratio = frame.w / DESIGN_WIDTH
   const videoSize = 860 * ratio
   // hero 전용: about으로 이동/축소시키지 않고 hero 자리(가운데, scale 0.78)에 고정.
-  const heroCrystalY = isMobile ? -frame.h * 0.30 : 0
+  const heroCrystalY = isMobile ? -frame.h * 0.26 : 0
   const videoScale = useTransform(slide, [0, 1], [0.78, 0.78])
   const videoX = useTransform(slide, [0, 1], [0, 0])
   const videoY = useTransform(slide, [0, 1], [heroCrystalY, heroCrystalY])
