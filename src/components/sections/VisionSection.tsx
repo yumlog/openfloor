@@ -174,8 +174,8 @@ export function VisionSection({ active }: VisionSectionProps) {
     const SLOT_W = 32
     const ROW_H = 58
     const cy = ROW_H / 2 // 26
-    const ICON_R = 21
-    const CR = 10
+    const ICON_R = 16
+    const CR = 12
     const GRAY = '#525252'
     const RED = '#FB3640'
 
@@ -205,12 +205,12 @@ export function VisionSection({ active }: VisionSectionProps) {
 
       const inner = (
         <>
-          <div className={`flex size-[42px] shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-[#FB3640] bg-[#FB3640]/20' : 'border-white/50 bg-white/[0.08]'}`}>
+          <div className={`flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-[#FB3640] bg-[#FB3640]/20' : 'border-white/50 bg-white/[0.08]'}`}>
             <Bot className={`size-5 transition-colors duration-200 ${isRed ? 'text-[#FB3640]' : 'text-neutral-400/80'}`} />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[16px] font-bold leading-tight text-white">{node.title}</p>
-            <p className="mt-[2px] truncate text-[14px] leading-tight text-neutral-400">{node.desc}</p>
+            <p className="truncate text-[14px] font-bold leading-tight text-white">{node.title}</p>
+            <p className="mt-[4px] truncate text-[14px] leading-tight text-neutral-400">{node.desc}</p>
           </div>
           {isMid && (
             <ChevronDown className={`size-4 shrink-0 transition-transform duration-200 ${row.open ? 'rotate-180 text-[#FB3640]' : 'text-neutral-500'}`} />
