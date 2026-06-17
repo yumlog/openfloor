@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { Bot } from 'lucide-react'
 import { Container } from '@/components/layout/Container'
@@ -18,17 +18,17 @@ const R = 28 // 원 반지름
 
 // 컬럼 x: root=28, 중간=580, 오른쪽=940 / y: 중간 4개 164 간격, 오른쪽 6개 균등 배치
 const NODES: VNode[] = [
-  { id: 'root',   title: '통제 가능한 실전 AI',          desc: 'AI 신뢰성과 제어력을 핵심 축',     x: 28,  y: 336 },
-  { id: 'gen',    title: '생성형 비주얼',                desc: '이미지·영상 생성 기술',           x: 580, y: 90  },
-  { id: 'llm',    title: '로컬 LLM·파인튜닝',            desc: '온프레미스 모델 최적화',          x: 580, y: 254 },
-  { id: 'doc',    title: '문서 분석 자동화',             desc: '비정형 데이터 처리 파이프라인',    x: 580, y: 418 },
-  { id: 'qa',     title: 'AI 품질 검증',                desc: '성능 평가·회귀 방어',            x: 580, y: 582 },
-  { id: 'img',    title: '이미지 생성 파이프라인',        desc: '자체 R&D·구축 운영',            x: 940, y: 46  },
-  { id: 'motion', title: '영상 모션 전이·페이스스왑',      desc: '고객 프로젝트·전략 평가',         x: 940, y: 162 },
-  { id: 'sllm',   title: '도메인 특화 sLLM 파인튜닝',     desc: '고객 프로젝트·전략 평가',         x: 940, y: 278 },
-  { id: 'ir',     title: '금융 IR 텍스트·감성 분석 엔진',  desc: '고객 프로젝트·구축 운영',         x: 940, y: 394 },
-  { id: 'rfp',    title: '공공조달 RFP 분석 파이프라인',   desc: '자체 R&D·구축 운영',            x: 940, y: 510 },
-  { id: 'eval',   title: 'AI평가·회귀 검증 방법론',       desc: '자체 R&D·설계',                x: 940, y: 626 },
+  { id: 'root',   title: '통제 가능한 실전 AI',          desc: 'AI 신뢰성과 제어력을 핵심 축',     x: 28,  y: 356 },
+  { id: 'gen',    title: '생성형 비주얼',                desc: '이미지·영상 생성 기술',           x: 580, y: 110 },
+  { id: 'llm',    title: '로컬 LLM·파인튜닝',            desc: '온프레미스 모델 최적화',          x: 580, y: 274 },
+  { id: 'doc',    title: '문서 분석 자동화',             desc: '비정형 데이터 처리 파이프라인',    x: 580, y: 438 },
+  { id: 'qa',     title: 'AI 품질 검증',                desc: '성능 평가·회귀 방어',            x: 580, y: 602 },
+  { id: 'img',    title: '이미지 생성 파이프라인',        desc: '자체 R&D·구축 운영',            x: 940, y: 55  },
+  { id: 'motion', title: '영상 모션 전이·페이스스왑',      desc: '고객 프로젝트·전략 평가',         x: 940, y: 165 },
+  { id: 'sllm',   title: '도메인 특화 sLLM 파인튜닝',     desc: '고객 프로젝트·전략 평가',         x: 940, y: 274 },
+  { id: 'ir',     title: '금융 IR 텍스트·감성 분석 엔진',  desc: '고객 프로젝트·구축 운영',         x: 940, y: 383 },
+  { id: 'rfp',    title: '공공조달 RFP 분석 파이프라인',   desc: '자체 R&D·구축 운영',            x: 940, y: 493 },
+  { id: 'eval',   title: 'AI평가·회귀 검증 방법론',       desc: '자체 R&D·설계',                x: 940, y: 602 },
 ]
 
 const EDGES: [NodeId, NodeId][] = [
@@ -38,6 +38,23 @@ const EDGES: [NodeId, NodeId][] = [
   ['doc', 'ir'], ['doc', 'rfp'],
   ['qa', 'eval'],
 ]
+
+const CHILDREN: Record<NodeId, NodeId[]> = {
+  root: ['gen', 'llm', 'doc', 'qa'],
+  gen: ['img', 'motion'],
+  llm: ['sllm'],
+  doc: ['ir', 'rfp'],
+  qa: ['eval'],
+  img: [], motion: [], sllm: [], ir: [], rfp: [], eval: [],
+}
+const PARENT: Partial<Record<NodeId, NodeId>> = {
+  gen: 'root', llm: 'root', doc: 'root', qa: 'root',
+  img: 'gen', motion: 'gen', sllm: 'llm', ir: 'doc', rfp: 'doc', eval: 'qa',
+}
+const DEPTH: Record<NodeId, number> = {
+  root: 0, gen: 1, llm: 1, doc: 1, qa: 1,
+  img: 2, motion: 2, sllm: 2, ir: 2, rfp: 2, eval: 2,
+}
 
 const byId = Object.fromEntries(NODES.map((n) => [n.id, n])) as Record<NodeId, VNode>
 
@@ -52,6 +69,23 @@ export function VisionSection({ active }: VisionSectionProps) {
   const H = frame.h / ratio
 
   const [hovered, setHovered] = useState<NodeId | null>(null)
+
+  const redSet = useMemo(() => {
+    const s = new Set<NodeId>(['root']) // 1뎁스(root)는 항상 빨강
+    if (hovered && hovered !== 'root') {
+      s.add(hovered)
+      if (DEPTH[hovered] === 1) {
+        // 2뎁스 호버 → 자식 3뎁스 모두
+        CHILDREN[hovered].forEach((c) => s.add(c))
+      } else if (DEPTH[hovered] === 2) {
+        // 3뎁스 호버 → 부모 2뎁스 + 자신만(형제 제외)
+        const p = PARENT[hovered]
+        if (p) s.add(p)
+      }
+    }
+    return s
+  }, [hovered])
+
   const [widths, setWidths] = useState<Record<string, number>>({})
   const nodeRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -138,7 +172,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                 fill="none"
               >
                 {EDGES.map(([sid, tid], i) => {
-                  const hot = hovered === sid || hovered === tid
+                  const hot = redSet.has(sid) && redSet.has(tid) // 양 끝이 모두 빨강일 때만 선 빨강
                   return (
                     <motion.path
                       key={`${sid}-${tid}`}
@@ -157,7 +191,7 @@ export function VisionSection({ active }: VisionSectionProps) {
 
               {/* 노드 */}
               {NODES.map((n, i) => {
-                const hot = hovered === n.id
+                const hot = redSet.has(n.id)
                 const delay = (n.x < 100 ? 0 : n.x < 700 ? 0.45 : 0.95) + i * 0.03
                 return (
                   <motion.div
