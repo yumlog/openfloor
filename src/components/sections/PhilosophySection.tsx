@@ -37,6 +37,9 @@ const DWELL = 0.1
 export const GROW_START = STACK_END + DWELL // 0.65
 /** 확대 글라이드 시간(s). 역방향 축소 중 입력 잠금(useSlideController)이 참조하므로 export. */
 export const GROW_DURATION = 1.0
+/** 확대 카드가 화면을 '딱 덮는' g 지점. 이 시점에 곧장 portfolio로 넘겨, g=1까지
+    가는 동안 깔리는 '정지 빨강' 꼬리를 텍스트 페이드인으로 대체한다. */
+const COVER_AT = 0.92
 const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
 const GCW = 800 // 확대 카드 design 너비
 const GCH = 280 // 확대 카드 design 높이
@@ -86,17 +89,21 @@ export function PhilosophySection({
       // 0.4로 두면 컨트롤러 역방향 잠금(seam 0.4 + GROW_DURATION)과 딱 맞물린다.
       delay: growing ? 0 : 0.4,
       ease: growing ? [0.22, 1, 0.36, 1] : [0.4, 0, 1, 1],
-      // 확대가 끝나면 트랩을 1.0까지 더 굴리는 죽은 스크롤 없이 곧장 portfolio로 넘긴다.
-      // 정방향 확대 완료에서만(아직 philosophy일 때) 발동 — 역방향 재진입은 growing이
-      // true로 유지돼 애니메이션이 재시작되지 않으므로 onComplete가 다시 불리지 않는다.
-      onComplete:
-        growing && PORTFOLIO_INDEX > 0
-          ? () => {
-              if (slide.get() < PORTFOLIO_INDEX) goTo(PORTFOLIO_INDEX)
-            }
-          : undefined,
     })
-    return () => controls.stop()
+    // 화면을 덮는 순간(COVER_AT) 곧장 portfolio로 넘긴다 — g=1까지 기다리며 '정지 빨강'이
+    // 깔리지 않게. 그 시점부터 Portfolio 텍스트가 빨강 위로 페이드인(+정체)된다.
+    // (g=1까지의 오버슈트는 그대로 깔린 채 진행.) 한 번만 발동.
+    let handed = false
+    const unsub = g.on('change', (v) => {
+      if (growing && !handed && v >= COVER_AT && slide.get() < PORTFOLIO_INDEX) {
+        handed = true
+        goTo(PORTFOLIO_INDEX)
+      }
+    })
+    return () => {
+      controls.stop()
+      unsub()
+    }
   }, [growing, g, goTo, slide])
 
   // 확대 진행(g)에 따라 타이틀+스택을 페이드아웃(시간 기반, 스크롤 속도 무관).
@@ -226,9 +233,7 @@ function PhilosophyGrow({
   // 최종(g=1)은 1.3배 여유까지 — 커버리지 마진 유지(가장자리 안 샘).
   const coverScale = exactCover * 1.3
   // g 0→COVER_AT: 작음→딱 덮음(눈에 보이는 확대). g COVER_AT→1: 1.3배 여유로
-  // 빠르게 오버슈트(이미 덮여 있어 안 보임). '다 덮인 뒤 변화 없는 정지 빨강' 꼬리가
-  // 거의 사라진다.
-  const COVER_AT = 0.92
+  // 빠르게 오버슈트(이미 덮여 있어 안 보임).
   const scale = useTransform(
     g,
     [0, COVER_AT, 1],

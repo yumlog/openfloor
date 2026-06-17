@@ -23,7 +23,7 @@ export const REVEAL_END = 0.25
     역방향(REVEAL_REVERSE_DURATION)과 동일하게 둬 정/역 split·merge가 거울 대칭. */
 export const REVEAL_DURATION = 0.9
 /** 진입 후 텍스트가 합쳐진 채 멈춰 있는 시간(s) — 컨트롤러가 자동 전진 delay로 참조. */
-export const REVEAL_HOLD = 0.1
+export const REVEAL_HOLD = 0.25
 /** reveal 자동 전진 이징(컨트롤러가 참조). 역방향과 동일 easeIn — split이 천천히
     시작(빠르게 튀지 않음)하고, 역방향 merge를 그대로 되감은 모양이라 대칭. */
 export const TIME_EASE = [0.5, 0, 0.85, 0.25] as const
