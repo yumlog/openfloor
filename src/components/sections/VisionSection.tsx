@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { motion } from 'motion/react'
-import { Bot } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import { Bot, ChevronDown } from 'lucide-react'
 import { Container } from '@/components/layout/Container'
 import { RISE, entryTransition } from '@/lib/motion'
 import { useFrameSize } from '@/hooks/useFrameSize'
@@ -72,6 +72,7 @@ export function VisionSection({ active }: VisionSectionProps) {
   const H = frame.h / ratio
 
   const [hovered, setHovered] = useState<NodeId | null>(null)
+  const [openId, setOpenId] = useState<NodeId | null>(null) // 모바일 아코디언
 
   const redSet = useMemo(() => {
     const s = new Set<NodeId>(['root']) // 1뎁스(root)는 항상 빨강
@@ -166,14 +167,91 @@ export function VisionSection({ active }: VisionSectionProps) {
   if (isMobile) {
     return (
       <section id={def.id} className="relative flex h-[100dvh] w-full flex-col overflow-hidden">
-        <Container className="flex h-full flex-col pt-[88px]">
-          <motion.p {...rise(0)} className="text-[15px] font-bold leading-[1.4] tracking-[-0.04em] text-[#FB3640]">
+        <Container className="flex h-full flex-col pt-[88px] pb-[24px]">
+          <motion.p {...rise(0)} className="text-[14px] font-bold leading-[1.4] tracking-[-0.04em] text-[#FB3640]">
             OUR VISION
           </motion.p>
-          <motion.p {...rise(0.06)} className="mt-4 text-[clamp(26px,7vw,36px)] font-bold leading-[1.5] text-white">
+          <motion.p {...rise(0.06)} className="mt-3 text-[clamp(20px,5.5vw,28px)] font-bold leading-[1.35] text-white">
             AI와 함께 일하는 방식이 바뀌는 시대, 우리는 그 변화를 가장 깊이 만들어갑니다.
           </motion.p>
-          {/* 모바일 아코디언은 3단계에서 */}
+
+          {/* 아코디언 (스크롤 불가 → 100dvh 안에 fit) */}
+          <motion.div {...rise(0.12)} className="mt-5 flex flex-col gap-1.5">
+            {/* root — 항상 빨강 헤더 */}
+            <div className="flex items-center gap-3 rounded-2xl border border-[#FB3640] bg-[#FB3640]/10 px-3.5 py-2">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-[#FB3640] bg-[#FB3640]/20">
+                <Bot className="size-[18px] text-[#FB3640]" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-[14px] font-bold leading-tight text-white">{byId.root.title}</p>
+                <p className="truncate text-[11px] leading-tight text-neutral-400">{byId.root.desc}</p>
+              </div>
+            </div>
+
+            {/* 2뎁스 아코디언(단일 오픈) */}
+            {MID_IDS.map((mid) => {
+              const node = byId[mid]
+              const open = openId === mid
+              return (
+                <div key={mid}>
+                  <button
+                    type="button"
+                    onClick={() => setOpenId(open ? null : mid)}
+                    className={`flex w-full items-center gap-3 rounded-2xl border px-3.5 py-2 text-left transition-colors duration-200 ${
+                      open ? 'border-[#FB3640] bg-[#FB3640]/10' : 'border-white/15 bg-white/[0.04]'
+                    }`}
+                  >
+                    <div
+                      className={`flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
+                        open ? 'border-[#FB3640] bg-[#FB3640]/20' : 'border-white/50 bg-white/[0.08]'
+                      }`}
+                    >
+                      <Bot className={`size-[18px] transition-colors duration-200 ${open ? 'text-[#FB3640]' : 'text-neutral-400/80'}`} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[14px] font-bold leading-tight text-white">{node.title}</p>
+                      <p className="truncate text-[11px] leading-tight text-neutral-400">{node.desc}</p>
+                    </div>
+                    <ChevronDown
+                      className={`size-5 shrink-0 transition-transform duration-200 ${open ? 'rotate-180 text-[#FB3640]' : 'text-neutral-500'}`}
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {open && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex flex-col gap-1.5 py-1.5 pl-5">
+                          {CHILDREN[mid].map((kid) => {
+                            const c = byId[kid]
+                            return (
+                              <div
+                                key={kid}
+                                className="flex items-center gap-2.5 rounded-xl border border-[#FB3640]/50 bg-[#FB3640]/[0.06] px-3 py-2"
+                              >
+                                <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-[#FB3640] bg-[#FB3640]/20">
+                                  <Bot className="size-3.5 text-[#FB3640]" />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="truncate text-[12px] font-bold leading-tight text-white">{c.title}</p>
+                                  <p className="truncate text-[10px] leading-tight text-neutral-400">{c.desc}</p>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })}
+          </motion.div>
         </Container>
       </section>
     )
