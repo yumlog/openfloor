@@ -36,7 +36,7 @@ const DWELL = 0.1
     쓰도록 useSlideController가 import 한다. */
 export const GROW_START = STACK_END + DWELL // 0.65
 /** 확대 글라이드 시간(s). 역방향 축소 중 입력 잠금(useSlideController)이 참조하므로 export. */
-export const GROW_DURATION = 1.1
+export const GROW_DURATION = 0.9
 const GROWN_CARD = PHILOSOPHY_CARDS[2] // 확대되는 마지막 카드(빨강)
 const GCW = 800 // 확대 카드 design 너비
 const GCH = 280 // 확대 카드 design 높이

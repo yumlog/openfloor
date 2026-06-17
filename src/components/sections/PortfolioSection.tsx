@@ -22,17 +22,17 @@ export const REVEAL_END = 0.25
 /** reveal 자동 전진 시간(s). 컨트롤러가 이 값으로 progress를 전진시킨다. */
 export const REVEAL_DURATION = 1.6
 /** 진입 후 텍스트가 합쳐진 채 멈춰 있는 시간(s) — 컨트롤러가 자동 전진 delay로 참조. */
-export const REVEAL_HOLD = 0.45
+export const REVEAL_HOLD = 0.2
 /** reveal 자동 전진 이징(컨트롤러가 참조). */
-export const TIME_EASE = [0.22, 1, 0.36, 1] as const
+export const TIME_EASE = [0.33, 1, 0.68, 1] as const
 /** 역방향(regather) 전용 시간(s) — 정방향보다 짧게. */
 export const REVEAL_REVERSE_DURATION = 0.9
 /** 역방향(regather) 전용 이징 — 끝이 빠른 easeIn. */
 export const TIME_EASE_REVERSE = [0.5, 0, 0.85, 0.25] as const
 
 /* reveal 구간 매핑(겹침이 핵심). */
-const TEXT_SPLIT_RANGE: [number, number] = [0, 0.78] // 텍스트가 위/아래로 벌어지는 구간
-const TEXT_FADE_RANGE: [number, number] = [0.35, 0.75] // 텍스트가 사라지는 구간(늦게 시작)
+const TEXT_SPLIT_RANGE: [number, number] = [0, 0.85] // 텍스트가 위/아래로 벌어지는 구간
+const TEXT_FADE_RANGE: [number, number] = [0.42, 0.85] // 텍스트가 사라지는 구간(늦게 시작)
 // reveal 구간: 확대 시작 · 오버슈트 피크 · 안착
 const SLIDE_SCALE_IN: number[] = [0.25, 0.78, 0.9]
 // scale: 0 → 살짝 넘김(1.07) → 1.0 안착
