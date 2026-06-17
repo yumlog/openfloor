@@ -336,13 +336,23 @@ function PortfolioRiseSlide({
   progress: MotionValue<number>
 }) {
   const y = useTransform(progress, band, ['100%', '0%'], { clamp: true })
+  // 이 프로젝트가 거의 다 올라온 시점에 텍스트 순차 등장(첫 슬라이드와 동일).
+  // 역방향으로 내려가면 다시 false가 되어 텍스트가 먼저 사라진다.
+  const [revealed, setRevealed] = useState(false)
+  useEffect(() => {
+    const settleAt = band[1] - (band[1] - band[0]) * (1 - REVEAL_SETTLE)
+    const apply = (v: number) => setRevealed(v >= settleAt)
+    apply(progress.get())
+    const unsub = progress.on('change', apply)
+    return () => unsub()
+  }, [progress, band])
   return (
     <motion.div className="absolute inset-0" style={{ y, zIndex: z }}>
       <PortfolioSlideContent
         project={project}
         index={index}
         total={total}
-        revealed
+        revealed={revealed}
       />
     </motion.div>
   )
