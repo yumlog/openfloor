@@ -199,34 +199,35 @@ export function VisionSection({ active }: VisionSectionProps) {
                 viewBox={`0 0 ${TREE_W} ${TREE_H}`}
                 fill="none"
               >
-                {EDGES.map(([sid, tid], i) => {
-                  const d = edgePath(sid, tid)
+                {/* 회색 베이스 — 전부 먼저(아래 레이어) */}
+                {EDGES.map(([sid, tid], i) => (
+                  <motion.path
+                    key={`base-${sid}-${tid}`}
+                    d={edgePath(sid, tid)}
+                    fill="none"
+                    stroke="#525252"
+                    strokeWidth={1.5}
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: active ? 1 : 0 }}
+                    transition={{ duration: 0.7, ease: 'easeInOut', delay: (sid === 'root' ? 0.25 : 0.75) + i * 0.04 }}
+                  />
+                ))}
+                {/* 빨강 오버레이 — 전부 나중(위 레이어). opacity로 비호버 시 점 숨김 */}
+                {EDGES.map(([sid, tid]) => {
                   const hot = redSet.has(sid) && redSet.has(tid)
                   return (
-                    <g key={`${sid}-${tid}`}>
-                      {/* 베이스(회색) — 등장 시 그려짐 */}
-                      <motion.path
-                        d={d}
-                        fill="none"
-                        stroke="#525252"
-                        strokeWidth={1.5}
-                        strokeLinecap="round"
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: active ? 1 : 0 }}
-                        transition={{ duration: 0.7, ease: 'easeInOut', delay: (sid === 'root' ? 0.25 : 0.75) + i * 0.04 }}
-                      />
-                      {/* 빨강 오버레이 — 호버 시 선을 따라 채워지며 흐름 */}
-                      <motion.path
-                        d={d}
-                        fill="none"
-                        stroke="#FB3640"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        initial={{ pathLength: 0 }}
-                        animate={{ pathLength: hot ? 1 : 0 }}
-                        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                      />
-                    </g>
+                    <motion.path
+                      key={`red-${sid}-${tid}`}
+                      d={edgePath(sid, tid)}
+                      fill="none"
+                      stroke="#FB3640"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: hot ? 1 : 0, opacity: hot ? 1 : 0 }}
+                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], opacity: { duration: 0.2 } }}
+                    />
                   )
                 })}
               </svg>
