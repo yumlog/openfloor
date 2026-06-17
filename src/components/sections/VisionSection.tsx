@@ -174,8 +174,8 @@ export function VisionSection({ active }: VisionSectionProps) {
     const SLOT_W = 32
     const ROW_H = 52
     const cy = ROW_H / 2 // 26
-    const ICON_R = 16
-    const CR = 12
+    const ICON_R = 21
+    const CR = 10
     const GRAY = '#525252'
     const RED = '#FB3640'
 
@@ -195,7 +195,7 @@ export function VisionSection({ active }: VisionSectionProps) {
       const d = row.depth
       const isRed = mRed.has(row.id)
       const gutterW = d * SLOT_W
-      const ex = d * SLOT_W - SLOT_W / 2
+      const ex = (d - 1) * SLOT_W + ICON_R
       const elbowD = `M ${ex} ${cy - CR} Q ${ex} ${cy} ${ex + CR} ${cy} H ${gutterW}`
       const isMid = d === 1
       const i = row.index ?? 0
@@ -205,8 +205,8 @@ export function VisionSection({ active }: VisionSectionProps) {
 
       const inner = (
         <>
-          <div className={`flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-[#FB3640] bg-[#FB3640]/20' : 'border-white/50 bg-white/[0.08]'}`}>
-            <Bot className={`size-4 transition-colors duration-200 ${isRed ? 'text-[#FB3640]' : 'text-neutral-400/80'}`} />
+          <div className={`flex size-[42px] shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-[#FB3640] bg-[#FB3640]/20' : 'border-white/50 bg-white/[0.08]'}`}>
+            <Bot className={`size-5 transition-colors duration-200 ${isRed ? 'text-[#FB3640]' : 'text-neutral-400/80'}`} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[16px] font-bold leading-tight text-white">{node.title}</p>
@@ -221,7 +221,7 @@ export function VisionSection({ active }: VisionSectionProps) {
       return (
         <div key={row.id} className="relative flex items-stretch" style={{ height: ROW_H }}>
           {d === 0 && (
-            <span className="absolute" style={{ left: SLOT_W / 2 - 1, top: cy + ICON_R, width: 2, height: ROW_H - (cy + ICON_R), background: openIdx >= 0 ? RED : GRAY }} />
+            <span className="absolute" style={{ left: ICON_R - 1, top: cy + ICON_R, width: 2, height: ROW_H - (cy + ICON_R), background: openIdx >= 0 ? RED : GRAY }} />
           )}
 
           {d > 0 && (
@@ -231,30 +231,30 @@ export function VisionSection({ active }: VisionSectionProps) {
                 <path d={elbowD} fill="none" stroke={GRAY} strokeWidth={1.5} strokeLinecap="round" />
               )}
               {d === 1 && isOpenMid && !row.isLast && (
-                <line x1={SLOT_W / 2} y1={cy - CR} x2={SLOT_W / 2} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
+                <line x1={ICON_R} y1={cy - CR} x2={ICON_R} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
               )}
               {isPlainGray && (
                 <>
-                  <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={row.isLast ? cy - CR : ROW_H} stroke={GRAY} strokeWidth={1.5} />
+                  <line x1={ICON_R} y1={0} x2={ICON_R} y2={row.isLast ? cy - CR : ROW_H} stroke={GRAY} strokeWidth={1.5} />
                   <path d={elbowD} fill="none" stroke={GRAY} strokeWidth={1.5} strokeLinecap="round" />
                 </>
               )}
               {d === 2 && !row.parentLast && (
-                <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
+                <line x1={ICON_R} y1={0} x2={ICON_R} y2={ROW_H} stroke={GRAY} strokeWidth={1.5} />
               )}
 
               {/* ===== 빨강 나중(위 레이어) ===== */}
               {d === 1 && onPathAbove && (
-                <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={ROW_H} stroke={RED} strokeWidth={2} />
+                <line x1={ICON_R} y1={0} x2={ICON_R} y2={ROW_H} stroke={RED} strokeWidth={2} />
               )}
               {d === 1 && isOpenMid && (
                 <>
-                  <line x1={SLOT_W / 2} y1={0} x2={SLOT_W / 2} y2={cy - CR} stroke={RED} strokeWidth={2} />
+                  <line x1={ICON_R} y1={0} x2={ICON_R} y2={cy - CR} stroke={RED} strokeWidth={2} />
                   <path d={elbowD} fill="none" stroke={RED} strokeWidth={2} strokeLinecap="round" />
                 </>
               )}
               {d === 1 && row.open && (
-                <line x1={SLOT_W + SLOT_W / 2} y1={cy + ICON_R} x2={SLOT_W + SLOT_W / 2} y2={ROW_H} stroke={RED} strokeWidth={2} />
+                <line x1={SLOT_W + ICON_R} y1={cy + ICON_R} x2={SLOT_W + ICON_R} y2={ROW_H} stroke={RED} strokeWidth={2} />
               )}
               {d === 2 && (
                 <>
