@@ -61,6 +61,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'About Us', index: 1 },
   { label: 'Philosophy', index: 2 },
   { label: 'Portfolio', index: 3 },
+  { label: 'Vision', index: 4 },
 ]
 
 /* 스냅 엔진 타이밍. */
