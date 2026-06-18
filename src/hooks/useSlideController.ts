@@ -178,6 +178,13 @@ export function useSlideController({
         // 롤 AND 탈출을 막는다.
         rollAnimatingRef.current = false
       }
+      // philosophy/portfolio 범위(2~3) 밖으로 이동하면 parked된 philosophyRoll을 0으로
+      // 초기화 — 그대로 두면 grow(빨강 g=1)가 살아남아, 멀리서 헤더로 점프할 때 전환 중
+      // slide가 2~3을 지나며 빨강이 스치거나(문제1), 다시 정방향 진입 시 g가 1→0으로
+      // 줄며 축소 애니가 보인다(문제2). 인접 seam(next=2 또는 3)은 제외해 안 깨뜨린다.
+      if (next < PHILO_IDX || next > PORT_IDX) {
+        trapAt(PHILO_IDX)?.progress.set(0)
+      }
       currentRef.current = next
       setTarget(next)
       animatingRef.current = true
