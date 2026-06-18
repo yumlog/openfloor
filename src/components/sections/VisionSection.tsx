@@ -1,6 +1,20 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Bot, ChevronDown } from 'lucide-react'
+import {
+  Bot,
+  BrainCircuit,
+  ChevronDown,
+  Clapperboard,
+  Cpu,
+  FileSearch,
+  FlaskConicalOff,
+  ImagePlay,
+  ScrollText,
+  ShieldCheck,
+  TrendingUp,
+  WandSparkles,
+  type LucideIcon,
+} from 'lucide-react'
 import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
@@ -28,6 +42,7 @@ interface VNode {
   desc: string
   x: number
   y: number
+  icon: LucideIcon
 }
 
 const TREE_W = 1312
@@ -42,6 +57,7 @@ const NODES: VNode[] = [
     desc: 'AI 신뢰성과 제어력을 핵심 축',
     x: 28,
     y: 356,
+    icon: Bot,
   },
   {
     id: 'gen',
@@ -49,6 +65,7 @@ const NODES: VNode[] = [
     desc: '이미지·영상 생성 기술',
     x: 490,
     y: 110,
+    icon: ImagePlay,
   },
   {
     id: 'llm',
@@ -56,6 +73,7 @@ const NODES: VNode[] = [
     desc: '온프레미스 모델 최적화',
     x: 490,
     y: 274,
+    icon: Cpu,
   },
   {
     id: 'doc',
@@ -63,6 +81,7 @@ const NODES: VNode[] = [
     desc: '비정형 데이터 처리 파이프라인',
     x: 490,
     y: 438,
+    icon: FileSearch,
   },
   {
     id: 'qa',
@@ -70,6 +89,7 @@ const NODES: VNode[] = [
     desc: '성능 평가·회귀 방어',
     x: 490,
     y: 602,
+    icon: ShieldCheck,
   },
   {
     id: 'img',
@@ -77,6 +97,7 @@ const NODES: VNode[] = [
     desc: '자체 R&D·구축 운영',
     x: 940,
     y: 55,
+    icon: WandSparkles,
   },
   {
     id: 'motion',
@@ -84,6 +105,7 @@ const NODES: VNode[] = [
     desc: '고객 프로젝트·전략 평가',
     x: 940,
     y: 165,
+    icon: Clapperboard,
   },
   {
     id: 'sllm',
@@ -91,6 +113,7 @@ const NODES: VNode[] = [
     desc: '고객 프로젝트·전략 평가',
     x: 940,
     y: 274,
+    icon: BrainCircuit,
   },
   {
     id: 'ir',
@@ -98,6 +121,7 @@ const NODES: VNode[] = [
     desc: '고객 프로젝트·구축 운영',
     x: 940,
     y: 383,
+    icon: TrendingUp,
   },
   {
     id: 'rfp',
@@ -105,6 +129,7 @@ const NODES: VNode[] = [
     desc: '자체 R&D·구축 운영',
     x: 940,
     y: 493,
+    icon: ScrollText,
   },
   {
     id: 'eval',
@@ -112,6 +137,7 @@ const NODES: VNode[] = [
     desc: '자체 R&D·설계',
     x: 940,
     y: 602,
+    icon: FlaskConicalOff,
   },
 ]
 
@@ -337,7 +363,7 @@ export function VisionSection({ active }: VisionSectionProps) {
           <div
             className={`flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${isRed ? 'border-accent bg-accent/20' : 'border-title-on-dark/50 bg-title-on-dark/8'}`}
           >
-            <Bot
+            <node.icon
               className={`size-5 transition-colors duration-200 ${isRed ? 'text-accent' : 'text-text-on-dark/80'}`}
             />
           </div>
@@ -720,7 +746,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                           : 'border-title-on-dark/50 bg-title-on-dark/8'
                       }`}
                     >
-                      <Bot
+                      <n.icon
                         className={`size-7 transition-colors duration-200 ${hot ? 'text-accent' : 'text-text-on-dark/80'}`}
                       />
                     </div>
