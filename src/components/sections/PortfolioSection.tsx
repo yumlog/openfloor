@@ -234,7 +234,7 @@ function PortfolioSlideContent({
               {project.project}
             </motion.h3>
             <motion.p
-              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-normal font-normal tracking-[-0.015em] text-pretty break-keep max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)] max-md:tracking-normal"
+              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-[1.6] font-normal tracking-[-0.015em] text-pretty break-keep max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)] max-md:tracking-normal"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.59) : { duration: 0.3 }}
