@@ -63,8 +63,8 @@ export default function App() {
         sensitivity: 0.0008,
         autoFlow: {
           speed: 0.015,
-          fwdCap: 0.78,
-          revCap: 0.22,
+          fwdCap: 1.0,
+          revCap: 0.0,
           damp: 4,
           impulse: 0.004,
           vMax: 1.0,
