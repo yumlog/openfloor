@@ -20,12 +20,18 @@ const INFO = {
   phone: '010-8718-5785',
 }
 const MENUS = ['Company Profile', 'Portfolio']
+/** 하단 메뉴 → 이동할 슬라이드 인덱스(헤더 내비처럼 goTo로 스냅). */
+const MENU_INDEX: Record<string, number> = {
+  'Company Profile': SLIDES.findIndex((s) => s.id === 'about'),
+  Portfolio: SLIDES.findIndex((s) => s.id === 'portfolio'),
+}
 
 interface ContactSectionProps {
   active: boolean
+  goTo: (next: number) => void
 }
 
-export function ContactSection({ active }: ContactSectionProps) {
+export function ContactSection({ active, goTo }: ContactSectionProps) {
   const frame = useFrameSize()
   const isMobile = frame.w < 768
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
@@ -60,7 +66,7 @@ export function ContactSection({ active }: ContactSectionProps) {
           </motion.p>
           <motion.p
             {...rise(0.06)}
-            className="text-title-on-dark mt-5 text-[clamp(26px,7.5vw,38px)] leading-none font-bold tracking-normal"
+            className="text-title-on-dark font-montserrat mt-5 text-[clamp(26px,7.5vw,38px)] leading-none font-bold tracking-normal"
           >
             {INFO.email}
           </motion.p>
@@ -114,6 +120,7 @@ export function ContactSection({ active }: ContactSectionProps) {
               {MENUS.map((m) => (
                 <span
                   key={m}
+                  onClick={() => goTo(MENU_INDEX[m])}
                   className="text-title-on-dark hover:text-accent decoration-accent cursor-pointer text-[clamp(20px,5.5vw,26px)] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap underline-offset-[5px] transition-colors hover:underline hover:decoration-2"
                 >
                   {m}
@@ -146,24 +153,24 @@ export function ContactSection({ active }: ContactSectionProps) {
           </motion.p>
           <motion.p
             {...rise(0.06)}
-            className="text-title-on-dark mt-9 text-[44px] leading-none font-bold tracking-normal"
+            className="text-title-on-dark font-montserrat mt-9 text-[44px] leading-none font-bold tracking-normal"
           >
             {INFO.email}
           </motion.p>
           <motion.div {...rise(0.12)} className="mt-10 flex gap-10.5">
             <div>
-              <p className="text-text-nav text-[20px] leading-[1.3] font-normal tracking-[-0.04em]">
+              <p className="text-text-on-dark text-[20px] leading-[1.3] font-normal tracking-[-0.04em]">
                 Address
               </p>
-              <p className="text-text-on-dark mt-3 text-[20px] leading-none font-normal tracking-normal">
+              <p className="text-title-on-dark mt-3 text-[20px] leading-none font-normal tracking-normal">
                 {INFO.address}
               </p>
             </div>
             <div>
-              <p className="text-text-nav text-[20px] leading-[1.3] font-normal tracking-[-0.04em]">
+              <p className="text-text-on-dark text-[20px] leading-[1.3] font-normal tracking-[-0.04em]">
                 Phone Number
               </p>
-              <p className="text-text-on-dark mt-3 text-[20px] leading-none font-normal tracking-normal">
+              <p className="text-title-on-dark mt-3 text-[20px] leading-none font-normal tracking-normal">
                 {INFO.phone}
               </p>
             </div>
@@ -197,7 +204,7 @@ export function ContactSection({ active }: ContactSectionProps) {
         {/* 좌하단 CONTACT */}
         <motion.p
           {...fade(0.1)}
-          className="text-accent absolute text-[136px] leading-none font-bold tracking-[-0.04em]"
+          className="text-title-on-dark absolute text-[136px] leading-none font-bold tracking-[-0.04em]"
           style={{ left: 64, bottom: 100 }}
         >
           CONTACT
@@ -212,6 +219,7 @@ export function ContactSection({ active }: ContactSectionProps) {
           {MENUS.map((m) => (
             <span
               key={m}
+              onClick={() => goTo(MENU_INDEX[m])}
               className="text-title-on-dark hover:text-accent decoration-accent cursor-pointer text-[32px] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap underline-offset-[6px] transition-colors hover:underline hover:decoration-[3px]"
             >
               {m}
