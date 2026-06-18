@@ -61,7 +61,14 @@ export default function App() {
         steps: MANIFESTO_STEPS,
         progress: rollProgress,
         sensitivity: 0.0008,
-        autoFlow: { speed: 0.015, fwdCap: 0.78, revCap: 0.22 },
+        autoFlow: {
+          speed: 0.015,
+          fwdCap: 0.78,
+          revCap: 0.22,
+          damp: 4,
+          impulse: 0.004,
+          vMax: 1.0,
+        },
       },
     ],
     [isMobile, philosophyRoll, portfolioRoll, rollProgress]

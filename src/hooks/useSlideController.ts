@@ -45,7 +45,14 @@ interface TrapOptions {
   /** 유휴(스크롤 멈춤) 시 progress를 진입 방향으로 천천히 자동 전진시킨다. speed는
       초당 progress 증가량, fwdCap/revCap은 자동이 멈추는 지점(끝 줄이 정면). 그 너머
       이탈은 스크롤로만. progress와 rollTargetRef를 함께 움직여 데드존·점프가 없다. */
-  autoFlow?: { speed: number; fwdCap: number; revCap: number }
+  autoFlow?: {
+    speed: number
+    fwdCap: number
+    revCap: number
+    damp: number
+    impulse: number
+    vMax: number
+  }
 }
 
 interface Options {
@@ -343,6 +350,9 @@ export function useSlideController({
     // (연속 스크롤 / 관성) 유지되고 멎으면 해제되어, 끊기지 않은 한 제스처가 딱
     // 한 섹션만 이동하게 한다.
     let wheelLocked = false
+    // autoFlow 속도-바닥 모델의 현재 progress 속도(progress/sec). 휠/터치/키가 힘을
+    // 더하고, 자동 루프가 진입 방향 자동 속도로 수렴시키며 적분한다.
+    let v = 0
     let wheelResetTimer: ReturnType<typeof setTimeout>
     const resetWheel = () => {
       wheelAccum = 0
@@ -355,6 +365,13 @@ export function useSlideController({
       // 가둔 슬라이드: 드럼을 관성으로 비례 롤. 끝에 핀 채로 계속 밀 때만
       // 누적 버스트가 밖으로 advance.
       if (inTrap() && !trapAt(currentRef.current)?.snap) {
+        // autoFlow 트랩: 속도-바닥 모델 — 휠은 속도 v에 힘만 더한다(관성). 진행·이탈은
+        // 자동 루프가 담당하므로 rollTo / push-past-end를 쓰지 않는다.
+        const af = trapAt(currentRef.current)?.autoFlow
+        if (af) {
+          v = clamp(v + e.deltaY * af.impulse, -af.vMax, af.vMax)
+          return
+        }
         // 확대 커밋 후 정방향 휠은 무시(조기 portfolio advance 방지).
         if (philoGrowCommitted() && e.deltaY > 0) {
           resetWheel()
@@ -418,6 +435,11 @@ export function useSlideController({
       const dy = touchPrevY - y
       touchPrevY = y
       if (inTrap()) {
+        const af = trapAt(currentRef.current)?.autoFlow
+        if (af) {
+          v = clamp(v + dy * af.impulse, -af.vMax, af.vMax)
+          return
+        }
         if (trapAt(currentRef.current)?.snap) return // ← 스냅은 end에서 판정
         // 확대 커밋 후 정방향 터치는 무시(조기 portfolio advance 방지).
         if (philoGrowCommitted() && dy > 0) return
@@ -433,6 +455,8 @@ export function useSlideController({
       // 가둔 동안: 손가락이 이미 드럼을 굴렸으니, 끝에 핀 상태에서의 결정적
       // 스와이프만 밖으로 advance.
       if (inTrap()) {
+        // autoFlow는 경계 이탈을 자동 루프가 처리하므로 여기선 아무것도 안 한다.
+        if (trapAt(currentRef.current)?.autoFlow) return
         if (trapAt(currentRef.current)?.snap) {
           if (delta > TOUCH_THRESHOLD) step(1)
           else if (delta < -TOUCH_THRESHOLD) step(-1)
@@ -449,6 +473,20 @@ export function useSlideController({
 
     // 키보드.
     const onKey = (e: KeyboardEvent) => {
+      // autoFlow 트랩: 위/아래 키도 속도 v에 힘을 더한다(자동 루프가 진행·이탈 담당).
+      const af = trapAt(currentRef.current)?.autoFlow
+      if (af && !animatingRef.current) {
+        if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+          e.preventDefault()
+          v = clamp(v + 100 * af.impulse, -af.vMax, af.vMax)
+          return
+        }
+        if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+          e.preventDefault()
+          v = clamp(v - 100 * af.impulse, -af.vMax, af.vMax)
+          return
+        }
+      }
       if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault()
         step(1)
@@ -464,42 +502,47 @@ export function useSlideController({
       }
     }
 
-    // 유휴 자동 흐름: autoFlow 트랩에서 progress가 "내가 마지막으로 쓴 값 그대로"일
-    // 때만(=스프링/스크롤/seat 등 외부가 progress를 전혀 안 건드린 완전 정착 상태) 진입
-    // 방향으로 progress와 rollTargetRef를 함께 천천히 전진시킨다. 스프링이 미세하게라도
-    // 움직이는 동안엔 끼어들지 않아 충돌(툭/점프)이 없다. progress가 곧 시각·이탈 기준이라
-    // 마지막 줄이 사라지는 순간이 이탈과 일치한다(데드존 없음). cap까지만, 이후 이탈은 스크롤.
+    // 속도-바닥(velocity floor) 모델: autoFlow 트랩에서 스크롤과 자동 흐름을 하나의
+    // 속도 v로 통합한다. 휠/터치/키가 v에 힘을 더하고, 가만히 두면 v는 0이 아니라 진입
+    // 방향 자동 속도(floor)로 수렴한다 → 스크롤이 멈춰도 정지하지 않고 그 속도로 자연
+    // 감속·연결되어 "툭" 끊김이 없다. floor는 cap 안쪽에서만 자동 속도라 유휴는 마지막/
+    // 첫 줄에서 멈추고, 경계(progress 1/0)에 닿으면 즉시 이탈한다(push-past-end 없음 = 데드존 0).
     let autoRaf = 0
     let autoPrev = performance.now()
-    let autoLast = NaN // 자동이 마지막으로 쓴 progress 값 — 외부 변경 감지용.
     const autoLoop = (now: number) => {
       const dt = Math.min(0.05, (now - autoPrev) / 1000)
       autoPrev = now
       const trap = trapAt(currentRef.current)
       if (trap?.autoFlow && !animatingRef.current) {
-        const p = trap.progress.get()
-        if (p === autoLast) {
-          // 완전 정착 — 이때만 전진.
-          const { speed, fwdCap, revCap } = trap.autoFlow
-          const dir = trapDirRef.current
-          const cap = dir > 0 ? fwdCap : revCap
-          const cur = rollTargetRef.current
-          const reached = dir > 0 ? cur >= cap : cur <= cap
-          if (!reached) {
-            const np =
-              dir > 0
-                ? Math.min(cap, cur + speed * dt)
-                : Math.max(cap, cur - speed * dt)
-            rollTargetRef.current = np
-            trap.progress.set(np)
-            autoLast = np
-          }
+        const { speed, fwdCap, revCap, damp } = trap.autoFlow
+        const dir = trapDirRef.current
+        let p = trap.progress.get()
+        // cap 안쪽이면 자동 속도, 밖이면 0 — v가 수렴할 "바닥".
+        const past = dir > 0 ? p >= fwdCap : p <= revCap
+        const floor = past ? 0 : dir * speed
+        v += (floor - v) * Math.min(1, damp * dt)
+        p += v * dt
+        if (dir > 0 && p >= 1) {
+          // 마지막 줄이 막 화면을 벗어남 → 즉시 다음 섹션(데드존 없음).
+          trap.progress.set(1)
+          rollTargetRef.current = 1
+          v = 0
+          wheelLocked = true // 남은 관성이 다음 섹션까지 넘어가지 않게.
+          goTo(currentRef.current + 1)
+        } else if (dir < 0 && p <= 0) {
+          // 첫 줄이 막 화면을 벗어남(아래) → 즉시 이전 섹션.
+          trap.progress.set(0)
+          rollTargetRef.current = 0
+          v = 0
+          wheelLocked = true
+          goTo(currentRef.current - 1)
         } else {
-          // 외부(스프링 진행/스크롤/seat)가 progress를 바꿈 → 보류하고 값만 추적.
-          autoLast = p
+          p = clamp(p, 0, 1)
+          trap.progress.set(p)
+          rollTargetRef.current = p
         }
       } else {
-        autoLast = NaN
+        v = 0
       }
       autoRaf = requestAnimationFrame(autoLoop)
     }
