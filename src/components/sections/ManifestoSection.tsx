@@ -94,6 +94,13 @@ const MAX_TILT_DEG = 5
 // 호버 색수차 스팟의 스크린 반경(px).
 const SPOT = 90
 
+// 유휴(스크롤 멈춤) 자동 흐름 속도 — 초당 전진하는 progress 양. 작을수록 천천히.
+const AUTO_SPEED = 0.03
+// 자동 흐름은 여기까지만(≈ 마지막 줄이 정면). 그 이후(섹션 이탈)는 스크롤로만.
+const AUTO_IDLE_CAP = 0.83
+// 스크롤을 멈춘 뒤 자동 흐름이 다시 시작되기까지의 지연(ms).
+const IDLE_DELAY = 600
+
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v))
 
 interface DrumLineProps {
@@ -254,9 +261,48 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
     maxLineW > 0 ? (CANVAS_W - 2 * SIDE_PAD) / maxLineW : Infinity
   const fillScale = Math.min(hBand / NATURAL_H, widthCap)
 
-  // 0..1 progress → 정면 줄 위치. 아래 페이드 가장자리(첫 줄이 막 올라오기 직전)에서
+  // 자동 흐름 + 스크롤 합성값(0..1). rAF 루프가 매 프레임 갱신한다:
+  //  - 스크롤 입력: progress의 프레임 델타를 현재 위치에 더해 점프·데드존 없이 1:1.
+  //  - 유휴(IDLE_DELAY 경과): 아주 천천히 자동 전진(AUTO_IDLE_CAP까지).
+  // 진입 직후도 유휴라 첫 줄이 스스로 떠오르며 콘텐츠를 암시하고, 스크롤하다 멈추면
+  // 다시 자동으로 흐른다. 컨트롤러의 트랩/progress는 읽기만 하고 건드리지 않으므로
+  // 섹션 이탈 조건(스크롤로 progress=1)은 그대로다.
+  const roll = useMotionValue(0)
+  useEffect(() => {
+    if (!active) {
+      roll.set(0)
+      return
+    }
+    let raf = 0
+    let lastP = progress.get()
+    let lastInput = performance.now()
+    let prev = performance.now()
+    const loop = (now: number) => {
+      const dt = Math.min(0.05, (now - prev) / 1000) // 탭 전환 등 큰 점프 방지
+      prev = now
+      const p = progress.get()
+      const dp = p - lastP
+      lastP = p
+      let r = roll.get()
+      if (Math.abs(dp) > 1e-4) {
+        // 스크롤: 현재 시각 위치에 델타를 더한다(절대 동기화가 아닌 상대 이동) →
+        // 자동으로 앞서 있던 위치에서 점프·데드존 없이 이어진다.
+        r = clamp01(r + dp)
+        lastInput = now
+      } else if (now - lastInput > IDLE_DELAY && r < AUTO_IDLE_CAP) {
+        // 멈춰 있으면 천천히 자동으로 흐른다(마지막 줄까지만).
+        r = Math.min(AUTO_IDLE_CAP, r + AUTO_SPEED * dt)
+      }
+      roll.set(r)
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [active, progress, roll])
+
+  // 0..1 합성값 → 정면 줄 위치. 아래 페이드 가장자리(첫 줄이 막 올라오기 직전)에서
   // 시작해 위 가장자리(마지막 줄이 막 사라짐)에서 끝난다.
-  const rollPos = useTransform(progress, (p) => p * TRAVEL + START_OFFSET)
+  const rollPos = useTransform(roll, (r) => r * TRAVEL + START_OFFSET)
 
   return (
     <section
