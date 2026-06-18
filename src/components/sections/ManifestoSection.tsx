@@ -100,8 +100,9 @@ const AUTO_SPEED = 0.015
 const AUTO_FWD_CAP = 0.83
 // 역방향 자동 흐름이 멈추는 지점(≈ 첫 줄이 정면).
 const AUTO_REV_CAP = 0.17
-// 스크롤을 멈춘 뒤 자동 흐름이 다시 시작되기까지의 지연(ms).
-const IDLE_DELAY = 150
+// 스크롤이 잦아든 속도에서 자동 흐름 속도로 수렴하는 빠르기(초당 계수). 멈춤 구간
+// 없이 속도를 이어받아 부드럽게 전환한다. 클수록 빨리 자동 속도에 안착.
+const AUTO_EASE = 4
 
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v))
 
@@ -265,10 +266,11 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
 
   // 자동 흐름 + 스크롤 합성값(0..1). rAF 루프가 매 프레임 갱신한다:
   //  - 스크롤 입력: progress의 프레임 델타를 현재 위치에 더해 점프·데드존 없이 1:1.
-  //  - 유휴(IDLE_DELAY 경과): 진입 방향으로 아주 천천히 자동 흐름(반대편 끝 줄까지).
-  // 진입 직후도 유휴라 시작 줄이 스스로 떠오르며 콘텐츠를 암시하고, 스크롤하다 멈추면
-  // 다시 자동으로 흐른다. 컨트롤러의 트랩/progress는 읽기만 하고 건드리지 않으므로
-  // 섹션 이탈 조건(스크롤로 progress=1)은 그대로다.
+  //    그 순간 속도(vel)를 기억한다.
+  //  - 유휴: 정지 구간 없이 vel을 진입 방향 자동 속도로 부드럽게 수렴시키며 적분한다
+  //    → 스크롤이 잦아든 속도에서 끊김(툭) 없이 자동 흐름으로 이어진다.
+  // 진입 직후도 유휴라 시작 줄이 스스로 떠오르며 콘텐츠를 암시한다. 컨트롤러의
+  // 트랩/progress는 읽기만 하고 건드리지 않으므로 섹션 이탈 조건은 그대로다.
   const roll = useMotionValue(0)
   useEffect(() => {
     if (!active) {
@@ -283,7 +285,7 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
     const dir = seat < 0.5 ? 1 : -1
     let raf = 0
     let lastP = seat
-    let lastInput = performance.now()
+    let vel = 0 // 현재 roll 속도(progress/sec) — 스크롤↔자동 전환을 끊김 없이 잇는다.
     let prev = performance.now()
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - prev) / 1000) // 탭 전환 등 큰 점프 방지
@@ -293,17 +295,19 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
       lastP = p
       let r = roll.get()
       if (Math.abs(dp) > 1e-4) {
-        // 스크롤: 현재 시각 위치에 델타를 더한다(절대 동기화가 아닌 상대 이동) →
-        // 자동으로 앞서 있던 위치에서 점프·데드존 없이 이어진다.
+        // 스크롤: 델타를 그대로 반영(점프·데드존 없이 1:1). 속도를 기억해 둔다.
         r = clamp01(r + dp)
-        lastInput = now
-      } else if (now - lastInput > IDLE_DELAY) {
-        // 멈춰 있으면 진입 방향으로 천천히 자동으로 흐른다(반대편 끝 줄까지만).
-        if (dir > 0 && r < AUTO_FWD_CAP) {
-          r = Math.min(AUTO_FWD_CAP, r + AUTO_SPEED * dt)
-        } else if (dir < 0 && r > AUTO_REV_CAP) {
-          r = Math.max(AUTO_REV_CAP, r - AUTO_SPEED * dt)
-        }
+        vel = dp / dt
+      } else {
+        // 유휴: 진입 방향 목표 속도(끝 줄 도달 시 0)로 vel을 부드럽게 수렴시키며 적분.
+        // 멈춤 구간 없이 스크롤 잦아든 속도에서 이어받아 툭 끊김이 없다.
+        const goal = dir > 0 ? AUTO_FWD_CAP : AUTO_REV_CAP
+        const reached = dir > 0 ? r >= goal : r <= goal
+        const targetVel = reached ? 0 : dir * AUTO_SPEED
+        vel += (targetVel - vel) * Math.min(1, AUTO_EASE * dt)
+        r = r + vel * dt
+        if (!reached) r = dir > 0 ? Math.min(r, goal) : Math.max(r, goal)
+        r = clamp01(r)
       }
       roll.set(r)
       raf = requestAnimationFrame(loop)
