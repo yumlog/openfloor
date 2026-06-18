@@ -42,6 +42,10 @@ interface TrapOptions {
   reverseSeat?: number
   /** true면 휠/터치도 비례 스크럽 대신 노치 스텝(한 제스처 = 한 칸). */
   snap?: boolean
+  /** 유휴(스크롤 멈춤) 시 progress를 진입 방향으로 천천히 자동 전진시킨다. speed는
+      초당 progress 증가량, fwdCap/revCap은 자동이 멈추는 지점(끝 줄이 정면). 그 너머
+      이탈은 스크롤로만. progress와 rollTargetRef를 함께 움직여 데드존·점프가 없다. */
+  autoFlow?: { speed: number; fwdCap: number; revCap: number }
 }
 
 interface Options {
@@ -107,6 +111,8 @@ export function useSlideController({
   // 가둔 롤이 향하는 목표(0..1). 휠/터치가 매 이벤트마다 재타깃하며, seat +
   // discrete 노치에서 동기화해 경계 판정이 정확하다.
   const rollTargetRef = useRef(0)
+  // 가둔 트랩 진입 방향(+1 정방향 / -1 역방향) — autoFlow 자동 흐름 방향 결정.
+  const trapDirRef = useRef(0)
   // 반환되는 goTo의 정체성이 바뀌지 않도록 하는 안정적인 핸들.
   const goToRef = useRef<(next: number) => void>(() => {})
 
@@ -157,6 +163,7 @@ export function useSlideController({
       const entering = trapAt(next)
       if (entering) {
         const seat = next > from ? 0 : (entering.reverseSeat ?? 1)
+        trapDirRef.current = next > from ? 1 : -1
         entering.progress.set(seat)
         rollTargetRef.current = seat
         // 여기서 `.set()`이 진행 중인 노치 애니를 중단시켜 onComplete가 안 불리므로,
@@ -457,6 +464,41 @@ export function useSlideController({
       }
     }
 
+    // 유휴 자동 흐름: autoFlow 트랩에서 스크롤이 정착(progress≈rollTarget)하고 전환 중이
+    // 아닐 때, 진입 방향으로 progress와 rollTargetRef를 함께 천천히 전진시킨다. 둘을 같이
+    // 움직이므로 다음 스크롤이 되돌아가 점프하지 않고, progress가 곧 시각·이탈 기준이라
+    // 마지막 줄이 사라지는 순간이 이탈과 일치한다(데드존 없음). cap까지만 — 그 너머
+    // 이탈은 스크롤로만. 스크롤 중에는 스프링이 progress를 끌어 rollTarget과 벌어지므로
+    // 자동이 멈추고, 정착하면 그 자리에서 끊김 없이 이어받는다.
+    let autoRaf = 0
+    let autoPrev = performance.now()
+    const autoLoop = (now: number) => {
+      const dt = Math.min(0.05, (now - autoPrev) / 1000)
+      autoPrev = now
+      const trap = trapAt(currentRef.current)
+      if (
+        trap?.autoFlow &&
+        !animatingRef.current &&
+        Math.abs(trap.progress.get() - rollTargetRef.current) < 1e-4
+      ) {
+        const { speed, fwdCap, revCap } = trap.autoFlow
+        const dir = trapDirRef.current
+        const cur = rollTargetRef.current
+        const cap = dir > 0 ? fwdCap : revCap
+        const reached = dir > 0 ? cur >= cap : cur <= cap
+        if (!reached) {
+          const np =
+            dir > 0
+              ? Math.min(cap, cur + speed * dt)
+              : Math.max(cap, cur - speed * dt)
+          rollTargetRef.current = np
+          trap.progress.set(np)
+        }
+      }
+      autoRaf = requestAnimationFrame(autoLoop)
+    }
+    autoRaf = requestAnimationFrame(autoLoop)
+
     window.addEventListener('wheel', onWheel, { passive: false })
     window.addEventListener('touchstart', onTouchStart, { passive: true })
     window.addEventListener('touchmove', onTouchMove, { passive: false })
@@ -470,6 +512,7 @@ export function useSlideController({
       window.removeEventListener('keydown', onKey)
       clearTimeout(wheelResetTimer)
       clearTimeout(reverseUnlockTimer)
+      cancelAnimationFrame(autoRaf)
       unsubPort?.()
     }
   }, [enabled, total, slide, traps, isMobile])
