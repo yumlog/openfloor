@@ -218,7 +218,7 @@ function PortfolioSlideContent({
           {/* 텍스트 묶음: clamp 폭 안에서 줄바꿈(모바일은 풀폭) */}
           <div className="max-w-[clamp(320px,34.72vw,500px)] max-md:max-w-none">
             <motion.p
-              className="font-pretendard text-title-on-dark text-[clamp(16px,1.67vw,24px)] leading-normal font-normal max-md:text-[clamp(16px,4.5vw,20px)]"
+              className="font-pretendard text-title-on-dark text-[clamp(16px,1.67vw,24px)] leading-normal font-normal tracking-[-0.015em] max-md:text-[clamp(16px,4.5vw,20px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.35) : { duration: 0.3 }}
@@ -226,7 +226,7 @@ function PortfolioSlideContent({
               {project.brand}
             </motion.p>
             <motion.h3
-              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold text-pretty break-keep max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]"
+              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(32px,3.89vw,56px)] leading-[1.4] font-bold tracking-[-0.02em] text-pretty break-keep max-md:mt-4 max-md:text-[clamp(28px,7vw,40px)]"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.47) : { duration: 0.3 }}
@@ -234,7 +234,7 @@ function PortfolioSlideContent({
               {project.project}
             </motion.h3>
             <motion.p
-              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-normal font-normal text-pretty break-keep max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)]"
+              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-normal font-normal tracking-[-0.015em] text-pretty break-keep max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)] max-md:tracking-normal"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.59) : { duration: 0.3 }}

@@ -170,7 +170,7 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
               <p className="text-text-on-dark text-[20px] leading-[1.3] font-normal tracking-[-0.04em]">
                 Phone Number
               </p>
-              <p className="text-title-on-dark mt-3 text-[20px] leading-none font-normal tracking-normal">
+              <p className="text-title-on-dark mt-3 text-[20px] leading-none font-normal tracking-[-0.015em]">
                 {INFO.phone}
               </p>
             </div>

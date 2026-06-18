@@ -751,7 +751,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                       />
                     </div>
                     <div className="ml-6">
-                      <p className="text-title-on-dark text-[20px] leading-normal font-medium whitespace-nowrap">
+                      <p className="text-title-on-dark text-[20px] leading-normal font-medium whitespace-nowrap tracking-[-0.015em]">
                         {n.title}
                       </p>
                       <p className="text-text-on-dark mt-1 text-[16px] leading-normal font-normal whitespace-nowrap">
