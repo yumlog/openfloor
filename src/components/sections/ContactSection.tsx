@@ -66,7 +66,7 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
           </motion.p>
           <motion.p
             {...rise(0.06)}
-            className="text-title-on-dark font-montserrat mt-5 text-[clamp(26px,7.5vw,38px)] leading-none font-bold tracking-normal"
+            className="text-title-on-dark font-montserrat mt-5 text-[clamp(26px,7.5vw,38px)] leading-none font-bold tracking-[-0.04em]"
           >
             {INFO.email}
           </motion.p>
@@ -153,7 +153,7 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
           </motion.p>
           <motion.p
             {...rise(0.06)}
-            className="text-title-on-dark font-montserrat mt-9 text-[44px] leading-none font-bold tracking-normal"
+            className="text-title-on-dark font-montserrat mt-9 text-[44px] leading-none font-bold tracking-[-0.04em]"
           >
             {INFO.email}
           </motion.p>
@@ -162,7 +162,7 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
               <p className="text-text-on-dark text-[20px] leading-[1.3] font-normal tracking-[-0.04em]">
                 Address
               </p>
-              <p className="text-title-on-dark mt-3 text-[20px] leading-none font-normal tracking-normal">
+              <p className="text-title-on-dark mt-3 text-[20px] leading-none font-normal tracking-[-0.015em]">
                 {INFO.address}
               </p>
             </div>

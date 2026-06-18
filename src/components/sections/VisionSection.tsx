@@ -311,7 +311,7 @@ export function VisionSection({ active }: VisionSectionProps) {
           '우리는 그 변화를 가장 깊이 만들어갑니다.',
         ]}
         baseDelay={0.1}
-        className="text-title-on-dark mt-4 text-[44px] leading-normal font-bold tracking-normal break-keep max-md:mt-3 max-md:text-[20px] max-md:leading-[1.35]"
+        className="text-title-on-dark mt-4 text-[44px] leading-normal font-bold tracking-[-0.02em] break-keep max-md:mt-3 max-md:text-[20px] max-md:tracking-[-0.015em] max-md:leading-[1.35]"
       />
     </div>
   )

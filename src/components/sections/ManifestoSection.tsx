@@ -149,14 +149,14 @@ function DrumLine({ rollPos, index, text, chromaRef }: DrumLineProps) {
     >
       <span className="relative inline-block whitespace-nowrap">
         {/* 깨끗한 글자 */}
-        <span className="text-title-on-dark text-[88px] leading-[1.4] font-bold tracking-normal">
+        <span className="text-title-on-dark text-[88px] leading-[1.4] font-bold tracking-[-0.02em]">
           {text}
         </span>
         {/* 호버 스팟에서만 드러나는 색수차 복제 레이어(정확히 겹침) */}
         <span
           ref={chromaRef}
           aria-hidden
-          className="manifesto-chroma text-title-on-dark text-[88px] leading-[1.4] font-bold tracking-normal"
+          className="manifesto-chroma text-title-on-dark text-[88px] leading-[1.4] font-bold tracking-[-0.02em]"
         >
           {text}
         </span>
@@ -336,7 +336,7 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
         {LINES.map((line, i) => (
           <span
             key={i}
-            className="block text-[88px] leading-[1.4] font-bold tracking-normal whitespace-nowrap"
+            className="block text-[88px] leading-[1.4] font-bold tracking-[-0.02em] whitespace-nowrap"
           >
             {line}
           </span>

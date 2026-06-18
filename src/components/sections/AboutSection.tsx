@@ -90,7 +90,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           as="h2"
           active={active}
           lines={HEADLINE_LINES}
-          className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-normal font-bold tracking-normal break-keep max-md:text-[20px]"
+          className="text-title-on-dark my-[clamp(12px,1.11vw,16px)] text-[clamp(26px,3.06vw,44px)] leading-normal font-bold tracking-[-0.02em] break-keep max-md:text-[20px] max-md:tracking-[-0.015em]"
         />
 
         <motion.p
@@ -162,7 +162,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
 
   return (
     <div className="flex flex-col items-start md:min-w-0 md:flex-1">
-      <span className="font-num text-title-on-dark text-[80px] leading-[1.2] font-bold tracking-normal tabular-nums max-md:text-[32px]">
+      <span className="font-num text-title-on-dark text-[80px] leading-[1.2] font-bold tracking-[-0.02em] tabular-nums max-md:text-[32px] max-md:tracking-[-0.015em]">
         <span ref={numRef}>0</span>
         {stat.suffix}
       </span>
@@ -180,7 +180,7 @@ function StatItem({ stat, active, index }: StatItemProps) {
         initial="hidden"
         animate={active ? 'show' : 'hidden'}
         transition={entryTransition(base + 0.12)}
-        className="text-text-on-dark mt-1 text-[16px] leading-[1.4] font-normal tracking-[-0.04em] max-md:text-[14px]"
+        className="text-text-on-dark mt-1 text-[16px] leading-[1.4] font-normal tracking-normal max-md:text-[14px]"
       >
         {stat.caption}
       </motion.span>

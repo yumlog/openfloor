@@ -51,7 +51,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
               as="h1"
               active={active}
               lines={HEADLINE_LINES}
-              className="text-title-on-dark text-[clamp(36px,4.17vw,60px)] leading-normal font-bold tracking-normal max-md:text-[clamp(26px,7vw,34px)]"
+              className="text-title-on-dark text-[clamp(36px,4.17vw,60px)] leading-normal font-bold tracking-[-0.02em] max-md:text-[clamp(26px,7vw,34px)] max-md:tracking-[-0.015em]"
             />
 
             <motion.div
