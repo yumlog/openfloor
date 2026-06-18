@@ -522,15 +522,15 @@ export function useSlideController({
         const floor = past ? 0 : dir * speed
         v += (floor - v) * Math.min(1, damp * dt)
         p += v * dt
-        if (dir > 0 && p >= 1) {
-          // 마지막 줄이 막 화면을 벗어남 → 즉시 다음 섹션(데드존 없음).
+        if (p >= 1) {
+          // 아래 경계(마지막 줄이 위로 사라짐) → 다음 섹션. 진입 방향과 무관.
           trap.progress.set(1)
           rollTargetRef.current = 1
           v = 0
           wheelLocked = true // 남은 관성이 다음 섹션까지 넘어가지 않게.
           goTo(currentRef.current + 1)
-        } else if (dir < 0 && p <= 0) {
-          // 첫 줄이 막 화면을 벗어남(아래) → 즉시 이전 섹션.
+        } else if (p <= 0) {
+          // 위 경계(첫 줄이 아래로 사라짐) → 이전 섹션. 정방향 진입 후 되돌아가기 포함.
           trap.progress.set(0)
           rollTargetRef.current = 0
           v = 0
