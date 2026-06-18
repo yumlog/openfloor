@@ -464,36 +464,42 @@ export function useSlideController({
       }
     }
 
-    // 유휴 자동 흐름: autoFlow 트랩에서 스크롤이 정착(progress≈rollTarget)하고 전환 중이
-    // 아닐 때, 진입 방향으로 progress와 rollTargetRef를 함께 천천히 전진시킨다. 둘을 같이
-    // 움직이므로 다음 스크롤이 되돌아가 점프하지 않고, progress가 곧 시각·이탈 기준이라
-    // 마지막 줄이 사라지는 순간이 이탈과 일치한다(데드존 없음). cap까지만 — 그 너머
-    // 이탈은 스크롤로만. 스크롤 중에는 스프링이 progress를 끌어 rollTarget과 벌어지므로
-    // 자동이 멈추고, 정착하면 그 자리에서 끊김 없이 이어받는다.
+    // 유휴 자동 흐름: autoFlow 트랩에서 progress가 "내가 마지막으로 쓴 값 그대로"일
+    // 때만(=스프링/스크롤/seat 등 외부가 progress를 전혀 안 건드린 완전 정착 상태) 진입
+    // 방향으로 progress와 rollTargetRef를 함께 천천히 전진시킨다. 스프링이 미세하게라도
+    // 움직이는 동안엔 끼어들지 않아 충돌(툭/점프)이 없다. progress가 곧 시각·이탈 기준이라
+    // 마지막 줄이 사라지는 순간이 이탈과 일치한다(데드존 없음). cap까지만, 이후 이탈은 스크롤.
     let autoRaf = 0
     let autoPrev = performance.now()
+    let autoLast = NaN // 자동이 마지막으로 쓴 progress 값 — 외부 변경 감지용.
     const autoLoop = (now: number) => {
       const dt = Math.min(0.05, (now - autoPrev) / 1000)
       autoPrev = now
       const trap = trapAt(currentRef.current)
-      if (
-        trap?.autoFlow &&
-        !animatingRef.current &&
-        Math.abs(trap.progress.get() - rollTargetRef.current) < 1e-4
-      ) {
-        const { speed, fwdCap, revCap } = trap.autoFlow
-        const dir = trapDirRef.current
-        const cur = rollTargetRef.current
-        const cap = dir > 0 ? fwdCap : revCap
-        const reached = dir > 0 ? cur >= cap : cur <= cap
-        if (!reached) {
-          const np =
-            dir > 0
-              ? Math.min(cap, cur + speed * dt)
-              : Math.max(cap, cur - speed * dt)
-          rollTargetRef.current = np
-          trap.progress.set(np)
+      if (trap?.autoFlow && !animatingRef.current) {
+        const p = trap.progress.get()
+        if (p === autoLast) {
+          // 완전 정착 — 이때만 전진.
+          const { speed, fwdCap, revCap } = trap.autoFlow
+          const dir = trapDirRef.current
+          const cap = dir > 0 ? fwdCap : revCap
+          const cur = rollTargetRef.current
+          const reached = dir > 0 ? cur >= cap : cur <= cap
+          if (!reached) {
+            const np =
+              dir > 0
+                ? Math.min(cap, cur + speed * dt)
+                : Math.max(cap, cur - speed * dt)
+            rollTargetRef.current = np
+            trap.progress.set(np)
+            autoLast = np
+          }
+        } else {
+          // 외부(스프링 진행/스크롤/seat)가 progress를 바꿈 → 보류하고 값만 추적.
+          autoLast = p
         }
+      } else {
+        autoLast = NaN
       }
       autoRaf = requestAnimationFrame(autoLoop)
     }
