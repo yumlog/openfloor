@@ -46,7 +46,7 @@ export default function App() {
         index: 2,
         steps: isMobile ? 3 : PHILOSOPHY_STEPS,
         progress: philosophyRoll,
-        sensitivity: isMobile ? 0.0009 : 0.0006,
+        sensitivity: isMobile ? 0.002 : 0.0006,
         reverseSeat: isMobile ? 1 : STACK_END,
       },
       {
