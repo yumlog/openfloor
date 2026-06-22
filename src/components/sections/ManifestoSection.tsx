@@ -77,19 +77,21 @@ const NATURAL_HALF_H =
 const NATURAL_H = 2 * NATURAL_HALF_H
 
 const LAST_INDEX = LINES.length - 1
-// 롤 범위(라인 스텝 단위). 입구/출구 리드(W_IN/W_OUT)를 라인 스텝으로 둔다.
-// 입구 리드 W_IN: 첫 줄이 중앙에 오기 전, 아래 페이드 가장자리에서 올라오며
-// 등장하는 양. FADE_LIMIT/STEP_ANG면 첫 줄이 화면 밖에서 페이드인하며 들어온다.
-// (주의: roll=0은 정방향 입구이자 역방향 출구라 한 지점이다. W_IN을 0으로 두면
-//  입구 페이드인은 사라지는 대신 역방향 이탈의 까만 꼬리가 없어진다 — 둘은
-//  같은 자리라 동시 불가. 여기선 입구 페이드인 등장을 택한다.)
+// 롤 범위(라인 스텝 단위). W_IN = 입구 리드: 진입 방향으로 "들어오는 줄"이 화면
+// 밖 페이드 가장자리에서 중앙까지 올라오며 등장하는 양. 진행 방향의 마지막 줄이
+// 중앙에 오는 순간 이탈하므로 출구 리드는 없다(0).
+// 드럼은 방향 대칭이다:
+//  정방향(vision→contact): line 0이 아래에서 페이드인 → … → line 8 중앙 → 이탈
+//  역방향(contact→vision): line 8이 위에서 페이드인 → … → line 0 중앙 → 이탈
 const W_IN = FADE_LIMIT / STEP_ANG
-// 출구 리드(라인 스텝): 마지막 줄이 중앙(roll=1)에 온 뒤, 추가로 더 굴려
-// 페이드아웃시키는 양. 0이면 마지막 줄이 중앙에 온 순간 바로 다음 섹션으로 넘어가
-// 까만 구간이 생기지 않는다(섹션이 마지막 줄을 보여준 채 슬라이드로 빠짐).
-const W_OUT = 0
-const START_OFFSET = -W_IN
-const TRAVEL = LAST_INDEX + W_IN + W_OUT
+const TRAVEL = LAST_INDEX + W_IN
+// 드럼 기준점(START_OFFSET)은 진입 방향에 따라 다르다 — roll=0 한 점은 정방향
+// 입구이자 역방향 출구라, 양방향 대칭은 한 상수로는 불가하기 때문(아래 rAF에서
+// dir로 선택해 startOffset에 세팅):
+//  정방향 — line 0을 아래 페이드 가장자리(-W_IN)에 두고 시작(roll=0에서 line 0 아래).
+//  역방향 — 출구(roll=0)에서 line 0이 정확히 중앙(0)에 오도록 둔다.
+const START_FWD = -W_IN
+const START_REV = 0
 
 // 드럼을 통과하는 제스처 수. 고정(동적 기하에 묶이지 않음)이라 섹션을 지나는 데
 // 필요한 스크롤 수가 뷰포트 크기에 따라 변하지 않는다. 클수록 = 제스처당 롤이
@@ -104,10 +106,10 @@ const SPOT = 90
 
 // 유휴(스크롤 멈춤) 자동 흐름 속도 — 초당 전진하는 progress 양. 작을수록 천천히.
 const AUTO_SPEED = 0.015
-// 정방향 자동 흐름이 멈추는 지점(= 마지막 줄이 정면). W_OUT=0이면 1.0.
-const AUTO_FWD_CAP = (LAST_INDEX + W_IN) / TRAVEL
-// 역방향 자동 흐름이 멈추는 지점(= 첫 줄이 정면).
-const AUTO_REV_CAP = W_IN / TRAVEL
+// 정방향 자동 흐름이 멈추는 지점 = line 8 중앙 = roll 1.0(= contact 이탈 경계).
+const AUTO_FWD_CAP = 1
+// 역방향 자동 흐름이 멈추는 지점 = line 0 중앙 = roll 0.0(= vision 이탈 경계).
+const AUTO_REV_CAP = 0
 // 스크롤이 잦아든 속도에서 자동 흐름 속도로 수렴하는 빠르기(초당 계수). 멈춤 구간
 // 없이 속도를 이어받아 부드럽게 전환한다. 클수록 빨리 자동 속도에 안착.
 const AUTO_EASE = 4
@@ -280,6 +282,8 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
   // 진입 직후도 유휴라 시작 줄이 스스로 떠오르며 콘텐츠를 암시한다. 컨트롤러의
   // 트랩/progress는 읽기만 하고 건드리지 않으므로 섹션 이탈 조건은 그대로다.
   const roll = useMotionValue(0)
+  // 드럼 기준점 — 진입 방향에 따라 정방향(-W_IN)/역방향(0)으로 세팅한다.
+  const startOffset = useMotionValue(START_FWD)
   useEffect(() => {
     if (!active) {
       roll.set(0)
@@ -291,6 +295,9 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
     const seat = progress.get()
     roll.set(seat)
     const dir = seat < 0.5 ? 1 : -1
+    // 방향 대칭: 정방향은 line 0이 아래에서 들어와 line 8 중앙에서 이탈,
+    // 역방향은 line 8이 위에서 들어와 line 0 중앙에서 이탈하도록 기준점을 고른다.
+    startOffset.set(dir > 0 ? START_FWD : START_REV)
     let raf = 0
     let lastP = seat
     let vel = 0 // 현재 roll 속도(progress/sec) — 스크롤↔자동 전환을 끊김 없이 잇는다.
@@ -322,11 +329,13 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
     }
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
-  }, [active, progress, roll])
+  }, [active, progress, roll, startOffset])
 
-  // 0..1 합성값 → 정면 줄 위치. 아래 페이드 가장자리(첫 줄이 막 올라오기 직전)에서
-  // 시작해 위 가장자리(마지막 줄이 막 사라짐)에서 끝난다.
-  const rollPos = useTransform(roll, (r) => r * TRAVEL + START_OFFSET)
+  // 0..1 합성값 → 정면 줄 위치(라인 스텝). 기준점은 진입 방향에 따라 다르다.
+  const rollPos = useTransform(
+    [roll, startOffset] as MotionValue<number>[],
+    ([r, so]: number[]) => r * TRAVEL + so,
+  )
 
   return (
     <section
