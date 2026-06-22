@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   Bot,
@@ -205,6 +205,11 @@ interface VisionSectionProps {
   active: boolean
 }
 
+// 마우스 기반 트리 "둥실 + 시차" 모션 파라미터.
+const FLOAT_AMP = 12 // 가만히도 떠다니는 진폭(px)
+const FLOAT_PAR = 10 // 마우스 시차 폭(px, 깊은 노드일수록 크게)
+const FLOAT_SPEED = 0.55 // 느긋함(작을수록 느림)
+
 export function VisionSection({ active }: VisionSectionProps) {
   const frame = useFrameSize()
   const isMobile = frame.w < 768
@@ -248,6 +253,25 @@ export function VisionSection({ active }: VisionSectionProps) {
     document.fonts?.ready.then(measure)
   }, [isMobile])
 
+  // 마우스 위치(정규화 -1..1) — 리렌더 없이 ref로 둔다.
+  const sectionRef = useRef<HTMLElement>(null)
+  const floatTarget = useRef({ x: 0, y: 0 })
+  const floatRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const edgeBaseRefs = useRef<Record<string, SVGPathElement | null>>({})
+  const edgeRedRefs = useRef<Record<string, SVGPathElement | null>>({})
+  const handleFloat = (e: ReactPointerEvent<HTMLElement>) => {
+    const el = sectionRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const c = (v: number) => Math.max(-1, Math.min(1, v))
+    floatTarget.current.x = c((e.clientX - (r.left + r.width / 2)) / (r.width / 2))
+    floatTarget.current.y = c((e.clientY - (r.top + r.height / 2)) / (r.height / 2))
+  }
+  const resetFloat = () => {
+    floatTarget.current.x = 0
+    floatTarget.current.y = 0
+  }
+
   // 세로(y)만 압축해 가용 높이에 맞춤 — 가로는 풀폭 유지(좌우 패딩 64px 고정)
   const vScale = Math.min(1, (H - 400) / TREE_H)
   const effY = (y: number) => y * vScale
@@ -275,18 +299,61 @@ export function VisionSection({ active }: VisionSectionProps) {
 
   const effX = (id: NodeId) => (RIGHT_IDS.includes(id) ? rightX : byId[id].x)
 
-  const edgePath = (sid: NodeId, tid: NodeId) => {
-    const s = byId[sid]
-    const t = byId[tid]
-    const GAP = 24
-    const x1 =
-      (MID_IDS.includes(sid) ? midExit : s.x - R + (widths[sid] ?? 220)) + GAP // 노드~선 간격
-    const y1 = effY(s.y)
-    const x2 = effX(tid) - R // 타겟 아이콘 좌측(붙임)
-    const y2 = effY(t.y)
-    const k = Math.max(40, (x2 - x1) * 0.5)
-    return `M ${x1} ${y1} C ${x1 + k} ${y1}, ${x2 - k} ${y2}, ${x2} ${y2}`
-  }
+  // 노드가 제자리에서 느리게 둥실 + 마우스 쪽으로 시차 이동, 연결선도 매 프레임 따라 휜다.
+  useEffect(() => {
+    if (isMobile || !active) return
+    const effYf = (y: number) => y * vScale
+    const effXf = (id: NodeId) =>
+      RIGHT_IDS.includes(id) ? rightX : byId[id].x
+    const ends = (sid: NodeId, tid: NodeId) => {
+      const s = byId[sid]
+      const GAP = 24
+      const x1 =
+        (MID_IDS.includes(sid) ? midExit : s.x - R + (widths[sid] ?? 220)) + GAP
+      return { x1, y1: effYf(s.y), x2: effXf(tid) - R, y2: effYf(byId[tid].y) }
+    }
+    const off: Record<string, { x: number; y: number }> = {}
+    const m = { x: 0, y: 0 }
+    let clock = 0
+    let last = performance.now()
+    let raf = 0
+    const loop = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000)
+      last = now
+      clock += dt * FLOAT_SPEED * 1.6
+      m.x += (floatTarget.current.x - m.x) * Math.min(1, dt * 4)
+      m.y += (floatTarget.current.y - m.y) * Math.min(1, dt * 4)
+      NODES.forEach((n, i) => {
+        const dep = (DEPTH[n.id] ?? 0) / 2
+        const px = m.x * FLOAT_PAR * (0.25 + dep)
+        const py = m.y * FLOAT_PAR * (0.25 + dep) * 0.7
+        const ax = Math.sin(clock * 0.8 + i * 0.9) * FLOAT_AMP
+        const ay = Math.cos(clock * 0.62 + i * 1.37) * FLOAT_AMP
+        const ox = px + ax
+        const oy = py + ay
+        off[n.id] = { x: ox, y: oy }
+        const el = floatRefs.current[n.id]
+        if (el) el.style.transform = `translate(${ox}px, ${oy}px)`
+      })
+      EDGES.forEach(([sid, tid]) => {
+        const e = ends(sid, tid)
+        const os = off[sid] ?? { x: 0, y: 0 }
+        const ot = off[tid] ?? { x: 0, y: 0 }
+        const X1 = e.x1 + os.x
+        const Y1 = e.y1 + os.y
+        const X2 = e.x2 + ot.x
+        const Y2 = e.y2 + ot.y
+        const k = Math.max(40, (X2 - X1) * 0.5)
+        const d = `M ${X1} ${Y1} C ${X1 + k} ${Y1}, ${X2 - k} ${Y2}, ${X2} ${Y2}`
+        const key = `${sid}-${tid}`
+        edgeBaseRefs.current[key]?.setAttribute('d', d)
+        edgeRedRefs.current[key]?.setAttribute('d', d)
+      })
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(raf)
+  }, [isMobile, active, widths, midExit, rightX, vScale])
 
   const rise = (d: number) => ({
     variants: RISE,
@@ -645,6 +712,9 @@ export function VisionSection({ active }: VisionSectionProps) {
   return (
     <section
       id={def.id}
+      ref={sectionRef}
+      onPointerMove={handleFloat}
+      onPointerLeave={resetFloat}
       className="relative flex h-dvh w-full items-center justify-center overflow-hidden"
     >
       <div
@@ -672,7 +742,9 @@ export function VisionSection({ active }: VisionSectionProps) {
                 {EDGES.map(([sid, tid], i) => (
                   <motion.path
                     key={`base-${sid}-${tid}`}
-                    d={edgePath(sid, tid)}
+                    ref={(el) => {
+                      edgeBaseRefs.current[`${sid}-${tid}`] = el
+                    }}
                     fill="none"
                     stroke="var(--color-line)"
                     strokeWidth={1.5}
@@ -692,7 +764,9 @@ export function VisionSection({ active }: VisionSectionProps) {
                   return (
                     <motion.path
                       key={`red-${sid}-${tid}`}
-                      d={edgePath(sid, tid)}
+                      ref={(el) => {
+                        edgeRedRefs.current[`${sid}-${tid}`] = el
+                      }}
                       fill="none"
                       stroke="var(--color-accent)"
                       strokeWidth={2}
@@ -718,27 +792,37 @@ export function VisionSection({ active }: VisionSectionProps) {
                 const delay =
                   (n.x < 100 ? 0 : n.x < 700 ? 0.45 : 0.95) + i * 0.03
                 return (
-                  <motion.div
+                  <div
                     key={n.id}
                     ref={(el) => {
-                      nodeRefs.current[n.id] = el
+                      floatRefs.current[n.id] = el
                     }}
-                    onMouseEnter={() => setHovered(n.id)}
-                    onMouseLeave={() => setHovered(null)}
-                    className="absolute flex cursor-default items-center"
-                    style={{ left: effX(n.id) - R, top: effY(n.y) - R }}
-                    initial={{ opacity: 0, scale: 0.92 }}
-                    animate={
-                      active
-                        ? { opacity: 1, scale: 1 }
-                        : { opacity: 0, scale: 0.92 }
-                    }
-                    transition={{
-                      duration: 0.5,
-                      ease: [0.22, 1, 0.36, 1],
-                      delay,
+                    className="absolute"
+                    style={{
+                      left: effX(n.id) - R,
+                      top: effY(n.y) - R,
+                      willChange: 'transform',
                     }}
                   >
+                    <motion.div
+                      ref={(el) => {
+                        nodeRefs.current[n.id] = el
+                      }}
+                      onMouseEnter={() => setHovered(n.id)}
+                      onMouseLeave={() => setHovered(null)}
+                      className="flex cursor-default items-center"
+                      initial={{ opacity: 0, scale: 0.92 }}
+                      animate={
+                        active
+                          ? { opacity: 1, scale: 1 }
+                          : { opacity: 0, scale: 0.92 }
+                      }
+                      transition={{
+                        duration: 0.5,
+                        ease: [0.22, 1, 0.36, 1],
+                        delay,
+                      }}
+                    >
                     <div
                       className={`flex size-14 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
                         hot
@@ -758,8 +842,9 @@ export function VisionSection({ active }: VisionSectionProps) {
                         {n.desc}
                       </p>
                     </div>
-                  </motion.div>
-                )
+                    </motion.div>
+                  </div>
+                  )
               })}
             </div>
           </div>
