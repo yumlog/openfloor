@@ -122,6 +122,9 @@ export function useSlideController({
   const trapDirRef = useRef(0)
   // 반환되는 goTo의 정체성이 바뀌지 않도록 하는 안정적인 핸들.
   const goToRef = useRef<(next: number) => void>(() => {})
+  // portfolio 첫 카드 자동 reveal(progress 0→REVEAL_END) 재생 중 여부 — 스크롤로
+  // 가로채(가속) 마무리할 수 있게 한다.
+  const revealingRef = useRef(false)
 
   // 페이지를 잠근다; 트랙 translate가 우리의 유일한 스크롤.
   useEffect(() => {
@@ -149,13 +152,16 @@ export function useSlideController({
     let reverseUnlockTimer: ReturnType<typeof setTimeout>
     // Portfolio reveal 자동 전진: 진입 후 REVEAL_HOLD 동안 통짜 텍스트(progress 0)로
     // 멈췄다가 split, 끝나면 목표 동기화 + unlock. seam(즉시)·점프 진입(착지 후) 공용.
+    let revealCtrl: ReturnType<typeof animate> | null = null
     const playPortfolioReveal = (trap: TrapOptions) => {
-      animate(trap.progress, REVEAL_END, {
+      revealingRef.current = true
+      revealCtrl = animate(trap.progress, REVEAL_END, {
         duration: REVEAL_DURATION,
         delay: REVEAL_HOLD,
         ease: TIME_EASE,
         onComplete: () => {
           rollTargetRef.current = REVEAL_END
+          revealingRef.current = false
           animatingRef.current = false
         },
       })
@@ -352,6 +358,16 @@ export function useSlideController({
       })
     }
 
+    // 자동 reveal(첫 카드 등장) 도중 스크롤이 들어오면 가로채 첫 카드까지 빠르게
+    // 마무리(스프링)하고 잠금을 푼다 — 이후 카드는 일반 스냅 스크롤로 이어진다.
+    const takeOverReveal = () => {
+      revealCtrl?.stop()
+      revealCtrl = null
+      revealingRef.current = false
+      animatingRef.current = false
+      rollTo(REVEAL_END)
+    }
+
     if (!enabled) return
 
     // 휠: delta를 누적, 임계를 넘으면 한 번 발사, 버스트 사이에 리셋.
@@ -378,6 +394,13 @@ export function useSlideController({
     }
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
+
+      // 자동 reveal 재생 중: 정방향 휠은 가로채 첫 카드까지 빠르게 마무리. 그동안
+      // 다른 입력은 무시(잠금 유지).
+      if (revealingRef.current) {
+        if (e.deltaY > 0) takeOverReveal()
+        return
+      }
 
       // 가둔 슬라이드: 드럼을 관성으로 비례 롤. 끝에 핀 채로 계속 밀 때만
       // 누적 버스트가 밖으로 advance.
@@ -491,6 +514,11 @@ export function useSlideController({
       const y = e.touches[0].clientY
       const dy = touchPrevY - y
       touchPrevY = y
+      // 자동 reveal 재생 중: 정방향 드래그는 가로채 첫 카드까지 빠르게 마무리.
+      if (revealingRef.current) {
+        if (dy > 0) takeOverReveal()
+        return
+      }
       if (inTrap()) {
         const af = trapAt(currentRef.current)?.autoFlow
         if (af) {
@@ -643,6 +671,7 @@ export function useSlideController({
       clearTimeout(wheelResetTimer)
       clearTimeout(reverseUnlockTimer)
       cancelAnimationFrame(autoRaf)
+      revealCtrl?.stop()
       unsubPort?.()
     }
   }, [enabled, total, slide, traps, isMobile])
