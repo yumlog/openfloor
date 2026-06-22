@@ -206,7 +206,7 @@ interface VisionSectionProps {
 }
 
 // 마우스 기반 트리 "둥실 + 시차" 모션 파라미터.
-const FLOAT_AMP = 12 // 가만히도 떠다니는 진폭(px)
+const FLOAT_AMP = 6 // 가만히도 떠다니는 진폭(px)
 const FLOAT_PAR = 10 // 마우스 시차 폭(px, 깊은 노드일수록 크게)
 const FLOAT_SPEED = 0.55 // 느긋함(작을수록 느림)
 
