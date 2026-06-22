@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, useTransform, easeOut, type MotionValue } from 'motion/react'
+import {
+  motion,
+  useTransform,
+  easeOut,
+  cubicBezier,
+  type MotionValue,
+} from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
-import { DESIGN_WIDTH } from '@/config/slides'
+import { DESIGN_WIDTH, SLIDE_EASE } from '@/config/slides'
 import { PORTFOLIO_PROJECTS, type PortfolioProject } from './portfolio/projects'
 
 /* ---------------------------------------------------------------------------
@@ -344,7 +350,11 @@ function PortfolioRiseSlide({
   z: number
   progress: MotionValue<number>
 }) {
-  const y = useTransform(progress, band, ['100%', '0%'], { clamp: true })
+  // 섹션 전환과 같은 이징(SLIDE_EASE)으로 각 카드가 부드럽게 올라온다(선형 → ease-in-out).
+  const y = useTransform(progress, band, ['100%', '0%'], {
+    clamp: true,
+    ease: cubicBezier(...SLIDE_EASE),
+  })
   // 이 프로젝트가 거의 다 올라온 시점에 텍스트 순차 등장(첫 슬라이드와 동일).
   // 역방향으로 내려가면 다시 false가 되어 텍스트가 먼저 사라진다.
   const [revealed, setRevealed] = useState(false)
