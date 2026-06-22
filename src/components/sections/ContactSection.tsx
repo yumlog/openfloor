@@ -20,9 +20,10 @@ const INFO = {
   phone: '010-8718-5785',
 }
 const MENUS = ['Company Profile', 'Portfolio']
-/** 하단 메뉴 → 이동할 슬라이드 인덱스(헤더 내비처럼 goTo로 스냅). */
+/** Company Profile 클릭 시 다운로드할 PDF(public/ → 루트 경로). */
+const PROFILE_PDF = '/pdfs/openfloor.pdf'
+/** 하단 메뉴 → 이동할 슬라이드 인덱스(Company Profile은 이동 대신 PDF 다운로드). */
 const MENU_INDEX: Record<string, number> = {
-  'Company Profile': SLIDES.findIndex((s) => s.id === 'about'),
   Portfolio: SLIDES.findIndex((s) => s.id === 'portfolio'),
 }
 
@@ -32,6 +33,19 @@ interface ContactSectionProps {
 }
 
 export function ContactSection({ active, goTo }: ContactSectionProps) {
+  // Company Profile → PDF 다운로드, 그 외 → 슬라이드 이동.
+  const handleMenu = (m: string) => {
+    if (m === 'Company Profile') {
+      const a = document.createElement('a')
+      a.href = PROFILE_PDF
+      a.download = 'openfloor.pdf'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      return
+    }
+    goTo(MENU_INDEX[m])
+  }
   const frame = useFrameSize()
   const isMobile = frame.w < 768
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
@@ -120,7 +134,7 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
               {MENUS.map((m) => (
                 <span
                   key={m}
-                  onClick={() => goTo(MENU_INDEX[m])}
+                  onClick={() => handleMenu(m)}
                   className="text-title-on-dark hover:text-accent decoration-accent cursor-pointer text-[clamp(20px,5.5vw,26px)] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap underline-offset-[5px] transition-colors hover:underline hover:decoration-2"
                 >
                   {m}
@@ -219,7 +233,7 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
           {MENUS.map((m) => (
             <span
               key={m}
-              onClick={() => goTo(MENU_INDEX[m])}
+              onClick={() => handleMenu(m)}
               className="text-title-on-dark hover:text-accent decoration-accent cursor-pointer text-[32px] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap underline-offset-[6px] transition-colors hover:underline hover:decoration-[3px]"
             >
               {m}
