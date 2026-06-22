@@ -356,6 +356,9 @@ export function useSlideController({
 
     // 휠: delta를 누적, 임계를 넘으면 한 번 발사, 버스트 사이에 리셋.
     let wheelAccum = 0
+    // 스냅 트랩(portfolio) 전용: 휠/터치 입력을 progress 단위로 누적했다가 노치(카드)
+    // 단위로 커밋한다 — 천천히=한 장씩, 많이/세게=여러 장 한 번에 글라이드.
+    let snapAccum = 0
     // 가둔 동안 "끝을 넘어 미는" 용도의 별도 누산기 — 롤과 섹션 advance가 상태를
     // 공유하지 않게.
     let rollEdgeAccum = 0
@@ -370,6 +373,7 @@ export function useSlideController({
     const resetWheel = () => {
       wheelAccum = 0
       rollEdgeAccum = 0
+      snapAccum = 0
       wheelLocked = false
     }
     const onWheel = (e: WheelEvent) => {
@@ -416,6 +420,45 @@ export function useSlideController({
         return
       }
 
+      // 스냅 트랩(portfolio): 노치(카드) 단위로 양자화하되 누적이 클수록 목표가 여러
+      // 노치 전진 → 천천히=한 장씩 안착, 많이/세게=여러 장 모멘텀 글라이드. 끝에 핀 채
+      // 계속 밀면 섹션 밖으로 advance.
+      if (inTrap() && trapAt(currentRef.current)?.snap) {
+        const trap = trapAt(currentRef.current)!
+        const sz = 1 / trap.steps
+        const sens = trap.sensitivity ?? ROLL_SENSITIVITY
+        clearTimeout(wheelResetTimer)
+        wheelResetTimer = setTimeout(resetWheel, WHEEL_RESET_MS)
+        const t = rollTargetRef.current
+        const atEnd =
+          (e.deltaY > 0 && t >= 1 - ROLL_EPS) || (e.deltaY < 0 && t <= ROLL_EPS)
+        if (atEnd) {
+          rollEdgeAccum += e.deltaY
+          if (rollEdgeAccum > WHEEL_THRESHOLD) {
+            rollEdgeAccum = 0
+            wheelLocked = true
+            step(1)
+          } else if (rollEdgeAccum < -WHEEL_THRESHOLD) {
+            rollEdgeAccum = 0
+            wheelLocked = true
+            step(-1)
+          }
+          return
+        }
+        snapAccum += e.deltaY * sens
+        let moved = 0
+        while (snapAccum >= sz) {
+          snapAccum -= sz
+          moved++
+        }
+        while (snapAccum <= -sz) {
+          snapAccum += sz
+          moved--
+        }
+        if (moved !== 0) rollTo(clamp(t + moved * sz, 0, 1))
+        return
+      }
+
       // 매 이벤트마다 quiet 타이머 갱신(잠겨 있어도) — 잠금은 휠이 실제로
       // WHEEL_RESET_MS 동안 멎어야만 해제된다.
       clearTimeout(wheelResetTimer)
@@ -441,6 +484,7 @@ export function useSlideController({
     const onTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0].clientY
       touchPrevY = touchStartY
+      snapAccum = 0
     }
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault()
@@ -453,7 +497,28 @@ export function useSlideController({
           v = clamp(v + dy * af.impulse, -af.vMax, af.vMax)
           return
         }
-        if (trapAt(currentRef.current)?.snap) return // ← 스냅은 end에서 판정
+        if (trapAt(currentRef.current)?.snap) {
+          // 스냅: 노치 단위 양자화 + 모멘텀(휠과 동일). 끝이면 onTouchEnd에서 advance.
+          const trap = trapAt(currentRef.current)!
+          const sz = 1 / trap.steps
+          const sens = trap.sensitivity ?? ROLL_SENSITIVITY
+          const t = rollTargetRef.current
+          const atEnd =
+            (dy > 0 && t >= 1 - ROLL_EPS) || (dy < 0 && t <= ROLL_EPS)
+          if (atEnd) return
+          snapAccum += dy * sens
+          let moved = 0
+          while (snapAccum >= sz) {
+            snapAccum -= sz
+            moved++
+          }
+          while (snapAccum <= -sz) {
+            snapAccum += sz
+            moved--
+          }
+          if (moved !== 0) rollTo(clamp(t + moved * sz, 0, 1))
+          return
+        }
         // 확대 커밋 후 정방향 터치는 무시(조기 portfolio advance 방지).
         if (philoGrowCommitted() && dy > 0) return
         const sens = trapAt(currentRef.current)?.sensitivity ?? ROLL_SENSITIVITY
@@ -471,8 +536,11 @@ export function useSlideController({
         // autoFlow는 경계 이탈을 자동 루프가 처리하므로 여기선 아무것도 안 한다.
         if (trapAt(currentRef.current)?.autoFlow) return
         if (trapAt(currentRef.current)?.snap) {
-          if (delta > TOUCH_THRESHOLD) step(1)
-          else if (delta < -TOUCH_THRESHOLD) step(-1)
+          // 노치는 move에서 이미 커밋됨 — end에선 끝에 핀 채의 결정적 스와이프만 섹션 밖으로.
+          const t = rollTargetRef.current
+          if (delta > TOUCH_THRESHOLD && t >= 1 - ROLL_EPS) step(1)
+          else if (delta < -TOUCH_THRESHOLD && t <= ROLL_EPS) step(-1)
+          snapAccum = 0
           return
         }
         const t = rollTargetRef.current
