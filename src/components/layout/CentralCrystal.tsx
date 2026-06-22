@@ -1,4 +1,4 @@
-import { Fragment, memo, Suspense, useEffect, useMemo, useRef } from 'react'
+import { Fragment, memo, Suspense, useMemo, useRef } from 'react'
 import { motion, type MotionValue } from 'motion/react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import {
@@ -35,26 +35,15 @@ const fresnelFragment = `
     gl_FragColor=vec4(uColor*f*uIntensity,f); }`
 
 const MAX_TILT = 0.22 // 최대 기울기(rad ≈ 12.6°). "살짝".
-const TILT_SMOOTH = 4 // 커서를 따라오는 부드러움(클수록 빠르게 붙음).
+const TILT_SMOOTH = 4 // 목표 기울기로 붙는 부드러움(마운트 시 0→궤도 진입을 매끄럽게).
+const ORBIT_PERIOD = 11 // 가상 커서가 한 바퀴 도는 데 걸리는 시간(초). 작을수록 빠름.
 
 function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
   const { scene } = useGLTF('/models/crystal.glb')
   // 외곽 그룹: 부유(y) + 정규화 스케일.
   const groupRef = useRef<THREE.Group>(null)
-  // 내부 그룹: 커서 방향 틸트(X·Y, 원점 정렬된 지오메트리를 중심으로 기운다).
+  // 내부 그룹: 자동 궤도 틸트(X·Y, 원점 정렬된 지오메트리를 중심으로 기운다).
   const spinRef = useRef<THREE.Group>(null)
-
-  // 정규화 커서(-1..1, 뷰포트 중심 기준). 캔버스가 pointer-events-none이라
-  // R3F state.pointer 대신 window에서 직접 추적한다.
-  const pointerRef = useRef({ x: 0, y: 0 })
-  useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      pointerRef.current.x = (e.clientX / window.innerWidth) * 2 - 1
-      pointerRef.current.y = (e.clientY / window.innerHeight) * 2 - 1
-    }
-    window.addEventListener('pointermove', onMove)
-    return () => window.removeEventListener('pointermove', onMove)
-  }, [])
 
   // 멀티 메시 대응: scene을 순회해 모든 mesh geometry를 모은다.
   const geometries = useMemo(() => {
@@ -136,16 +125,20 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
     []
   )
 
-  // 자동 회전 제거 → 부유(y) + 커서 방향 살짝 틸트(X·Y).
+  // 자동 회전 제거 → 부유(y) + 자동 궤도 틸트(X·Y).
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime
     if (groupRef.current) {
       groupRef.current.position.y = Math.sin(t * 0.5) * 0.12 // 부유 유지
     }
     if (spinRef.current) {
-      const p = pointerRef.current
-      const targetY = p.x * MAX_TILT
-      const targetX = -p.y * MAX_TILT // 커서 상하 → X축 틸트(반전이면 부호 제거)
+      // 마우스 대신: 가상 커서가 오브젝트를 중심으로 원을 그리는 궤도를 자동 재생.
+      // 6시(아래)에서 시작해 시계방향. 단위원을 기존 마우스 매핑에 그대로 흘려보낸다.
+      const angle = (t / ORBIT_PERIOD) * Math.PI * 2
+      const px = Math.sin(angle)
+      const py = Math.cos(angle)
+      const targetY = px * MAX_TILT
+      const targetX = -py * MAX_TILT
       const k = 1 - Math.exp(-TILT_SMOOTH * delta) // 프레임레이트 독립 댐핑
       spinRef.current.rotation.y = THREE.MathUtils.lerp(
         spinRef.current.rotation.y,
@@ -329,7 +322,7 @@ export function CentralCrystal({
             className="h-full w-full"
             resize={{ offsetSize: true }}
             gl={{ alpha: true, antialias: true }}
-            camera={{ position: [0, 0, 6], fov: 35 }}
+            camera={{ position: [0, 0, 12], fov: 18 }}
             dpr={[1, 1]}
             frameloop={visible ? 'always' : 'never'}
             onCreated={({ gl }) => {
