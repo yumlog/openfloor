@@ -62,7 +62,7 @@ export default function App() {
         progress: rollProgress,
         sensitivity: 0.0008,
         autoFlow: {
-          speed: 0.018,
+          speed: 0.05,
           fwdCap: 1.0,
           revCap: 0.0,
           damp: 4,
