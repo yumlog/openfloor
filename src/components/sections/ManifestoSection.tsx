@@ -81,7 +81,11 @@ const LAST_INDEX = LINES.length - 1
 // 1은 마지막 줄을 위 가장자리에 seat 한다. W는 그 가장자리를 라인 스텝으로 표현.
 const W = FADE_LIMIT / STEP_ANG
 const START_OFFSET = -W
-const TRAVEL = LAST_INDEX + 2 * W
+// 출구 리드(라인 스텝): 마지막 줄이 중앙(roll=1)에 온 뒤, 추가로 더 굴려
+// 페이드아웃시키는 양. 0이면 마지막 줄이 중앙에 온 순간 바로 다음 섹션으로 넘어가
+// 까만 구간이 생기지 않는다(섹션이 마지막 줄을 보여준 채 슬라이드로 빠짐).
+const W_OUT = 0
+const TRAVEL = LAST_INDEX + W + W_OUT
 
 // 드럼을 통과하는 제스처 수. 고정(동적 기하에 묶이지 않음)이라 섹션을 지나는 데
 // 필요한 스크롤 수가 뷰포트 크기에 따라 변하지 않는다. 클수록 = 제스처당 롤이
@@ -96,10 +100,10 @@ const SPOT = 90
 
 // 유휴(스크롤 멈춤) 자동 흐름 속도 — 초당 전진하는 progress 양. 작을수록 천천히.
 const AUTO_SPEED = 0.015
-// 정방향 자동 흐름이 멈추는 지점(≈ 마지막 줄이 정면). 이후 이탈은 스크롤로만.
-const AUTO_FWD_CAP = 0.83
+// 정방향 자동 흐름이 멈추는 지점(= 마지막 줄이 정면). W_OUT=0이면 1.0.
+const AUTO_FWD_CAP = (LAST_INDEX + W) / TRAVEL
 // 역방향 자동 흐름이 멈추는 지점(≈ 첫 줄이 정면).
-const AUTO_REV_CAP = 0.17
+const AUTO_REV_CAP = W / TRAVEL
 // 스크롤이 잦아든 속도에서 자동 흐름 속도로 수렴하는 빠르기(초당 계수). 멈춤 구간
 // 없이 속도를 이어받아 부드럽게 전환한다. 클수록 빨리 자동 속도에 안착.
 const AUTO_EASE = 4
