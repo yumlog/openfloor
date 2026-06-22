@@ -122,9 +122,6 @@ export function useSlideController({
   const trapDirRef = useRef(0)
   // 반환되는 goTo의 정체성이 바뀌지 않도록 하는 안정적인 핸들.
   const goToRef = useRef<(next: number) => void>(() => {})
-  // portfolio 첫 카드 자동 reveal(progress 0→REVEAL_END) 재생 중 여부 — 스크롤로
-  // 가로채(가속) 마무리할 수 있게 한다.
-  const revealingRef = useRef(false)
 
   // 페이지를 잠근다; 트랙 translate가 우리의 유일한 스크롤.
   useEffect(() => {
@@ -152,16 +149,13 @@ export function useSlideController({
     let reverseUnlockTimer: ReturnType<typeof setTimeout>
     // Portfolio reveal 자동 전진: 진입 후 REVEAL_HOLD 동안 통짜 텍스트(progress 0)로
     // 멈췄다가 split, 끝나면 목표 동기화 + unlock. seam(즉시)·점프 진입(착지 후) 공용.
-    let revealCtrl: ReturnType<typeof animate> | null = null
     const playPortfolioReveal = (trap: TrapOptions) => {
-      revealingRef.current = true
-      revealCtrl = animate(trap.progress, REVEAL_END, {
+      animate(trap.progress, REVEAL_END, {
         duration: REVEAL_DURATION,
         delay: REVEAL_HOLD,
         ease: TIME_EASE,
         onComplete: () => {
           rollTargetRef.current = REVEAL_END
-          revealingRef.current = false
           animatingRef.current = false
         },
       })
@@ -358,23 +352,10 @@ export function useSlideController({
       })
     }
 
-    // 자동 reveal(첫 카드 등장) 도중 스크롤이 들어오면 가로채 첫 카드까지 빠르게
-    // 마무리(스프링)하고 잠금을 푼다 — 이후 카드는 일반 스냅 스크롤로 이어진다.
-    const takeOverReveal = () => {
-      revealCtrl?.stop()
-      revealCtrl = null
-      revealingRef.current = false
-      animatingRef.current = false
-      rollTo(REVEAL_END)
-    }
-
     if (!enabled) return
 
     // 휠: delta를 누적, 임계를 넘으면 한 번 발사, 버스트 사이에 리셋.
     let wheelAccum = 0
-    // 스냅 트랩(portfolio) 전용: 휠/터치 입력을 progress 단위로 누적했다가 노치(카드)
-    // 단위로 커밋한다 — 천천히=한 장씩, 많이/세게=여러 장 한 번에 글라이드.
-    let snapAccum = 0
     // 가둔 동안 "끝을 넘어 미는" 용도의 별도 누산기 — 롤과 섹션 advance가 상태를
     // 공유하지 않게.
     let rollEdgeAccum = 0
@@ -389,18 +370,10 @@ export function useSlideController({
     const resetWheel = () => {
       wheelAccum = 0
       rollEdgeAccum = 0
-      snapAccum = 0
       wheelLocked = false
     }
     const onWheel = (e: WheelEvent) => {
       e.preventDefault()
-
-      // 자동 reveal 재생 중: 정방향 휠은 가로채 첫 카드까지 빠르게 마무리. 그동안
-      // 다른 입력은 무시(잠금 유지).
-      if (revealingRef.current) {
-        if (e.deltaY > 0) takeOverReveal()
-        return
-      }
 
       // 가둔 슬라이드: 드럼을 관성으로 비례 롤. 끝에 핀 채로 계속 밀 때만
       // 누적 버스트가 밖으로 advance.
@@ -443,45 +416,6 @@ export function useSlideController({
         return
       }
 
-      // 스냅 트랩(portfolio): 노치(카드) 단위로 양자화하되 누적이 클수록 목표가 여러
-      // 노치 전진 → 천천히=한 장씩 안착, 많이/세게=여러 장 모멘텀 글라이드. 끝에 핀 채
-      // 계속 밀면 섹션 밖으로 advance.
-      if (inTrap() && trapAt(currentRef.current)?.snap) {
-        const trap = trapAt(currentRef.current)!
-        const sz = 1 / trap.steps
-        const sens = trap.sensitivity ?? ROLL_SENSITIVITY
-        clearTimeout(wheelResetTimer)
-        wheelResetTimer = setTimeout(resetWheel, WHEEL_RESET_MS)
-        const t = rollTargetRef.current
-        const atEnd =
-          (e.deltaY > 0 && t >= 1 - ROLL_EPS) || (e.deltaY < 0 && t <= ROLL_EPS)
-        if (atEnd) {
-          rollEdgeAccum += e.deltaY
-          if (rollEdgeAccum > WHEEL_THRESHOLD) {
-            rollEdgeAccum = 0
-            wheelLocked = true
-            step(1)
-          } else if (rollEdgeAccum < -WHEEL_THRESHOLD) {
-            rollEdgeAccum = 0
-            wheelLocked = true
-            step(-1)
-          }
-          return
-        }
-        snapAccum += e.deltaY * sens
-        let moved = 0
-        while (snapAccum >= sz) {
-          snapAccum -= sz
-          moved++
-        }
-        while (snapAccum <= -sz) {
-          snapAccum += sz
-          moved--
-        }
-        if (moved !== 0) rollTo(clamp(t + moved * sz, 0, 1))
-        return
-      }
-
       // 매 이벤트마다 quiet 타이머 갱신(잠겨 있어도) — 잠금은 휠이 실제로
       // WHEEL_RESET_MS 동안 멎어야만 해제된다.
       clearTimeout(wheelResetTimer)
@@ -507,46 +441,19 @@ export function useSlideController({
     const onTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0].clientY
       touchPrevY = touchStartY
-      snapAccum = 0
     }
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault()
       const y = e.touches[0].clientY
       const dy = touchPrevY - y
       touchPrevY = y
-      // 자동 reveal 재생 중: 정방향 드래그는 가로채 첫 카드까지 빠르게 마무리.
-      if (revealingRef.current) {
-        if (dy > 0) takeOverReveal()
-        return
-      }
       if (inTrap()) {
         const af = trapAt(currentRef.current)?.autoFlow
         if (af) {
           v = clamp(v + dy * af.impulse, -af.vMax, af.vMax)
           return
         }
-        if (trapAt(currentRef.current)?.snap) {
-          // 스냅: 노치 단위 양자화 + 모멘텀(휠과 동일). 끝이면 onTouchEnd에서 advance.
-          const trap = trapAt(currentRef.current)!
-          const sz = 1 / trap.steps
-          const sens = trap.sensitivity ?? ROLL_SENSITIVITY
-          const t = rollTargetRef.current
-          const atEnd =
-            (dy > 0 && t >= 1 - ROLL_EPS) || (dy < 0 && t <= ROLL_EPS)
-          if (atEnd) return
-          snapAccum += dy * sens
-          let moved = 0
-          while (snapAccum >= sz) {
-            snapAccum -= sz
-            moved++
-          }
-          while (snapAccum <= -sz) {
-            snapAccum += sz
-            moved--
-          }
-          if (moved !== 0) rollTo(clamp(t + moved * sz, 0, 1))
-          return
-        }
+        if (trapAt(currentRef.current)?.snap) return // ← 스냅은 end에서 판정
         // 확대 커밋 후 정방향 터치는 무시(조기 portfolio advance 방지).
         if (philoGrowCommitted() && dy > 0) return
         const sens = trapAt(currentRef.current)?.sensitivity ?? ROLL_SENSITIVITY
@@ -564,11 +471,8 @@ export function useSlideController({
         // autoFlow는 경계 이탈을 자동 루프가 처리하므로 여기선 아무것도 안 한다.
         if (trapAt(currentRef.current)?.autoFlow) return
         if (trapAt(currentRef.current)?.snap) {
-          // 노치는 move에서 이미 커밋됨 — end에선 끝에 핀 채의 결정적 스와이프만 섹션 밖으로.
-          const t = rollTargetRef.current
-          if (delta > TOUCH_THRESHOLD && t >= 1 - ROLL_EPS) step(1)
-          else if (delta < -TOUCH_THRESHOLD && t <= ROLL_EPS) step(-1)
-          snapAccum = 0
+          if (delta > TOUCH_THRESHOLD) step(1)
+          else if (delta < -TOUCH_THRESHOLD) step(-1)
           return
         }
         const t = rollTargetRef.current
@@ -671,7 +575,6 @@ export function useSlideController({
       clearTimeout(wheelResetTimer)
       clearTimeout(reverseUnlockTimer)
       cancelAnimationFrame(autoRaf)
-      revealCtrl?.stop()
       unsubPort?.()
     }
   }, [enabled, total, slide, traps, isMobile])

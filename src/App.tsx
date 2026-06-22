@@ -53,7 +53,7 @@ export default function App() {
         index: 3,
         steps: PORTFOLIO_STEPS,
         progress: portfolioRoll,
-        sensitivity: isMobile ? 0.0018 : 0.0012,
+        sensitivity: 0.0004,
         snap: true,
       },
       {
