@@ -129,7 +129,7 @@ function CrystalModel({ lowSpec }: { lowSpec: boolean }) {
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime
     if (groupRef.current) {
-      groupRef.current.position.y = Math.sin(t * 0.5) * 0.12 // 부유 유지
+      groupRef.current.position.y = Math.sin(t * 0.8) * 0.12 // 부유 유지
     }
     if (spinRef.current) {
       // 마우스 대신: 가상 커서가 오브젝트를 중심으로 원을 그리는 궤도를 자동 재생.
