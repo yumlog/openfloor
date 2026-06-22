@@ -34,7 +34,7 @@ const fresnelFragment = `
   void main(){ float f=pow(1.0-clamp(dot(normalize(vNormal),normalize(vView)),0.0,1.0),uPower);
     gl_FragColor=vec4(uColor*f*uIntensity,f); }`
 
-const MAX_TILT = 0.22 // 최대 기울기(rad ≈ 12.6°). "살짝".
+const MAX_TILT = 0.35 // 최대 기울기(rad ≈ 20°).
 const TILT_SMOOTH = 4 // 목표 기울기로 붙는 부드러움(마운트 시 0→궤도 진입을 매끄럽게).
 const ORBIT_PERIOD = 11 // 가상 커서가 한 바퀴 도는 데 걸리는 시간(초). 작을수록 빠름.
 
