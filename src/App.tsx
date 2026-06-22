@@ -135,7 +135,7 @@ export default function App() {
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
         <AboutSection active={index === 1} />
         <PhilosophySection
-          active={index === 2}
+          active={index === 2 && (target === 2 || source === 2)}
           progress={philosophyRoll}
           slide={slide}
           goTo={goTo}
