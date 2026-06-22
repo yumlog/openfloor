@@ -25,6 +25,8 @@ export interface SlideController {
   source: number
   /** 현재(마지막) 이동의 도착 섹션 인덱스. 포털 게이팅용. */
   target: number
+  /** 위로 스킵 점프 시 트랙 크로스페이드 불투명도(1=평소). */
+  transitionFade: MotionValue<number>
 }
 
 interface TrapOptions {
@@ -77,6 +79,12 @@ const clamp = (v: number, min: number, max: number) =>
 const PHILO_IDX = SLIDES.findIndex((sl) => sl.id === 'philosophy')
 const PORT_IDX = SLIDES.findIndex((sl) => sl.id === 'portfolio')
 const SEAM_DURATION = 0.4
+// 위로 portfolio(및 중간 섹션)를 가로지르는 점프: 트랙을 크로스페이드로 가리고
+// 안 보이는 동안 slide를 목표로 텔레포트한 뒤, 목표가 살짝 슬라이드되며 들어온다.
+const SKIP_FADE_OUT = 0.2 // 트랙 페이드아웃(초)
+const SKIP_FADE_IN = 0.3 // 트랙 페이드인(초)
+const SKIP_ENTER = 0.22 // 목표 바로 아래에서 슬라이드 인 거리(slot) — 스크롤 모션감
+const SKIP_ENTER_DUR = 0.34 // 슬라이드 인 시간(초)
 
 /* 제스처 임계값. */
 const WHEEL_THRESHOLD = 40
@@ -104,6 +112,8 @@ export function useSlideController({
   isMobile = false,
 }: Options): SlideController {
   const slide = useMotionValue(0)
+  // 위로 스킵 점프 시 트랙을 크로스페이드(1→0→1)로 가리는 불투명도.
+  const transitionFade = useMotionValue(1)
   const [index, setIndex] = useState(0)
   // 현재 이동의 출발/도착 섹션 — 포트폴리오 포털을 '포트폴리오가 끝점인 이동'에만
   // 켜기 위해 reactive하게 노출(통과 깜빡임 제거).
@@ -206,6 +216,28 @@ export function useSlideController({
       // 진입 — 착지 후 reveal을 자동재생해 통짜 텍스트에 멈춰 있지 않게 한다.
       const isPortJumpEntry =
         next === PORT_IDX && next > from && from !== PHILO_IDX
+      // 위로 portfolio를 가로지르는 점프(vision~contact → hero~philosophy): 중간(특히
+      // portfolio)을 보여주지 않도록 트랙을 크로스페이드로 가리고 slide를 텔레포트한다.
+      // 나머지 모든 전환은 기존 연속 슬라이드 그대로.
+      const skipUp = from > PORT_IDX && next < PORT_IDX
+      if (skipUp) {
+        animate(transitionFade, 0, {
+          duration: SKIP_FADE_OUT,
+          ease: 'easeIn',
+          onComplete: () => {
+            slide.set(next + SKIP_ENTER) // 안 보이는 동안 목표 바로 아래로 텔레포트
+            animate(slide, next, { duration: SKIP_ENTER_DUR, ease: SLIDE_EASE })
+            animate(transitionFade, 1, {
+              duration: SKIP_FADE_IN,
+              ease: 'easeOut',
+              onComplete: () => {
+                animatingRef.current = false
+              },
+            })
+          },
+        })
+        return
+      }
       animate(slide, next, {
         duration: isSeam ? SEAM_DURATION : SLIDE_DURATION,
         ease: SLIDE_EASE,
@@ -313,7 +345,13 @@ export function useSlideController({
       }
 
       if (animatingRef.current) return
-      goTo(currentRef.current + dir)
+      // 위로 한 칸: vision(포트폴리오 바로 아래)에서 위로 가면 portfolio를 건너뛰고
+      // philosophy로 — "올라갈 때 portfolio 스킵". 그 외는 인접 한 칸 이동.
+      const stepTarget =
+        dir < 0 && currentRef.current === PORT_IDX + 1
+          ? PORT_IDX - 1
+          : currentRef.current + dir
+      goTo(stepTarget)
     }
 
     // 가둔 슬라이드에 머무는 중이고, 섹션 스냅 중이 아닌가?
@@ -575,5 +613,5 @@ export function useSlideController({
 
   const goTo = useCallback((next: number) => goToRef.current(next), [])
 
-  return { slide, index, goTo, source, target }
+  return { slide, index, goTo, source, target, transitionFade }
 }

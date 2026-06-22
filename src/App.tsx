@@ -73,11 +73,12 @@ export default function App() {
     ],
     [isMobile, philosophyRoll, portfolioRoll, rollProgress]
   )
-  const { slide, index, goTo, source, target } = useSlideController({
-    total: TOTAL_SLIDES,
-    traps,
-    isMobile,
-  })
+  const { slide, index, goTo, source, target, transitionFade } =
+    useSlideController({
+      total: TOTAL_SLIDES,
+      traps,
+      isMobile,
+    })
 
   // 배경은 슬라이드 설정에 따라 라이트 <-> 다크로 크로스페이드.
   const background = useTransform(slide, BG_STOPS, BG_COLORS)
@@ -131,7 +132,7 @@ export default function App() {
         visible={crystalVisible}
       />
 
-      <Slides trackY={trackY}>
+      <Slides trackY={trackY} trackOpacity={transitionFade}>
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
         <AboutSection active={index === 1} />
         <PhilosophySection
