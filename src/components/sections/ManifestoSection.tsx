@@ -26,13 +26,13 @@ const def = SLIDES[5]
 
 const LINES = [
   '우리는 결과물만',
-  '전달하는 회사가',
-  '아닙니다',
-  '함께 문제를',
-  '정의하고,',
-  '올바른 방향을',
-  '만들며,',
-  '지속 가능한 결과를',
+  '납품하는 회사가',
+  '아닙니다.',
+  '우리는 문제의 본질을',
+  '함께 정의하고,',
+  '더 나은 방향을',
+  '설계하며,',
+  '지속 가능한 운영까지',
   '책임집니다.',
 ]
 
@@ -334,7 +334,7 @@ export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
   // 0..1 합성값 → 정면 줄 위치(라인 스텝). 기준점은 진입 방향에 따라 다르다.
   const rollPos = useTransform(
     [roll, startOffset] as MotionValue<number>[],
-    ([r, so]: number[]) => r * TRAVEL + so,
+    ([r, so]: number[]) => r * TRAVEL + so
   )
 
   return (

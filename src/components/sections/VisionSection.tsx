@@ -1,4 +1,10 @@
-import { useLayoutEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { AnimatePresence, motion, useSpring } from 'motion/react'
 import {
   Bot,
@@ -54,39 +60,39 @@ const NODES: VNode[] = [
   {
     id: 'root',
     title: '통제 가능한 실전 AI',
-    desc: 'AI 신뢰성과 제어력을 핵심 축',
+    desc: '신뢰성과 제어 가능성을 갖춘 업무형 AI 구조',
     x: 28,
     y: 356,
     icon: Bot,
   },
   {
     id: 'gen',
-    title: '생성형 비주얼',
-    desc: '이미지·영상 생성 기술',
+    title: '생성형 비주얼 AI',
+    desc: '이미지·영상 생성 파이프라인',
     x: 490,
     y: 110,
     icon: ImagePlay,
   },
   {
     id: 'llm',
-    title: '로컬 LLM·파인튜닝',
-    desc: '온프레미스 모델 최적화',
+    title: '온프레미스 LLM 최적화',
+    desc: '보안 환경에 맞춘 도메인 모델 구축',
     x: 490,
     y: 274,
     icon: Cpu,
   },
   {
     id: 'doc',
-    title: '문서 분석 자동화',
-    desc: '비정형 데이터 처리 파이프라인',
+    title: '비정형 문서 분석',
+    desc: '문서를 분석 가능한 데이터로 전환',
     x: 490,
     y: 438,
     icon: FileSearch,
   },
   {
     id: 'qa',
-    title: 'AI 품질 검증',
-    desc: '성능 평가·회귀 방어',
+    title: 'AI 평가·검증',
+    desc: '성능 평가와 회귀 방어 체계',
     x: 490,
     y: 602,
     icon: ShieldCheck,
@@ -94,7 +100,7 @@ const NODES: VNode[] = [
   {
     id: 'img',
     title: '이미지 생성 파이프라인',
-    desc: '자체 R&D·구축 운영',
+    desc: '자체 R&D 기반 구축·운영',
     x: 940,
     y: 55,
     icon: WandSparkles,
@@ -102,15 +108,15 @@ const NODES: VNode[] = [
   {
     id: 'motion',
     title: '영상 모션 전이·페이스스왑',
-    desc: '고객 프로젝트·전략 평가',
+    desc: '고객 프로젝트 기반 적용·검증',
     x: 940,
     y: 165,
     icon: Clapperboard,
   },
   {
     id: 'sllm',
-    title: '도메인 특화 sLLM 파인튜닝',
-    desc: '고객 프로젝트·전략 평가',
+    title: '도메인 맞춤형 sLLM 파인튜닝',
+    desc: '고객 프로젝트 기반 적용·검증',
     x: 940,
     y: 274,
     icon: BrainCircuit,
@@ -118,7 +124,7 @@ const NODES: VNode[] = [
   {
     id: 'ir',
     title: '금융 IR 텍스트·감성 분석 엔진',
-    desc: '고객 프로젝트·구축 운영',
+    desc: '고객 프로젝트 기반 구축·운영',
     x: 940,
     y: 383,
     icon: TrendingUp,
@@ -126,15 +132,15 @@ const NODES: VNode[] = [
   {
     id: 'rfp',
     title: '공공조달 RFP 분석 파이프라인',
-    desc: '자체 R&D·구축 운영',
+    desc: '자체 R&D 기반 구축·운영',
     x: 940,
     y: 493,
     icon: ScrollText,
   },
   {
     id: 'eval',
-    title: 'AI평가·회귀 검증 방법론',
-    desc: '자체 R&D·설계',
+    title: 'AI 평가·회귀 검증 체계',
+    desc: '자체 R&D 기반 설계',
     x: 940,
     y: 602,
     icon: FlaskConicalOff,
@@ -330,11 +336,11 @@ export function VisionSection({ active }: VisionSectionProps) {
         as="p"
         active={active}
         lines={[
-          'AI와 함께 일하는 방식이 바뀌는 시대,',
-          '우리는 그 변화를 가장 깊이 만들어갑니다.',
+          'AI가 일의 방식을 바꾸는 시대,',
+          'OPENFLOOR는 통제 가능한 실전 AI를 만듭니다.',
         ]}
         baseDelay={0.1}
-        className="text-title-on-dark mt-4 text-[44px] leading-normal font-bold tracking-[-0.02em] break-keep max-md:mt-3 max-md:text-[20px] max-md:tracking-[-0.015em] max-md:leading-[1.35]"
+        className="text-title-on-dark mt-4 text-[44px] leading-normal font-bold tracking-[-0.02em] break-keep max-md:mt-3 max-md:text-[20px] max-md:leading-[1.35] max-md:tracking-[-0.015em]"
       />
     </div>
   )
@@ -783,7 +789,7 @@ export function VisionSection({ active }: VisionSectionProps) {
                       />
                     </div>
                     <div className="ml-6">
-                      <p className="text-title-on-dark text-[20px] leading-normal font-medium whitespace-nowrap tracking-[-0.015em]">
+                      <p className="text-title-on-dark text-[20px] leading-normal font-medium tracking-[-0.015em] whitespace-nowrap">
                         {n.title}
                       </p>
                       <p className="text-text-on-dark mt-1 text-[16px] leading-normal font-normal whitespace-nowrap">
