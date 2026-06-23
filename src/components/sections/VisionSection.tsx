@@ -55,7 +55,7 @@ const TREE_W = 1312
 const TREE_H = 660
 const R = 28 // 원 반지름
 
-// 컬럼 x: root=28, 중간=580, 오른쪽=940 / y: 중간 4개 164 간격, 오른쪽 6개 균등 배치
+// 컬럼 x: root=28, 중간=560, 오른쪽=동적(rightX) / y: 중간 4개 164 간격, 오른쪽 6개 균등 배치
 const NODES: VNode[] = [
   {
     id: 'root',
@@ -69,7 +69,7 @@ const NODES: VNode[] = [
     id: 'gen',
     title: '생성형 비주얼 AI',
     desc: '이미지·영상 생성 파이프라인',
-    x: 490,
+    x: 560,
     y: 110,
     icon: ImagePlay,
   },
@@ -77,7 +77,7 @@ const NODES: VNode[] = [
     id: 'llm',
     title: '온프레미스 LLM 최적화',
     desc: '보안 환경에 맞춘 도메인 모델 구축',
-    x: 490,
+    x: 560,
     y: 274,
     icon: Cpu,
   },
@@ -85,7 +85,7 @@ const NODES: VNode[] = [
     id: 'doc',
     title: '비정형 문서 분석',
     desc: '문서를 분석 가능한 데이터로 전환',
-    x: 490,
+    x: 560,
     y: 438,
     icon: FileSearch,
   },
@@ -93,7 +93,7 @@ const NODES: VNode[] = [
     id: 'qa',
     title: 'AI 평가·검증',
     desc: '성능 평가와 회귀 방어 체계',
-    x: 490,
+    x: 560,
     y: 602,
     icon: ShieldCheck,
   },
