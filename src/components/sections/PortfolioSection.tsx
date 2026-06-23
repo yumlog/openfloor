@@ -221,8 +221,8 @@ function PortfolioSlideContent({
         />
         {/* 상단: 브랜드 / 프로젝트 / 설명 */}
         <div>
-          {/* 텍스트 묶음: clamp 폭 안에서 줄바꿈(모바일은 풀폭) */}
-          <div className="max-w-[clamp(320px,34.72vw,500px)] max-md:max-w-none">
+          {/* 텍스트 묶음: 줄바꿈은 desc의 수동 \n으로 제어(너비 제한 없음) */}
+          <div>
             <motion.p
               className="font-pretendard text-title-on-dark text-[clamp(16px,1.67vw,24px)] leading-normal font-normal tracking-[-0.015em] max-md:text-[clamp(16px,4.5vw,20px)]"
               initial={false}
@@ -240,7 +240,7 @@ function PortfolioSlideContent({
               {project.project}
             </motion.h3>
             <motion.p
-              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-[1.6] font-normal tracking-[-0.015em] text-pretty break-keep max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)] max-md:tracking-normal"
+              className="font-pretendard text-title-on-dark mt-[clamp(16px,1.67vw,24px)] text-[clamp(16px,1.67vw,24px)] leading-[1.6] font-normal tracking-[-0.015em] break-keep whitespace-pre-line max-md:mt-4 max-md:text-[clamp(15px,4vw,18px)] max-md:tracking-normal"
               initial={false}
               animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 12 }}
               transition={revealed ? ENTER(0.59) : { duration: 0.3 }}
