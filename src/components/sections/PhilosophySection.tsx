@@ -26,7 +26,7 @@ const PORTFOLIO_INDEX = SLIDES.findIndex((sl) => sl.id === 'portfolio')
 /** philosophy 트랩 스텝 수(카드 쌓임 + 마지막 노치 확대). */
 export const PHILOSOPHY_STEPS = 4
 
-const HEADLINE_LINES = ['결과로 말하는 것이', '우리의 방식입니다.']
+const HEADLINE_LINES = ['우리는 결과로 말합니다.']
 const LABEL_DELAY = 0
 const HEADLINE_DELAY = 0.15
 
@@ -95,7 +95,12 @@ export function PhilosophySection({
     // (g=1까지의 오버슈트는 그대로 깔린 채 진행.) 한 번만 발동.
     let handed = false
     const unsub = g.on('change', (v) => {
-      if (growing && !handed && v >= COVER_AT && slide.get() < PORTFOLIO_INDEX) {
+      if (
+        growing &&
+        !handed &&
+        v >= COVER_AT &&
+        slide.get() < PORTFOLIO_INDEX
+      ) {
         handed = true
         goTo(PORTFOLIO_INDEX)
       }

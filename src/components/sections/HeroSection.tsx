@@ -12,7 +12,7 @@ const CONTACT_INDEX = SLIDES.length - 1
 const HEADLINE_LINES = ['각자의 모서리가', '맞닿을 때', '비로소 완성됩니다']
 
 const INTRO =
-  '기획, 디자인, 개발, 운영 역할은 나뉘어 있지만 벽은 없습니다.\n서로가 무엇을 하는지 보이고, 그들의 의견과 나의 이견이 섞일 때\n비로소 진짜 품질이 만들어진다고 믿습니다.'
+  '맡은 역할의 차이는 있어도 벽은 없습니다.\n그들과 나의 생각이 섞일 때\n비로소 가치있는 품질이 탄생한다고 믿습니다.'
 
 interface HeroSectionProps {
   /** 단일 스크롤 엔진 motion value, 슬라이드-0 이탈 페이드용. */
@@ -80,7 +80,7 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
             initial="hidden"
             animate={active ? 'show' : 'hidden'}
             transition={{ delay: 0.65, duration: 0.6, ease: SLIDE_EASE }}
-            className="text-text-on-dark mt-[clamp(93px,11.11vw,160px)] max-w-[clamp(213px,27.78vw,402px)] text-[clamp(12px,1.11vw,16px)] leading-[1.6] font-medium whitespace-pre-line max-md:whitespace-normal max-md:text-pretty max-md:break-keep max-md:mt-0 max-md:max-w-none max-md:text-[14px]"
+            className="text-text-on-dark mt-[clamp(93px,11.11vw,160px)] max-w-[clamp(213px,27.78vw,402px)] text-[clamp(12px,1.11vw,16px)] leading-[1.6] font-medium whitespace-pre-line max-md:mt-0 max-md:max-w-none max-md:text-[14px] max-md:text-pretty max-md:break-keep max-md:whitespace-normal"
           >
             {INTRO}
           </motion.p>

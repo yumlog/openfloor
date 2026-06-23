@@ -26,12 +26,12 @@ const GROW: Variants = {
 // 헤드라인 — reveal sweep이 고르도록 미리 분할(각 줄은 한 줄에 들어가야 함;
 // 마스크는 줄 박스 단위로 크기가 정해진다).
 const HEADLINE_LINES = [
-  '닫힌 공간에서는 만들어질 수 없는 것이',
-  '있는데, 그것이 바로 시너지입니다.',
+  '닫힌 공간에서는 만들어질 수 없는 것이 있는데,',
+  '그것이 바로 시너지입니다.',
 ]
 
 const INTRO =
-  '우리는 개인의 역량보다, 서로의 역량이 연결되는 구조를 더 중요하게 생각합니다.\nAI 시대에는 개인 생산성보다 컨텍스트 공유, 의사결정 연결, 구조적 협업이 더 중요해집니다.\nOpenfloor는 그 구조를 만드는 회사입니다.'
+  '우리는 개인의 역량 자체보다, 서로의 역량이 연결되는 방식에 집중합니다.\n개인의 역량을 팀의 실행력으로 전환하기 위한 구조.\nOPENFLOOR는 그 구조를 만듭니다.'
 
 interface StatDef {
   label: string
@@ -98,7 +98,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           initial="hidden"
           animate={active ? 'show' : 'hidden'}
           transition={entryTransition(INTRO_DELAY)}
-          className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-[1.6] font-normal whitespace-pre-line max-md:whitespace-normal max-md:text-pretty max-md:break-keep max-md:text-[12px]"
+          className="text-text-on-dark text-[clamp(12px,1.11vw,16px)] leading-[1.6] font-normal whitespace-pre-line max-md:text-[12px] max-md:text-pretty max-md:break-keep max-md:whitespace-normal"
         >
           {INTRO}
         </motion.p>
