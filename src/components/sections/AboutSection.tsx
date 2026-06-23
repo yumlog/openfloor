@@ -1,5 +1,5 @@
-import { Fragment, useEffect, useRef } from 'react'
-import { animate, motion, type Variants } from 'motion/react'
+import { useEffect, useState, type CSSProperties } from 'react'
+import { motion } from 'motion/react'
 import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
@@ -7,24 +7,8 @@ import { SLIDES } from '@/config/slides'
 
 const def = SLIDES[1]
 
-/* 진입 애니메이션 타이밍. 상단 블록이 먼저; 통계 행은 세 컬럼을 좌 -> 우로
-   캐스케이드하고, 각 컬럼 안에선 라벨 -> 숫자 -> 캡션 순. */
 const INTRO_DELAY = 0.5
-// 카운트업은 매 프레임 setState로 리렌더하므로, 슬라이드 스냅(~1.05s)이 끝난
-// 정적 상태에서 시작하도록 지연을 둬 전환 프레임과 겹쳐 튀지 않게 한다.
-const STATS_BASE_DELAY = 0.9
-const STATS_STAGGER = 0.12
-/** 통계 컬럼 `i`의 시작 지연(좌 -> 우 캐스케이드). */
-const columnDelay = (i: number) => STATS_BASE_DELAY + i * STATS_STAGGER
 
-/** 구분선이 컬럼과 함께 중심에서 바깥으로 자란다(scaleY). */
-const GROW: Variants = {
-  hidden: { scaleY: 0, opacity: 0 },
-  show: { scaleY: 1, opacity: 1 },
-}
-
-// 헤드라인 — reveal sweep이 고르도록 미리 분할(각 줄은 한 줄에 들어가야 함;
-// 마스크는 줄 박스 단위로 크기가 정해진다).
 const HEADLINE_LINES = [
   '닫힌 공간에서는 만들어질 수 없는 것이 있는데,',
   '그것이 바로 시너지입니다.',
@@ -33,48 +17,94 @@ const HEADLINE_LINES = [
 const INTRO =
   '우리는 개인의 역량 자체보다, 서로의 역량이 연결되는 방식에 집중합니다.\n개인의 역량을 팀의 실행력으로 전환하기 위한 구조.\nOPENFLOOR는 그 구조를 만듭니다.'
 
-interface StatDef {
-  label: string
-  target: number
-  suffix: string
-  caption: string
+interface CardDef {
+  /** public/images 의 아이콘 그래픽. */
+  img: string
+  num: string
+  title: string
+  desc: string
 }
 
-const STATS: StatDef[] = [
-  { label: 'Partners', target: 6, suffix: '+', caption: '년간 파트너십' },
+const CARDS: CardDef[] = [
   {
-    label: 'Full-Cycle Execution',
-    target: 100,
-    suffix: '%',
-    caption: '풀사이클 수행',
+    img: '/images/sample-1.png',
+    num: '6+',
+    title: '년간 파트너십',
+    desc: '브랜드와 장기적으로 함께하며 쌓아온 신뢰 (설명 자리 — 실제 카피로 교체)',
   },
   {
-    label: 'In-House R&D Solutions',
-    target: 5,
-    suffix: '',
-    caption: '자체 R&D 솔루션',
+    img: '/images/sample-2.png',
+    num: '100%',
+    title: '풀사이클 수행',
+    desc: '기획·디자인·개발·운영까지 전 주기를 직접 책임집니다 (설명 자리)',
+  },
+  {
+    img: '/images/sample-3.png',
+    num: '5',
+    title: '자체 R&D 솔루션',
+    desc: '반복되는 문제를 자체 솔루션으로 풀어냅니다 (설명 자리)',
   },
 ]
 
+/* ── 카드 포커스 인터랙션 ──────────────────────────────────────────────
+   디폴트(compact): 아이콘 중앙, 작은 타이틀 좌상단.
+   진입 시 자동으로 한 장씩 scanning(확대·아이콘 중앙 크게)으로 포커스되고,
+   포커스가 다음으로 넘어가면 직전 카드는 revealed(아이콘 우상단 + 숫자·타이틀·
+   설명 좌하단)로 정착. 3번까지 끝나면 전부 revealed로 남고, 이후 호버하면 해당
+   카드가 focus(= 확대된 revealed)된다. (참조 이미지의 스캔 UI 모션을 따른다) */
+type Variant = 'compact' | 'scanning' | 'revealed' | 'focus'
+
+const EASE = 'cubic-bezier(0.77,0,0.175,1)'
+const TRANS = `all 0.6s ${EASE}`
+const GLOW = '0 14px 46px -12px rgba(251,54,64,0.42)'
+
+// 카드 컨테이너 — flex-grow(가로 비중)·들림·테두리·배경·그림자.
+const CARD_V: Record<Variant, CSSProperties> = {
+  compact: { flexGrow: 1, transform: 'translateY(0)', borderColor: '#262626', background: '#1e1e1e', boxShadow: 'none' },
+  scanning: { flexGrow: 2.4, transform: 'translateY(-6px)', borderColor: 'rgba(251,54,64,0.55)', background: '#242424', boxShadow: GLOW },
+  revealed: { flexGrow: 1, transform: 'translateY(0)', borderColor: '#333333', background: '#1e1e1e', boxShadow: 'none' },
+  focus: { flexGrow: 2.0, transform: 'translateY(-6px)', borderColor: 'rgba(251,54,64,0.55)', background: '#242424', boxShadow: GLOW },
+}
+
+// 아이콘 — 중앙(compact/scanning) ↔ 우상단(revealed/focus). left/top/transform/폭을
+// 보간해 미끄러지듯 이동. calc(100% - …)로 우측 정렬해도 transition이 끊기지 않게.
+const IMG_V: Record<Variant, CSSProperties> = {
+  compact: { left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 96 },
+  scanning: { left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 148, filter: 'drop-shadow(0 0 30px rgba(251,54,64,0.45))' },
+  revealed: { left: 'calc(100% - 22px)', top: '22px', transform: 'translate(-100%,0)', width: 58 },
+  focus: { left: 'calc(100% - 24px)', top: '24px', transform: 'translate(-100%,0)', width: 74, filter: 'drop-shadow(0 0 24px rgba(251,54,64,0.4))' },
+}
+
+const NUM_V: Record<Variant, CSSProperties> = {
+  compact: { opacity: 0, fontSize: 36 },
+  scanning: { opacity: 0, fontSize: 36 },
+  revealed: { opacity: 1, fontSize: 36 },
+  focus: { opacity: 1, fontSize: 44 },
+}
+
+// 타이틀 — compact/scanning은 좌상단(작게/희미→크게/흰색), revealed/focus는
+// 좌하단으로 내려가 더 크게.
+const TITLE_V: Record<Variant, CSSProperties> = {
+  compact: { top: '20px', fontSize: 13, color: '#a3a3a3' },
+  scanning: { top: '20px', fontSize: 18, color: '#fff' },
+  revealed: { top: 'calc(100% - 76px)', fontSize: 20, color: '#fff' },
+  focus: { top: 'calc(100% - 82px)', fontSize: 23, color: '#fff' },
+}
+
+const DESC_HIDDEN: CSSProperties = { opacity: 0 }
+const DESC_SHOWN: CSSProperties = { opacity: 1 }
+
 interface AboutSectionProps {
-  /** About이 활성 슬라이드인 동안 true — reveal + 카운트업 재생을 구동. */
+  /** About이 활성 슬라이드인 동안 true — reveal + 카드 포커스 시퀀스를 구동. */
   active: boolean
 }
 
-/**
- * 슬라이드 1, 다크. 중앙 비디오의 about 상태가 우상단(배경 레이어)에 있어,
- * 좌측 정렬·미리 줄바꿈된 콘텐츠가 너비 제한 없이 그것을 피한다. 상단 블록은
- * 슬라이드 위에서 124px(내비 포함); 3열 통계 행은 아래에서 124px. reveal +
- * 카운트업은 `active`로 진입할 때마다 다시 재생된다.
- */
 export function AboutSection({ active }: AboutSectionProps) {
   return (
     <section
       id={def.id}
       className="relative flex h-dvh w-full flex-col justify-between overflow-hidden"
     >
-      {/* 상단 블록(좌). 내비 포함 슬라이드 위에서 124px.
-          라벨이 먼저, 헤드라인 reveal, 소개문이 뒤따른다. */}
       <Container className="pt-[clamp(71px,8.61vw,124px)] max-md:pt-22">
         <motion.p
           variants={RISE}
@@ -104,86 +134,111 @@ export function AboutSection({ active }: AboutSectionProps) {
         </motion.p>
       </Container>
 
-      {/* 통계 행(하단). 슬라이드 아래에서 124px; 전체 프레임을 차지하는 동일
-          너비(flex-1) 좌측 정렬 3컬럼, 양쪽 130px 간격의 1px 세로선으로 구분.
-          모바일: 세로로 쌓고 세로선 제거. */}
       <Container className="pb-[clamp(71px,8.61vw,124px)] max-md:pb-12">
-        <div className="flex items-start gap-[clamp(74px,9.03vw,130px)] max-md:flex-col max-md:gap-4">
-          {STATS.map((stat, i) => (
-            <Fragment key={stat.label}>
-              {i > 0 && (
-                <motion.div
-                  aria-hidden
-                  variants={GROW}
-                  initial="hidden"
-                  animate={active ? 'show' : 'hidden'}
-                  transition={entryTransition(columnDelay(i))}
-                  className="bg-text-on-dark/50 h-[clamp(108px,13.19vw,190px)] w-px shrink-0 origin-center max-md:hidden"
-                />
-              )}
-              <StatItem stat={stat} active={active} index={i} />
-            </Fragment>
-          ))}
-        </div>
+        <AboutCards active={active} />
       </Container>
     </section>
   )
 }
 
-interface StatItemProps {
-  stat: StatDef
-  active: boolean
-  /** 컬럼 위치 — 좌 -> 우 캐스케이드 지연을 구동. */
-  index: number
-}
+function AboutCards({ active }: { active: boolean }) {
+  const [phases, setPhases] = useState<Variant[]>(['compact', 'compact', 'compact'])
+  const [seqDone, setSeqDone] = useState(false)
+  const [hover, setHover] = useState<number | null>(null)
 
-function StatItem({ stat, active, index }: StatItemProps) {
-  const base = columnDelay(index)
-  // 카운트업을 DOM ref에 직접 써 React 리렌더를 없앤다 — 매 프레임 setState가
-  // 크리스탈 frameloop 재개와 부딪히지 않도록. 숫자는 컬럼에 맞춰 등장.
-  const numRef = useRef<HTMLSpanElement>(null)
   useEffect(() => {
-    const el = numRef.current
-    if (!el) return
     if (!active) {
-      el.textContent = '0'
+      setPhases(['compact', 'compact', 'compact'])
+      setSeqDone(false)
+      setHover(null)
       return
     }
-    const controls = animate(0, stat.target, {
-      duration: 1.3,
-      delay: base + 0.05,
-      ease: 'easeOut',
-      onUpdate: (v) => {
-        el.textContent = String(Math.round(v))
-      },
-    })
-    return () => controls.stop()
-  }, [active, stat.target, base])
+    // 모바일(호버 없음)에선 시퀀스 없이 전부 revealed로 정적 표시.
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      setPhases(['revealed', 'revealed', 'revealed'])
+      setSeqDone(false)
+      setHover(null)
+      return
+    }
+    setPhases(['compact', 'compact', 'compact'])
+    setSeqDone(false)
+    setHover(null)
+    const t: number[] = []
+    t.push(window.setTimeout(() => setPhases(['scanning', 'compact', 'compact']), 450))
+    t.push(window.setTimeout(() => setPhases(['revealed', 'scanning', 'compact']), 1650))
+    t.push(window.setTimeout(() => setPhases(['revealed', 'revealed', 'scanning']), 2850))
+    t.push(
+      window.setTimeout(() => {
+        setPhases(['revealed', 'revealed', 'revealed'])
+        setSeqDone(true)
+      }, 4050),
+    )
+    return () => t.forEach(clearTimeout)
+  }, [active])
+
+  const variantOf = (i: number): Variant =>
+    seqDone && hover === i ? 'focus' : phases[i]
 
   return (
-    <div className="flex flex-col items-start md:min-w-0 md:flex-1">
-      <span className="font-num text-title-on-dark text-[80px] leading-[1.2] font-bold tracking-[-0.02em] tabular-nums max-md:text-[32px] max-md:tracking-[-0.015em]">
-        <span ref={numRef}>0</span>
-        {stat.suffix}
+    <div
+      className="flex items-stretch gap-[14px] max-md:flex-col max-md:gap-3"
+      onMouseLeave={() => setHover(null)}
+    >
+      {CARDS.map((card, i) => (
+        <AboutCard
+          key={card.title}
+          card={card}
+          variant={variantOf(i)}
+          onEnter={() => seqDone && setHover(i)}
+        />
+      ))}
+    </div>
+  )
+}
+
+interface AboutCardProps {
+  card: CardDef
+  variant: Variant
+  onEnter: () => void
+}
+
+function AboutCard({ card, variant, onEnter }: AboutCardProps) {
+  const showDesc = variant === 'revealed' || variant === 'focus'
+  return (
+    <div
+      onMouseEnter={onEnter}
+      style={{
+        ...CARD_V[variant],
+        flexBasis: 0,
+        transition: TRANS,
+        willChange: 'flex-grow, transform',
+      }}
+      className="relative h-[clamp(220px,26vw,300px)] shrink overflow-hidden rounded-2xl border max-md:h-[176px] max-md:flex-none"
+    >
+      <img
+        src={card.img}
+        alt={card.title}
+        draggable={false}
+        style={{ position: 'absolute', height: 'auto', objectFit: 'contain', pointerEvents: 'none', transition: TRANS, ...IMG_V[variant] }}
+      />
+      <span
+        className="font-num text-accent absolute left-[22px] leading-none font-extrabold tracking-[-0.02em] tabular-nums"
+        style={{ top: 'calc(100% - 116px)', transition: TRANS, ...NUM_V[variant] }}
+      >
+        {card.num}
       </span>
-      <motion.span
-        variants={RISE}
-        initial="hidden"
-        animate={active ? 'show' : 'hidden'}
-        transition={entryTransition(base)}
-        className="text-title-on-dark mt-4 text-[20px] leading-[1.4] font-normal tracking-[-0.04em] max-md:mt-2 max-md:text-[16px]"
+      <span
+        className="absolute left-[22px] font-semibold tracking-[-0.03em] whitespace-nowrap"
+        style={{ transition: TRANS, ...TITLE_V[variant] }}
       >
-        {stat.label}
-      </motion.span>
-      <motion.span
-        variants={RISE}
-        initial="hidden"
-        animate={active ? 'show' : 'hidden'}
-        transition={entryTransition(base + 0.12)}
-        className="text-text-on-dark mt-1 text-[16px] leading-[1.4] font-normal tracking-normal max-md:text-[14px]"
+        {card.title}
+      </span>
+      <span
+        className="text-text-on-dark absolute right-[18px] left-[22px] text-[12.5px] leading-[1.45] tracking-[-0.02em] break-keep"
+        style={{ top: 'calc(100% - 44px)', transition: TRANS, ...(showDesc ? DESC_SHOWN : DESC_HIDDEN) }}
       >
-        {stat.caption}
-      </motion.span>
+        {card.desc}
+      </span>
     </div>
   )
 }
