@@ -30,19 +30,19 @@ const CARDS: CardDef[] = [
     img: '/images/sample-1.png',
     num: '6+',
     title: '년간 파트너십',
-    desc: '브랜드와 장기적으로 함께하며 쌓아온 신뢰 (설명 자리 — 실제 카피로 교체)',
+    desc: 'Partners',
   },
   {
     img: '/images/sample-2.png',
     num: '100%',
     title: '풀사이클 수행',
-    desc: '기획·디자인·개발·운영까지 전 주기를 직접 책임집니다 (설명 자리)',
+    desc: 'Full-Cycle Execution',
   },
   {
     img: '/images/sample-3.png',
     num: '5',
     title: '자체 R&D 솔루션',
-    desc: '반복되는 문제를 자체 솔루션으로 풀어냅니다 (설명 자리)',
+    desc: 'In-House R&D Solutions',
   },
 ]
 
@@ -70,9 +70,9 @@ const CARD_V: Record<Variant, CSSProperties> = {
 // 보간해 미끄러지듯 이동. calc(100% - …)로 우측 정렬해도 transition이 끊기지 않게.
 const IMG_V: Record<Variant, CSSProperties> = {
   compact: { left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 96 },
-  scanning: { left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 148, filter: 'drop-shadow(0 0 30px rgba(251,54,64,0.45))' },
+  scanning: { left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: 148 },
   revealed: { left: 'calc(100% - 22px)', top: '22px', transform: 'translate(-100%,0)', width: 58 },
-  focus: { left: 'calc(100% - 24px)', top: '24px', transform: 'translate(-100%,0)', width: 74, filter: 'drop-shadow(0 0 24px rgba(251,54,64,0.4))' },
+  focus: { left: 'calc(100% - 24px)', top: '24px', transform: 'translate(-100%,0)', width: 74 },
 }
 
 const NUM_V: Record<Variant, CSSProperties> = {
