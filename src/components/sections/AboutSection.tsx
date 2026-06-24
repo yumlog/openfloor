@@ -20,9 +20,11 @@ const INTRO =
 
 interface CardDef {
   img: string
-  /** 이미지 실제 크기(영역 아님) — 카드별로 다름. */
+  /** 이미지 실제 크기(영역 아님). iw/ih=모바일 썸네일 기준, dw/dh=데스크탑 표시 크기. */
   iw: number
   ih: number
+  dw: number
+  dh: number
   num: string
   title: string
 }
@@ -32,6 +34,8 @@ const CARDS: CardDef[] = [
     img: '/images/sample-1.png',
     iw: 182,
     ih: 180,
+    dw: 140,
+    dh: 140,
     num: '+6',
     title: '년간 파트너십',
   },
@@ -39,6 +43,8 @@ const CARDS: CardDef[] = [
     img: '/images/sample-2.png',
     iw: 163,
     ih: 140,
+    dw: 140,
+    dh: 120,
     num: '100%',
     title: '풀사이클 수행',
   },
@@ -46,6 +52,8 @@ const CARDS: CardDef[] = [
     img: '/images/sample-3.png',
     iw: 188,
     ih: 120,
+    dw: 188,
+    dh: 120,
     num: '5',
     title: '자체 R&D 솔루션',
   },
@@ -252,8 +260,8 @@ function AboutCard({
     left: '50%',
     top: isStat ? px(135) : px(232),
     transform: 'translate(-50%,-50%)',
-    width: px(card.iw),
-    height: px(card.ih),
+    width: px(card.dw),
+    height: px(card.dh),
     pointerEvents: 'none',
     transition: TRANS,
   }
