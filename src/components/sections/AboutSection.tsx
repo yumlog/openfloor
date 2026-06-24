@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from 'react'
-import { motion } from 'motion/react'
+import { motion, animate, useMotionValue, useTransform } from 'motion/react'
 import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
@@ -159,6 +159,7 @@ function AboutCards({ active }: { active: boolean }) {
             variant={v}
             grow={grow}
             ratio={ratio}
+            active={active}
             onEnter={() => seqDone && setHover(i)}
           />
         )
@@ -172,10 +173,11 @@ interface AboutCardProps {
   variant: Variant
   grow: number
   ratio: number
+  active: boolean
   onEnter: () => void
 }
 
-function AboutCard({ card, variant, grow, ratio, onEnter }: AboutCardProps) {
+function AboutCard({ card, variant, grow, ratio, active, onEnter }: AboutCardProps) {
   const px = (n: number) => n * ratio
   const isStat = variant === 'revealed'
   const isEnlarged = variant === 'scanning' || variant === 'focus'
@@ -248,10 +250,60 @@ function AboutCard({ card, variant, grow, ratio, onEnter }: AboutCardProps) {
       <span className="font-pretendard" style={titleStyle}>
         {card.title}
       </span>
-      <span className="font-num tabular-nums" style={numStyle}>
-        {card.num}
-      </span>
+      <CountUpNumber
+        raw={card.num}
+        show={isStat}
+        active={active}
+        style={numStyle}
+        className="font-num tabular-nums"
+      />
     </div>
+  )
+}
+
+/** 'num' 문자열을 접두/숫자/접미로 분해('+6'→{+,6,''}, '100%'→{'',100,%}). */
+function parseNum(raw: string) {
+  const m = raw.match(/^(\D*)(\d+)(\D*)$/)
+  return {
+    prefix: m?.[1] ?? '',
+    target: m ? parseInt(m[2], 10) : 0,
+    suffix: m?.[3] ?? '',
+  }
+}
+
+/** 숫자 카운트업 — revealed로 나타날 때 0→목표(접두/접미 보존). 비활성 시 0으로 리셋해
+    재진입 때 다시 카운트. 호버로 다시 보일 땐 이미 목표값이라 재카운트되지 않는다. */
+function CountUpNumber({
+  raw,
+  show,
+  active,
+  style,
+  className,
+}: {
+  raw: string
+  show: boolean
+  active: boolean
+  style: CSSProperties
+  className?: string
+}) {
+  const { prefix, target, suffix } = parseNum(raw)
+  const mv = useMotionValue(0)
+  const text = useTransform(mv, (v) => `${prefix}${Math.round(v)}${suffix}`)
+
+  useEffect(() => {
+    if (!active) mv.set(0)
+  }, [active, mv])
+
+  useEffect(() => {
+    if (!show) return
+    const controls = animate(mv, target, { duration: 0.9, ease: [0.16, 1, 0.3, 1] })
+    return () => controls.stop()
+  }, [show, target, mv])
+
+  return (
+    <motion.span style={style} className={className}>
+      {text}
+    </motion.span>
   )
 }
 
