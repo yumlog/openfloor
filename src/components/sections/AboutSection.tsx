@@ -148,8 +148,10 @@ function AboutCards({ active }: { active: boolean }) {
       {CARDS.map((card, i) => {
         const v = variants[i]
         const enlarged = v === 'scanning' || v === 'focus'
-        // 작은 카드 304 : 큰 카드 663 비율(없으면 3등분). flex-grow 가중치로 컨테이너 채움.
-        const grow = anyEnlarged ? (enlarged ? 663 : 304) : 1
+        // 작은 304 : 큰 663. 비활성(3등분)도 같은 grow 합(1271)을 유지하도록 평균값을 써야
+        // 첫 카드 확대가 나머지 전환과 동일한 속도가 된다(합이 3→1271로 변하면 폭 보간이
+        // 앞쪽으로 쏠려 첫 카드만 가파르게 보임).
+        const grow = anyEnlarged ? (enlarged ? 663 : 304) : (663 + 304 + 304) / 3
         return (
           <AboutCard
             key={card.title}
