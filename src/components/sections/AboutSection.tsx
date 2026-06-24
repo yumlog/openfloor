@@ -256,17 +256,17 @@ function AboutCard({ card, variant, grow, ratio, onEnter }: AboutCardProps) {
 /** 모바일 정적 스택 — 가로 레이아웃(왼쪽 타이틀·숫자, 오른쪽 이미지)로 높이를 줄인다. */
 function MobileAboutCards() {
   return (
-    <div className="hidden flex-col gap-4 max-md:flex">
+    <div className="hidden flex-col gap-[13px] max-md:flex">
       {CARDS.map((card) => (
         <div
           key={card.title}
-          className="flex items-center justify-between gap-4 rounded-[20px] bg-white/6 px-6 py-5"
+          className="flex items-center justify-between gap-4 rounded-[16px] bg-white/6 px-[20px] py-[16px]"
         >
           <div className="min-w-0">
-            <p className="text-[16px] leading-[1.4] font-normal tracking-[-0.04em] text-white">
+            <p className="text-[13px] leading-[1.4] font-normal tracking-[-0.04em] text-white">
               {card.title}
             </p>
-            <p className="font-num mt-1 text-[36px] leading-[1.2] font-bold text-white tabular-nums">
+            <p className="font-num mt-1 text-[29px] leading-[1.2] font-bold text-white tabular-nums">
               {card.num}
             </p>
           </div>
@@ -274,7 +274,7 @@ function MobileAboutCards() {
             src={card.img}
             alt={card.title}
             draggable={false}
-            style={{ width: card.iw * 0.45, height: card.ih * 0.45 }}
+            style={{ width: card.iw * 0.365, height: card.ih * 0.365 }}
             className="shrink-0 object-contain"
           />
         </div>
