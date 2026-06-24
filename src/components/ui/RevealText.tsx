@@ -9,8 +9,8 @@ import {
 import { cn } from '@/lib/cn'
 
 interface RevealTextProps {
-  /** 각 항목이 렌더되는 한 줄(미리 분할; 줄은 wrap되면 안 됨). */
-  lines: string[]
+  /** 각 항목이 렌더되는 한 줄(미리 분할; 줄은 wrap되면 안 됨). 부분 스타일이 필요하면 JSX 가능. */
+  lines: ReactNode[]
   /**
    * 소속 섹션의 활성 여부. reveal은 이 값이 false -> true로 바뀔 때마다 (재)재생되고
    * active가 true인 동안 드러난 상태를 유지한다; 나갔다 다시 들어오면 다시 재생.
