@@ -296,7 +296,7 @@ function CountUpNumber({
 
   useEffect(() => {
     if (!show) return
-    const controls = animate(mv, target, { duration: 0.9, ease: [0.16, 1, 0.3, 1] })
+    const controls = animate(mv, target, { duration: 1.1, ease: 'linear' })
     return () => controls.stop()
   }, [show, target, mv])
 
