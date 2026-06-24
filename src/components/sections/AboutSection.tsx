@@ -96,7 +96,7 @@ export function AboutSection({ active }: AboutSectionProps) {
           <AboutCards active={active} />
         </div>
         {/* 모바일: 정적 스택 */}
-        <MobileAboutCards />
+        <MobileAboutCards active={active} />
       </Container>
     </section>
   )
@@ -256,31 +256,43 @@ function AboutCard({ card, variant, grow, ratio, onEnter }: AboutCardProps) {
 }
 
 /** 모바일 정적 스택 — 가로 레이아웃(왼쪽 타이틀·숫자, 오른쪽 이미지)로 높이를 줄인다. */
-function MobileAboutCards() {
+/** 모바일 정적 스택 — 진입(active)마다 화면 밖에서 좌/우 번갈아 슬라이드 인 + 페이드.
+    1번 왼쪽→, 2번 오른쪽←, 3번 왼쪽→. 섹션이 overflow-hidden이라 밖은 잘린다. */
+function MobileAboutCards({ active }: { active: boolean }) {
   return (
     <div className="hidden flex-col gap-[13px] max-md:flex">
-      {CARDS.map((card) => (
-        <div
-          key={card.title}
-          className="flex items-center justify-between gap-4 rounded-[16px] bg-white/6 px-[20px] py-[16px]"
-        >
-          <div className="min-w-0">
-            <p className="text-[13px] leading-[1.4] font-normal tracking-[-0.04em] text-white">
-              {card.title}
-            </p>
-            <p className="font-num mt-1 text-[29px] leading-[1.2] font-bold text-white tabular-nums">
-              {card.num}
-            </p>
-          </div>
-          <img
-            src={card.img}
-            alt={card.title}
-            draggable={false}
-            style={{ width: card.iw * 0.365, height: card.ih * 0.365 }}
-            className="shrink-0 object-contain"
-          />
-        </div>
-      ))}
+      {CARDS.map((card, i) => {
+        const offset = i % 2 === 0 ? '-110%' : '110%'
+        return (
+          <motion.div
+            key={card.title}
+            initial={{ x: offset, opacity: 0 }}
+            animate={active ? { x: '0%', opacity: 1 } : { x: offset, opacity: 0 }}
+            transition={{
+              duration: 0.6,
+              ease: [0.16, 1, 0.3, 1],
+              delay: active ? 0.1 + i * 0.12 : 0,
+            }}
+            className="flex items-center justify-between gap-4 rounded-[16px] bg-white/6 px-[20px] py-[16px]"
+          >
+            <div className="min-w-0">
+              <p className="text-[13px] leading-[1.4] font-normal tracking-[-0.04em] text-white">
+                {card.title}
+              </p>
+              <p className="font-num mt-1 text-[29px] leading-[1.2] font-bold text-white tabular-nums">
+                {card.num}
+              </p>
+            </div>
+            <img
+              src={card.img}
+              alt={card.title}
+              draggable={false}
+              style={{ width: card.iw * 0.365, height: card.ih * 0.365 }}
+              className="shrink-0 object-contain"
+            />
+          </motion.div>
+        )
+      })}
     </div>
   )
 }
