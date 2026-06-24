@@ -28,9 +28,27 @@ interface CardDef {
 }
 
 const CARDS: CardDef[] = [
-  { img: '/images/sample-1.png', iw: 182, ih: 180, num: '+6', title: '년간 파트너십' },
-  { img: '/images/sample-2.png', iw: 163, ih: 140, num: '100%', title: '풀사이클 수행' },
-  { img: '/images/sample-3.png', iw: 188, ih: 120, num: '5', title: '자체 R&D 솔루션' },
+  {
+    img: '/images/sample-1.png',
+    iw: 182,
+    ih: 180,
+    num: '+6',
+    title: '년간 파트너십',
+  },
+  {
+    img: '/images/sample-2.png',
+    iw: 163,
+    ih: 140,
+    num: '100%',
+    title: '풀사이클 수행',
+  },
+  {
+    img: '/images/sample-3.png',
+    iw: 188,
+    ih: 120,
+    num: '5',
+    title: '자체 R&D 솔루션',
+  },
 ]
 
 /* ── 카드 포커스 인터랙션 ──────────────────────────────────────────────
@@ -106,7 +124,11 @@ function AboutCards({ active }: { active: boolean }) {
   const frame = useFrameSize()
   const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
 
-  const [phases, setPhases] = useState<Variant[]>(['compact', 'compact', 'compact'])
+  const [phases, setPhases] = useState<Variant[]>([
+    'compact',
+    'compact',
+    'compact',
+  ])
   const [seqDone, setSeqDone] = useState(false)
   const [hover, setHover] = useState<number | null>(null)
 
@@ -121,14 +143,29 @@ function AboutCards({ active }: { active: boolean }) {
     setSeqDone(false)
     setHover(null)
     const t: number[] = []
-    t.push(window.setTimeout(() => setPhases(['scanning', 'compact', 'compact']), 450))
-    t.push(window.setTimeout(() => setPhases(['revealed', 'scanning', 'compact']), 1650))
-    t.push(window.setTimeout(() => setPhases(['revealed', 'revealed', 'scanning']), 2850))
+    t.push(
+      window.setTimeout(
+        () => setPhases(['scanning', 'compact', 'compact']),
+        450
+      )
+    )
+    t.push(
+      window.setTimeout(
+        () => setPhases(['revealed', 'scanning', 'compact']),
+        1650
+      )
+    )
+    t.push(
+      window.setTimeout(
+        () => setPhases(['revealed', 'revealed', 'scanning']),
+        2850
+      )
+    )
     t.push(
       window.setTimeout(() => {
         setPhases(['revealed', 'revealed', 'revealed'])
         setSeqDone(true)
-      }, 4050),
+      }, 4050)
     )
     return () => t.forEach(clearTimeout)
   }, [active])
@@ -151,7 +188,11 @@ function AboutCards({ active }: { active: boolean }) {
         // 작은 304 : 큰 663. 비활성(3등분)도 같은 grow 합(1271)을 유지하도록 평균값을 써야
         // 첫 카드 확대가 나머지 전환과 동일한 속도가 된다(합이 3→1271로 변하면 폭 보간이
         // 앞쪽으로 쏠려 첫 카드만 가파르게 보임).
-        const grow = anyEnlarged ? (enlarged ? 663 : 304) : (663 + 304 + 304) / 3
+        const grow = anyEnlarged
+          ? enlarged
+            ? 663
+            : 304
+          : (663 + 304 + 304) / 3
         return (
           <AboutCard
             key={card.title}
@@ -177,7 +218,14 @@ interface AboutCardProps {
   onEnter: () => void
 }
 
-function AboutCard({ card, variant, grow, ratio, active, onEnter }: AboutCardProps) {
+function AboutCard({
+  card,
+  variant,
+  grow,
+  ratio,
+  active,
+  onEnter,
+}: AboutCardProps) {
   const px = (n: number) => n * ratio
   const isStat = variant === 'revealed'
   const isEnlarged = variant === 'scanning' || variant === 'focus'
@@ -244,7 +292,12 @@ function AboutCard({ card, variant, grow, ratio, active, onEnter }: AboutCardPro
           src={card.img}
           alt={card.title}
           draggable={false}
-          style={{ display: 'block', width: '100%', height: '100%', objectFit: 'contain' }}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
         />
       </div>
       <span className="font-pretendard" style={titleStyle}>
@@ -288,7 +341,13 @@ function CountUpNumber({
 }) {
   const { prefix, target, suffix } = parseNum(raw)
   const mv = useMotionValue(0)
-  const text = useTransform(mv, (v) => `${prefix}${Math.round(v)}${suffix}`)
+  // 큰 수는 단위를 키워 점프(3자리=10단위, 1~2자리=1단위) → 같은 시간 안에서 100도
+  // 블러가 아니라 0·10·20…100으로 '확확' 오른다. 작은 수는 1단위로 또박또박.
+  const step = Math.max(1, 10 ** (String(target).length - 2))
+  const text = useTransform(
+    mv,
+    (v) => `${prefix}${Math.round(v / step) * step}${suffix}`
+  )
 
   useEffect(() => {
     if (!active) mv.set(0)
@@ -296,7 +355,7 @@ function CountUpNumber({
 
   useEffect(() => {
     if (!show) return
-    const controls = animate(mv, target, { duration: 1.1, ease: 'linear' })
+    const controls = animate(mv, target, { duration: 0.6, ease: 'linear' })
     return () => controls.stop()
   }, [show, target, mv])
 
@@ -319,7 +378,9 @@ function MobileAboutCards({ active }: { active: boolean }) {
           <motion.div
             key={card.title}
             initial={{ x: offset, opacity: 0 }}
-            animate={active ? { x: '0%', opacity: 1 } : { x: offset, opacity: 0 }}
+            animate={
+              active ? { x: '0%', opacity: 1 } : { x: offset, opacity: 0 }
+            }
             transition={{
               duration: 0.6,
               ease: [0.16, 1, 0.3, 1],
