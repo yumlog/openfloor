@@ -61,7 +61,7 @@ export function AboutSection({ active }: AboutSectionProps) {
       id={def.id}
       className="relative flex h-dvh w-full flex-col justify-between overflow-hidden"
     >
-      <Container className="pt-[clamp(71px,8.61vw,124px)] max-md:pt-22">
+      <Container className="pt-[clamp(57px,6.94vw,100px)] max-md:pt-22">
         <motion.p
           variants={RISE}
           initial="hidden"
@@ -90,7 +90,7 @@ export function AboutSection({ active }: AboutSectionProps) {
         </motion.p>
       </Container>
 
-      <Container className="pb-[clamp(71px,8.61vw,124px)] max-md:pb-12">
+      <Container className="pb-[clamp(57px,6.94vw,100px)] max-md:pb-12">
         {/* 데스크탑: 인터랙티브 카드 */}
         <div className="max-md:hidden">
           <AboutCards active={active} />
