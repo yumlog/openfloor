@@ -7,6 +7,7 @@ import {
   type MotionValue,
 } from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
+import { clamp01 } from '@/lib/math'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
 
 /* ---------------------------------------------------------------------------
@@ -113,8 +114,6 @@ const AUTO_REV_CAP = 0
 // 스크롤이 잦아든 속도에서 자동 흐름 속도로 수렴하는 빠르기(초당 계수). 멈춤 구간
 // 없이 속도를 이어받아 부드럽게 전환한다. 클수록 빨리 자동 속도에 안착.
 const AUTO_EASE = 4
-
-const clamp01 = (v: number) => Math.max(0, Math.min(1, v))
 
 interface DrumLineProps {
   /** 현재 정면에 있는 줄 위치(드럼 시작/끝이 비도록 음수 / 마지막 줄 너머까지

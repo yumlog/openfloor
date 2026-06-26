@@ -25,6 +25,7 @@ import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
 import { useFrameSize } from '@/hooks/useFrameSize'
+import { clamp } from '@/lib/math'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
 
 const def = SLIDES[4]
@@ -253,9 +254,8 @@ export function VisionSection({ active }: VisionSectionProps) {
     const r = el.getBoundingClientRect()
     const nx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2)
     const ny = (e.clientY - (r.top + r.height / 2)) / (r.height / 2)
-    const clamp1 = (v: number) => Math.max(-1, Math.min(1, v))
-    tiltY.set(clamp1(nx) * TILT_MAX)
-    tiltX.set(clamp1(-ny) * TILT_MAX)
+    tiltY.set(clamp(nx, -1, 1) * TILT_MAX)
+    tiltX.set(clamp(-ny, -1, 1) * TILT_MAX)
   }
   const resetTilt = () => {
     tiltX.set(0)

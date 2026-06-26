@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { animate, useMotionValue, type MotionValue } from 'motion/react'
+import { clamp } from '@/lib/math'
 import { SLIDE_DURATION, SLIDE_EASE, SLIDES } from '@/config/slides'
 import {
   REVEAL_DURATION,
@@ -70,9 +71,6 @@ interface Options {
    */
   traps?: TrapOptions[]
 }
-
-const clamp = (v: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, v))
 
 const PHILO_IDX = SLIDES.findIndex((sl) => sl.id === 'philosophy')
 const PORT_IDX = SLIDES.findIndex((sl) => sl.id === 'portfolio')
