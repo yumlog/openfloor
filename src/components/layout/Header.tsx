@@ -69,8 +69,9 @@ export function Header({ goTo }: HeaderProps) {
 
       {/* 모바일 풀스크린 오버레이 메뉴. */}
       {menuOpen && (
-        <div className="bg-bg-dark fixed inset-0 z-40 flex flex-col md:hidden">
-          <Container className="flex h-16.25 shrink-0 items-center justify-end">
+        <div className="bg-bg-dark fixed inset-0 z-40 md:hidden">
+          {/* 닫기 버튼은 absolute 오버레이로 빼서 메뉴가 화면 전체 높이에 중앙 정렬되게 한다. */}
+          <Container className="absolute inset-x-0 top-0 z-10 flex h-16.25 items-center justify-end">
             <button
               type="button"
               onClick={() => setMenuOpen(false)}
@@ -81,7 +82,7 @@ export function Header({ goTo }: HeaderProps) {
             </button>
           </Container>
 
-          <nav className="flex flex-1 flex-col items-center justify-center gap-10">
+          <nav className="flex h-full flex-col items-center justify-center gap-10">
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.label}
