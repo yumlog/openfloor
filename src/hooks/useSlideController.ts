@@ -145,6 +145,8 @@ export function useSlideController({
     const trapAt = (idx: number) => traps?.find((t) => t.index === idx)
     // 역방향 seam(portfolio→philosophy) 빨강 카드 축소 동안 입력 잠금 해제 타이머.
     let reverseUnlockTimer: ReturnType<typeof setTimeout>
+    // 역방향 regather: 모인 PORTFOLIO를 잠깐 보여준 뒤 핸드오프하는 dwell 타이머(데스크탑).
+    let reverseHoldTimer: ReturnType<typeof setTimeout>
     // Portfolio reveal 자동 전진: 진입 후 REVEAL_HOLD 동안 통짜 텍스트(progress 0)로
     // 멈췄다가 split, 끝나면 목표 동기화 + unlock. seam(즉시)·점프 진입(착지 후) 공용.
     const playPortfolioReveal = (trap: TrapOptions) => {
@@ -260,8 +262,16 @@ export function useSlideController({
         ease: TIME_EASE_REVERSE,
         onComplete: () => {
           regathering = false
-          animatingRef.current = false // 아래 goTo 가드 통과용
-          goTo(PHILO_IDX) // isReverseSeam 잠금으로 빨강 카드 축소까지 이어짐
+          // 데스크탑: 정방향 REVEAL_HOLD와 대칭으로, 모인 PORTFOLIO를 잠깐 dwell시킨 뒤
+          // 핸드오프한다. 이 동안 slide는 아직 3이라 빨강 grow 덮개(slide<2.97에서 등장)가
+          // 안 떠서 모인 흰 글자가 그대로 보인다. animatingRef는 true로 둔 채라 dwell 중
+          // 입력은 잠긴다. 모바일은 grow 덮개 자체가 없어 기존처럼 즉시 핸드오프(동작 불변).
+          const handoff = () => {
+            animatingRef.current = false // 아래 goTo 가드 통과용
+            goTo(PHILO_IDX) // isReverseSeam 잠금으로 빨강 카드 축소까지 이어짐
+          }
+          if (isMobile) handoff()
+          else reverseHoldTimer = setTimeout(handoff, REVEAL_HOLD * 1000)
         },
       })
     }
@@ -572,6 +582,7 @@ export function useSlideController({
       window.removeEventListener('keydown', onKey)
       clearTimeout(wheelResetTimer)
       clearTimeout(reverseUnlockTimer)
+      clearTimeout(reverseHoldTimer)
       cancelAnimationFrame(autoRaf)
       unsubPort?.()
     }
