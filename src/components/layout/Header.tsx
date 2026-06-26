@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Menu, X } from 'lucide-react'
 import { Container } from './Container'
+import { RevealText } from '@/components/ui/RevealText'
 import { NAV_ITEMS } from '@/config/slides'
 
 interface HeaderProps {
@@ -67,35 +69,57 @@ export function Header({ goTo }: HeaderProps) {
         </button>
       </Container>
 
-      {/* 모바일 풀스크린 오버레이 메뉴. */}
-      {menuOpen && (
-        <div className="bg-bg-dark fixed inset-0 z-40 md:hidden">
-          {/* 닫기 버튼은 absolute 오버레이로 빼서 메뉴가 화면 전체 높이에 중앙 정렬되게 한다. */}
-          <Container className="absolute inset-x-0 top-0 z-10 flex h-16.25 items-center justify-end">
-            <button
-              type="button"
-              onClick={() => setMenuOpen(false)}
-              aria-label="Close menu"
-              className="text-text-nav hover:text-accent transition-colors"
-            >
-              <X size={28} strokeWidth={2} />
-            </button>
-          </Container>
-
-          <nav className="flex h-full flex-col items-center justify-center gap-10">
-            {NAV_ITEMS.map((item) => (
+      {/* 모바일 풀스크린 오버레이 메뉴.
+          열기: dim(컨테이너 opacity 0→1)이 먼저 페이드인 → 메뉴는 baseDelay만큼 늦게
+          시작해 RevealText로 순차 등장(섹션 헤드라인과 같은 결).
+          닫기: AnimatePresence가 마운트를 유지한 채 컨테이너 opacity 1→0으로 떨어뜨려
+          dim+메뉴를 통째로 페이드아웃(항목별 RevealText는 마운트 동안 active=true라
+          드러난 상태를 유지하다 함께 사라진다). */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="mobile-menu"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="bg-bg-dark fixed inset-0 z-40 md:hidden"
+          >
+            {/* 닫기 버튼은 absolute 오버레이로 빼서 메뉴가 화면 전체 높이에 중앙 정렬되게 한다. */}
+            <Container className="absolute inset-x-0 top-0 z-10 flex h-16.25 items-center justify-end">
               <button
-                key={item.label}
                 type="button"
-                onClick={() => navigate(item.index)}
-                className="text-text-nav hover:text-accent text-[32px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors"
+                onClick={() => setMenuOpen(false)}
+                aria-label="Close menu"
+                className="text-text-nav hover:text-accent transition-colors"
               >
-                {item.label}
+                <X size={28} strokeWidth={2} />
               </button>
-            ))}
-          </nav>
-        </div>
-      )}
+            </Container>
+
+            <nav className="flex h-full flex-col items-center justify-center gap-10">
+              {NAV_ITEMS.map((item, i) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => navigate(item.index)}
+                  className="text-text-nav hover:text-accent transition-colors"
+                >
+                  {/* 항목별 단일 라인 RevealText. dim(0.3s) 뒤 시작하도록 baseDelay를
+                      0.28s부터 항목마다 0.1s씩 늦춰 위→아래 stagger를 만든다. */}
+                  <RevealText
+                    as="span"
+                    active
+                    lines={[item.label]}
+                    baseDelay={0.28 + i * 0.1}
+                    className="text-[32px] leading-[1.2] font-bold tracking-[-0.04em]"
+                  />
+                </button>
+              ))}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }
