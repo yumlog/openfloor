@@ -3,7 +3,7 @@ import { motion, animate, useMotionValue, useTransform } from 'motion/react'
 import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
-import { SLIDES } from '@/config/slides'
+import { SLIDES, SLIDE_EASE } from '@/config/slides'
 import { useFrameSize } from '@/hooks/useFrameSize'
 
 const def = SLIDES[1]
@@ -117,10 +117,18 @@ export function AboutSection({ active }: AboutSectionProps) {
       </Container>
 
       <Container className="pb-[clamp(57px,6.94vw,100px)] max-md:pb-12">
-        {/* 데스크탑: 인터랙티브 카드 */}
-        <div className="max-md:hidden">
+        {/* 데스크탑: 인터랙티브 카드. 비활성일 때 opacity 0으로 숨겨 트랙 통과 중
+            스쳐 보이지 않게 한다. 진입은 즉시(duration 0) 보이게 해 시퀀스 첫
+            프레임(compact)이 기존과 100% 동일하게 시작되고, 이탈만 페이드아웃한다.
+            (모바일 카드는 MobileAboutCards가 카드별로 이미 active 숨김 처리.) */}
+        <motion.div
+          className="max-md:hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: active ? 1 : 0 }}
+          transition={{ duration: active ? 0 : 0.4, ease: SLIDE_EASE }}
+        >
           <AboutCards active={active} />
-        </div>
+        </motion.div>
         {/* 모바일: 정적 스택 */}
         <MobileAboutCards active={active} />
       </Container>
