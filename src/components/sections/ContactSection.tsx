@@ -1,17 +1,19 @@
 import { useEffect } from 'react'
 import { motion, useMotionValue } from 'motion/react'
+import { ArrowDownToLine } from 'lucide-react'
 import { Container } from '@/components/layout/Container'
 import { CentralCrystal } from '@/components/layout/CentralCrystal'
 import { RISE, FADE, entryProps } from '@/lib/motion'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
+import { cn } from '@/lib/cn'
 import { CircularBadge } from './hero/CircularBadge'
 
 /* ---------------------------------------------------------------------------
    Contact — 슬라이드 6, 다크(#171717). 배경은 Frame 크로스페이드가 칠하므로
    섹션은 투명하다. Hero의 비주얼(중앙 3D 크리스탈 + 고스트 텍스트)을 그대로
-   재사용해 깔아두고, 그 위로 콘텐츠를 배치한다: 좌상단 이메일 블록, 우상단
-   Company Profile / Portfolio, 우하단 'SCROLL UP' 빨강 뱃지(클릭 시 Hero로).
+   재사용해 깔아두고, 그 위로 콘텐츠를 배치한다: 좌상단 이메일/주소 블록 +
+   Company Profile 버튼(PDF 다운로드), 우하단 'SCROLL UP' 빨강 뱃지(클릭 시 Hero로).
    데스크탑은 1440 design-px 캔버스를 `ratio`로 스케일; 모바일(<768)은 한 컬럼 reflow.
 --------------------------------------------------------------------------- */
 
@@ -22,12 +24,44 @@ const INFO = {
   address: '서울 중구 세종대로16길 18, 4층',
   phone: '010-8718-5785',
 }
-const MENUS = ['Company Profile', 'Portfolio']
 /** Company Profile 클릭 시 다운로드할 PDF(public/ → 루트 경로). */
 const PROFILE_PDF = '/pdfs/openfloor.pdf'
-/** 하단 메뉴 → 이동할 슬라이드 인덱스(Company Profile은 이동 대신 PDF 다운로드). */
-const MENU_INDEX: Record<string, number> = {
-  Portfolio: SLIDES.findIndex((s) => s.id === 'portfolio'),
+
+/**
+ * Company Profile 버튼 — Hero CTA와 동일한 외형(accent 보더 pill + accent 텍스트 +
+ * 우측 아이콘). 아이콘만 arrow-down-to-line(다운로드), 텍스트는 COMPANY PROFILE.
+ * Hero 버튼은 공용 컴포넌트가 아니라 인라인이므로 스타일을 그대로 복제한다.
+ * `scaled`: 데스크탑 스케일 캔버스 안에선 디자인px 고정(캔버스가 ratio로 축소),
+ * 모바일 normal-flow에선 Hero와 동일한 clamp 반응형(이중 스케일 방지).
+ */
+function ProfileButton({
+  onClick,
+  scaled,
+}: {
+  onClick: () => void
+  scaled: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'group border-accent text-accent hover:bg-accent hover:text-title-on-dark inline-flex items-center gap-2 rounded-full border-2 leading-[1.2] font-bold tracking-[-0.04em] transition-colors',
+        scaled
+          ? 'py-3 pr-3 pl-4 text-[20px]'
+          : 'py-[clamp(8px,0.83vw,12px)] pr-[clamp(8px,0.83vw,12px)] pl-[clamp(12px,1.11vw,16px)] text-[clamp(12px,1.39vw,20px)]'
+      )}
+    >
+      COMPANY PROFILE
+      <ArrowDownToLine
+        strokeWidth={2}
+        className={cn(
+          'shrink-0',
+          scaled ? 'size-6' : 'size-[clamp(16px,1.67vw,24px)]'
+        )}
+      />
+    </button>
+  )
 }
 
 interface ContactSectionProps {
@@ -75,18 +109,14 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
   const ratio = frame.ratio
   const H = frame.h / ratio
 
-  // Company Profile → PDF 다운로드, 그 외 → 슬라이드 이동.
-  const handleMenu = (m: string) => {
-    if (m === 'Company Profile') {
-      const a = document.createElement('a')
-      a.href = PROFILE_PDF
-      a.download = 'openfloor.pdf'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      return
-    }
-    goTo(MENU_INDEX[m])
+  // Company Profile → PDF 다운로드.
+  const downloadProfile = () => {
+    const a = document.createElement('a')
+    a.href = PROFILE_PDF
+    a.download = 'openfloor.pdf'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
   }
 
   // 중앙 크리스탈 — Hero(App.tsx)와 동일한 박스/스케일/위치. 슬라이드 진행에
@@ -178,16 +208,9 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
             </div>
           </motion.div>
 
-          <motion.div {...rise(0.14)} className="mt-7 flex gap-5">
-            {MENUS.map((m) => (
-              <span
-                key={m}
-                onClick={() => handleMenu(m)}
-                className="text-title-on-dark hover:text-accent decoration-accent cursor-pointer text-[18px] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap underline-offset-[5px] transition-colors hover:underline hover:decoration-2"
-              >
-                {m}
-              </span>
-            ))}
+          {/* Company Profile — 주소 블록 아래 좌측, Hero 스타일 버튼(PDF 다운로드). */}
+          <motion.div {...rise(0.14)} className="mt-7">
+            <ProfileButton scaled={false} onClick={downloadProfile} />
           </motion.div>
         </Container>
         {scrollUpBadge}
@@ -206,8 +229,9 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
         className="relative z-10 shrink-0"
         style={{ width: DESIGN_WIDTH, height: H, transform: `scale(${ratio})` }}
       >
-        {/* 좌상단: 이메일 + Address / Phone Number */}
-        <div className="absolute" style={{ left: 64, top: 100 }}>
+        {/* 좌상단: 이메일 + Address / Phone Number + Company Profile 버튼.
+            top:128 = 헤더(absolute 오버레이) 포함 상단 패딩 128(디자인px, 캔버스가 ratio로 비례 축소). */}
+        <div className="absolute" style={{ left: 64, top: 128 }}>
           <motion.p
             {...rise(0)}
             className="text-title-on-dark font-montserrat text-[44px] leading-none font-bold tracking-[-0.04em]"
@@ -232,24 +256,12 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
               </p>
             </div>
           </motion.div>
-        </div>
 
-        {/* 우상단: Company Profile / Portfolio(흰색 볼드, 호버 밑줄 유지) */}
-        <motion.div
-          {...rise(0.14)}
-          className="absolute flex items-baseline gap-8"
-          style={{ right: 64, top: 100 }}
-        >
-          {MENUS.map((m) => (
-            <span
-              key={m}
-              onClick={() => handleMenu(m)}
-              className="text-title-on-dark hover:text-accent decoration-accent cursor-pointer text-[32px] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap underline-offset-[6px] transition-colors hover:underline hover:decoration-[3px]"
-            >
-              {m}
-            </span>
-          ))}
-        </motion.div>
+          {/* Company Profile — Address/Phone 블록과 36px(mt-9) 간격, Hero 스타일 버튼. */}
+          <motion.div {...rise(0.2)} className="mt-9">
+            <ProfileButton scaled onClick={downloadProfile} />
+          </motion.div>
+        </div>
       </div>
       {scrollUpBadge}
     </section>

@@ -57,11 +57,15 @@ export interface NavItem {
   index: number
 }
 
+// index는 모두 슬라이드 id에서 파생한다(하드코딩 지양) — SLIDES 순서가 바뀌어도 따라간다.
+const navIndex = (id: string) => SLIDES.findIndex((s) => s.id === id)
+
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'About Us', index: 1 },
-  { label: 'Philosophy', index: 2 },
-  { label: 'Portfolio', index: 3 },
-  { label: 'Vision', index: 4 },
+  { label: 'About Us', index: navIndex('about') },
+  { label: 'Philosophy', index: navIndex('philosophy') },
+  { label: 'Portfolio', index: navIndex('portfolio') },
+  { label: 'Vision', index: navIndex('vision') },
+  { label: 'Contact', index: navIndex('contact') },
 ]
 
 /* 스냅 엔진 타이밍. */
