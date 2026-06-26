@@ -40,7 +40,14 @@ export const TIME_EASE_REVERSE = [0.5, 0, 0.85, 0.25] as const
 
 /* reveal 구간 매핑(겹침이 핵심). */
 const TEXT_SPLIT_RANGE: [number, number] = [0, 0.85] // 텍스트가 위/아래로 벌어지는 구간
-const TEXT_FADE_RANGE: [number, number] = [0.42, 0.85] // 텍스트가 사라지는 구간(늦게 시작)
+// PORTFOLIO 글자 opacity는 위치(split) 스크럽에서 분리해 별도 시간 기반 fade로 구동한다 —
+// 그래야 글자가 모이고/흩어지는 속도와 무관하게 '페이드 속도'만 독립적으로 조절된다(progress에
+// 결합하면 공유 런웨이 한계로 정확한 2배가 불가). reveal이 이 중점을 "넘는" 순간 fade가
+// 트리거되고(정방향=아웃, 역방향=인) TEXT_FADE_DURATION 동안 진행한다. 중점(0.635)은 기존
+// fade 구간 [0.42,0.85]의 가운데라 '반쯤 사라진' 시점이 그대로 유지되고 페이드만 길어진다.
+const TEXT_FADE_MID = 0.635
+// 글자 페이드(인/아웃) 지속시간(s) — 페이드 '속도' 노브. 기존(progress 결합) 대비 약 2배 길게.
+const TEXT_FADE_DURATION = 0.4
 // reveal 구간: 페이드/스케일 시작 · 안착
 const SLIDE_SCALE_IN: number[] = [0.25, 0.9]
 // scale: 0 → 1.0. 작게 시작해 점점 커지며 안착(오버슈트=바운스 없이 단조 증가).
@@ -142,7 +149,21 @@ function PortfolioText({
   const split = useTransform(reveal, TEXT_SPLIT_RANGE, [0, 1], { clamp: true })
   const topY = useTransform(split, (v) => -v * frameH * 0.7)
   const bottomY = useTransform(split, (v) => v * frameH * 0.7)
-  const opacity = useTransform(reveal, TEXT_FADE_RANGE, [1, 0], { clamp: true })
+
+  // 위치(split)와 분리된 시간 기반 페이드: reveal이 중점을 넘으면 hidden, 그 아래면 보임.
+  // reveal은 진입/이탈 모두 컨트롤러가 오토 트윈으로 움직이므로(손 스크럽 없음) 트리거가 안정적.
+  const [textHidden, setTextHidden] = useState(() => reveal.get() >= TEXT_FADE_MID)
+  useEffect(() => {
+    const apply = (v: number) => setTextHidden(v >= TEXT_FADE_MID)
+    apply(reveal.get())
+    const unsub = reveal.on('change', apply)
+    return () => unsub()
+  }, [reveal])
+  const fade = {
+    initial: false as const,
+    animate: { opacity: textHidden ? 0 : 1 },
+    transition: { duration: TEXT_FADE_DURATION, ease: 'easeInOut' as const },
+  }
 
   const base = {
     fontFamily: 'var(--font-montserrat)',
@@ -159,14 +180,16 @@ function PortfolioText({
       <div className="relative">
         <motion.div
           aria-hidden
-          style={{ ...base, y: bottomY, opacity, clipPath: 'inset(50% 0 0 0)' }}
+          style={{ ...base, y: bottomY, clipPath: 'inset(50% 0 0 0)' }}
+          {...fade}
         >
           PORTFOLIO
         </motion.div>
         <motion.div
           aria-hidden
           className="absolute inset-0"
-          style={{ ...base, y: topY, opacity, clipPath: 'inset(0 0 50% 0)' }}
+          style={{ ...base, y: topY, clipPath: 'inset(0 0 50% 0)' }}
+          {...fade}
         >
           PORTFOLIO
         </motion.div>
