@@ -122,7 +122,10 @@ export default function App() {
 
       <Slides trackY={trackY}>
         <HeroSection slide={slide} goTo={goTo} active={index === 0} />
-        <AboutSection active={index === 1} />
+        {/* active를 현재 이동의 출발/도착이 About일 때만 true로 가드 — index===1
+            단독이면 Hero↔Contact 점프로 slide가 1을 스칠 때 index가 잠깐 1이 되어
+            카드가 켜졌다(스침). source/target 가드로 통과 중엔 계속 false 유지. */}
+        <AboutSection active={index === 1 && (source === 1 || target === 1)} />
         <PhilosophySection
           active={index === 2 && (target === 2 || source === 2)}
           // 빨강 grow 오버레이는 현재 이동의 도착이 philosophy(2)/portfolio(3)일
