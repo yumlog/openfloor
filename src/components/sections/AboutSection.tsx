@@ -374,9 +374,9 @@ function CountUpNumber({
   )
 }
 
-/** 모바일 정적 스택 — 가로 레이아웃(왼쪽 타이틀·숫자, 오른쪽 이미지)로 높이를 줄인다. */
-/** 모바일 정적 스택 — 진입(active)마다 화면 밖에서 좌/우 번갈아 슬라이드 인 + 페이드.
-    1번 왼쪽→, 2번 오른쪽←, 3번 왼쪽→. 섹션이 overflow-hidden이라 밖은 잘린다. */
+/** 모바일 정적 스택 — 가로 레이아웃(왼쪽 타이틀·숫자, 오른쪽 이미지)로 높이를 줄인다.
+    진입(active)마다 화면 밖에서 좌/우 번갈아 슬라이드 인 + 페이드(1번 왼쪽→, 2번
+    오른쪽←, 3번 왼쪽→). 섹션이 overflow-hidden이라 밖은 잘린다. */
 function MobileAboutCards({ active }: { active: boolean }) {
   return (
     <div className="hidden flex-col gap-[13px] max-md:flex">

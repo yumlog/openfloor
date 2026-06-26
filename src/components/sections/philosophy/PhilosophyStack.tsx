@@ -10,7 +10,7 @@ import { PHILOSOPHY_CARDS, type PhilosophyCard } from './cards'
              기반(easeOut)으로 끝까지 스륵 올라붙는다. 휠 양과 무관하게 항상 완전히
              안착(중간에 멈추지 않음). 임계값을 벌려놔 하나씩.
    데스크탑: 고정 카드 높이(CARD_H). 마지막(빨강) 카드가 다 쌓이면 PhilosophyGrow
-   (포털)가 확대를 이어받는다(STAGE_H/LAST_CARD_CENTER_FRAC export로 측정).
+   (포털)가 확대를 이어받는다(LAST_CARD_CENTER_FRAC export로 그 중심을 측정).
    모바일: 카드별 내용 높이를 실측해 가변 높이(여백 0) + spread 위치 계산. stacked
    겹침 OFFSET은 일정. 확대 핸드오프 없음.
    모든 값 design px; 부모 stage가 scale(ratio), origin top.
@@ -25,7 +25,7 @@ const ENTRY_OFFSET = 26
 
 export const STACK_END = 0.55
 const STACK_THRESHOLDS = [0, 0.18, 0.42]
-export const STAGE_H = STACK_OFFSET * (N - 1) + CARD_H // 560
+const STAGE_H = STACK_OFFSET * (N - 1) + CARD_H // 560
 export const LAST_CARD_CENTER_FRAC =
   (STACK_OFFSET * (N - 1) + CARD_H / 2) / STAGE_H // 0.75
 

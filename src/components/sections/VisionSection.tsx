@@ -384,7 +384,7 @@ export function VisionSection({ active }: VisionSectionProps) {
       const onPathAbove = openIdx >= 0 && i < openIdx
       const isOpenMid = openIdx >= 0 && i === openIdx
       const isPlainGray = d === 1 && !onPathAbove && !isOpenMid
-      const entryIdx = d === 0 ? 0 : (row.index ?? 0) + 1
+      const entryIdx = d === 0 ? 0 : i + 1
       const entryDelay = active ? 0.1 + entryIdx * 0.1 : 0
 
       const inner = (
