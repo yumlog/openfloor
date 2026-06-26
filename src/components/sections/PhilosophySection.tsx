@@ -11,7 +11,7 @@ import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
 import { useFrameSize } from '@/hooks/useFrameSize'
-import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
+import { SLIDES } from '@/config/slides'
 import {
   PhilosophyStack,
   CardFace,
@@ -64,7 +64,7 @@ export function PhilosophySection({
 }: PhilosophySectionProps) {
   const frame = useFrameSize()
   const isMobile = frame.w < 768
-  const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
+  const ratio = frame.ratio
   // 모바일 스택 캔버스 스케일(375 기준). 좁은 폰에서 카드가 넘치지 않게 축소.
   const mobileScale = Math.min(1, frame.w / 375)
 

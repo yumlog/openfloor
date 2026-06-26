@@ -184,7 +184,7 @@ interface ManifestoSectionProps {
 export function ManifestoSection({ active, progress }: ManifestoSectionProps) {
   const frame = useFrameSize()
   // 글자는 너비 기준 유지(≥1440에서 88px).
-  const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
+  const ratio = frame.ratio
 
   // 정규화 마우스 X(-1..1) → rotateY(deg), 스프링으로 부드럽게.
   const mouseX = useMotionValue(0)

@@ -8,7 +8,7 @@ import {
   type MotionValue,
 } from 'motion/react'
 import { useFrameSize } from '@/hooks/useFrameSize'
-import { DESIGN_WIDTH, SLIDE_EASE } from '@/config/slides'
+import { SLIDE_EASE } from '@/config/slides'
 import { PORTFOLIO_PROJECTS, type PortfolioProject } from './portfolio/projects'
 
 /* ---------------------------------------------------------------------------
@@ -73,7 +73,7 @@ interface PortfolioSectionProps {
 
 export function PortfolioSection({ active, progress }: PortfolioSectionProps) {
   const frame = useFrameSize()
-  const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
+  const ratio = frame.ratio
 
   // reveal을 trap progress로 직접 구동(0→REVEAL_END에서 0→1). 정/역/재진입 모두
   // progress만 따르므로 클럭/히스테리시스가 불필요.

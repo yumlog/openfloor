@@ -3,7 +3,7 @@ import { motion, animate, useMotionValue, useTransform } from 'motion/react'
 import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
 import { RISE, entryTransition } from '@/lib/motion'
-import { SLIDES, DESIGN_WIDTH } from '@/config/slides'
+import { SLIDES } from '@/config/slides'
 import { useFrameSize } from '@/hooks/useFrameSize'
 
 const def = SLIDES[1]
@@ -129,8 +129,7 @@ export function AboutSection({ active }: AboutSectionProps) {
 }
 
 function AboutCards({ active }: { active: boolean }) {
-  const frame = useFrameSize()
-  const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
+  const ratio = useFrameSize().ratio
 
   const [phases, setPhases] = useState<Variant[]>([
     'compact',

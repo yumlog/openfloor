@@ -24,12 +24,7 @@ import { ContactSection } from '@/components/sections/ContactSection'
 import { VisionSection } from '@/components/sections/VisionSection'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { useSlideController } from '@/hooks/useSlideController'
-import {
-  BG_COLORS,
-  BG_STOPS,
-  DESIGN_WIDTH,
-  TOTAL_SLIDES,
-} from '@/config/slides'
+import { BG_COLORS, BG_STOPS, TOTAL_SLIDES } from '@/config/slides'
 
 export default function App() {
   const frame = useFrameSize()
@@ -89,8 +84,7 @@ export default function App() {
   // 페이드아웃만 한다(about으로 이동/축소하지 않음). 박스 크기 `videoSize`는
   // 1440 기준을 `ratio`(frame.w / 1440)로 스케일해 좁은 화면에서 비례 축소.
   // 모바일에선 박스를 위로 올려(heroCrystalY) 쌓인 hero 텍스트를 피한다.
-  const ratio = frame.w / DESIGN_WIDTH
-  const videoSize = 860 * ratio
+  const videoSize = 860 * frame.ratio
   const heroCrystalY = isMobile ? -frame.h * 0.26 : 0
   const videoScale = useMotionValue(0.78)
   const videoX = useMotionValue(0)

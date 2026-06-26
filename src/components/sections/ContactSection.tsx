@@ -48,7 +48,7 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
   }
   const frame = useFrameSize()
   const isMobile = frame.w < 768
-  const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
+  const ratio = frame.ratio
   const H = frame.h / ratio
 
   const rise = (d: number) => ({

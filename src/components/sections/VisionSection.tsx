@@ -219,7 +219,7 @@ const TILT_PERSPECTIVE = 1400
 export function VisionSection({ active }: VisionSectionProps) {
   const frame = useFrameSize()
   const isMobile = frame.w < 768
-  const ratio = Math.min(1, frame.w / DESIGN_WIDTH)
+  const ratio = frame.ratio
   const H = frame.h / ratio
 
   const [hovered, setHovered] = useState<NodeId | null>(null)
