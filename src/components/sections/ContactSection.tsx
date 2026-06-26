@@ -126,7 +126,7 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
           <CircularBadge
             label="SCROLL UP • SCROLL UP •"
             direction="up"
-            accent
+            tracking="0.3em"
             onClick={() => goTo(0)}
           />
         </motion.div>
