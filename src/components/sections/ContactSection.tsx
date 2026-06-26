@@ -1,19 +1,22 @@
-import { motion } from 'motion/react'
-import { ArrowUpRight } from 'lucide-react'
+import { useEffect } from 'react'
+import { motion, useMotionValue } from 'motion/react'
 import { Container } from '@/components/layout/Container'
+import { CentralCrystal } from '@/components/layout/CentralCrystal'
 import { RISE, FADE, entryProps } from '@/lib/motion'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
+import { CircularBadge } from './hero/CircularBadge'
 
 /* ---------------------------------------------------------------------------
    Contact — 슬라이드 6, 다크(#171717). 배경은 Frame 크로스페이드가 칠하므로
-   섹션은 투명하다. 데스크탑은 1440 design-px 캔버스를 `ratio`로 스케일해 모든
-   너비에서 같은 비율로 렌더(내부 요소는 절대 배치); 모바일(<768)은 한 컬럼 reflow.
+   섹션은 투명하다. Hero의 비주얼(중앙 3D 크리스탈 + 고스트 텍스트)을 그대로
+   재사용해 깔아두고, 그 위로 콘텐츠를 배치한다: 좌상단 이메일 블록, 우상단
+   Company Profile / Portfolio, 우하단 'SCROLL UP' 빨강 뱃지(클릭 시 Hero로).
+   데스크탑은 1440 design-px 캔버스를 `ratio`로 스케일; 모바일(<768)은 한 컬럼 reflow.
 --------------------------------------------------------------------------- */
 
 const def = SLIDES[6]
 
-const BADGES = ['R&D', 'Research', 'UXUI', 'Development', 'AI Platform']
 const INFO = {
   email: 'by.lee@openfloor.kr',
   address: '서울 중구 세종대로16길 18, 4층',
@@ -32,7 +35,38 @@ interface ContactSectionProps {
   goTo: (next: number) => void
 }
 
+/**
+ * Hero와 동일한 마크업/문구의 큼직한 고스트 텍스트. Hero에선 Frame 레이어(HeroGhost)에
+ * 있지만, Contact에선 섹션이 이미 스크롤 트랙과 함께 translate되므로 slide 모션 없이
+ * 섹션 바닥에 정적으로 둔다. 진입 시 active로 페이드인(Hero와 동일 타이밍).
+ */
+function ContactGhost({ active }: { active: boolean }) {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 flex h-dvh flex-col justify-end"
+    >
+      <Container className="mb-[clamp(58px,6.94vw,100px)] max-md:mb-8">
+        <motion.h2
+          initial={{ opacity: 0 }}
+          animate={{ opacity: active ? 1 : 0 }}
+          transition={{ delay: 0.8, duration: 1.2, ease: 'easeOut' }}
+          className="text-ghost-on-dark text-[clamp(46px,8vw,115px)] leading-none font-bold tracking-[-0.04em] whitespace-nowrap max-md:text-[44px]"
+        >
+          <span className="block">UNDERSTAND DEEPER</span>
+          <span className="block">BUILD TO LAST</span>
+        </motion.h2>
+      </Container>
+    </div>
+  )
+}
+
 export function ContactSection({ active, goTo }: ContactSectionProps) {
+  const frame = useFrameSize()
+  const isMobile = frame.w < 768
+  const ratio = frame.ratio
+  const H = frame.h / ratio
+
   // Company Profile → PDF 다운로드, 그 외 → 슬라이드 이동.
   const handleMenu = (m: string) => {
     if (m === 'Company Profile') {
@@ -46,13 +80,59 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
     }
     goTo(MENU_INDEX[m])
   }
-  const frame = useFrameSize()
-  const isMobile = frame.w < 768
-  const ratio = frame.ratio
-  const H = frame.h / ratio
+
+  // 중앙 크리스탈 — Hero(App.tsx)와 동일한 박스/스케일/위치. 슬라이드 진행에
+  // 묶이지 않은 상수 motion value로 구동하고, Contact가 활성일 때만 frameloop를
+  // 돌려(visible) GPU를 아낀다. 모바일은 Hero처럼 위로 올려 쌓인 텍스트를 피한다.
+  const crystalSize = 860 * ratio
+  const crystalY = isMobile ? -frame.h * 0.26 : 0
+  const crystalScale = useMotionValue(0.78)
+  const crystalX = useMotionValue(0)
+  const crystalYMV = useMotionValue(crystalY)
+  const crystalOpacity = useMotionValue(1)
+  // 리사이즈/모바일 토글로 crystalY가 바뀌면 반영(useMotionValue는 초기값만 잡음).
+  useEffect(() => {
+    crystalYMV.set(crystalY)
+  }, [crystalY, crystalYMV])
 
   const rise = (d: number) => entryProps(RISE, active, d)
   const fade = (d: number) => entryProps(FADE, active, d)
+
+  // 고스트 + 크리스탈(뒤 레이어) + 우하단 뱃지(앞 레이어) — 데스크탑/모바일 공통.
+  const visual = (
+    <>
+      <ContactGhost active={active} />
+      <CentralCrystal
+        size={crystalSize}
+        scale={crystalScale}
+        x={crystalX}
+        y={crystalYMV}
+        opacity={crystalOpacity}
+        lowSpec={isMobile}
+        visible={active}
+      />
+    </>
+  )
+
+  // 우하단 'SCROLL UP' 빨강 뱃지 — Hero 뱃지와 동일하게 스케일 캔버스 밖
+  // normal-flow에서 clamp 스케일(캔버스 transform과 이중 스케일 방지). 클릭 시 Hero로.
+  const scrollUpBadge = (
+    <div className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-end">
+      <Container className="relative mb-[clamp(58px,6.94vw,100px)] max-md:mb-8">
+        <motion.div
+          {...fade(0.3)}
+          className="pointer-events-auto absolute right-6 bottom-0 md:right-16"
+        >
+          <CircularBadge
+            label="SCROLL UP • SCROLL UP •"
+            direction="up"
+            accent
+            onClick={() => goTo(0)}
+          />
+        </motion.div>
+      </Container>
+    </div>
+  )
 
   // 모바일(<768): 한 컬럼 풀폭 스택.
   if (isMobile) {
@@ -61,20 +141,15 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
         id={def.id}
         className="relative flex h-dvh w-full flex-col overflow-hidden"
       >
-        <Container className="flex h-full flex-col pt-22 pb-12">
+        {visual}
+        <Container className="relative z-10 flex h-full flex-col pt-22 pb-12">
           <motion.p
             {...rise(0)}
-            className="text-text-on-dark text-[15px] leading-[1.3] font-normal tracking-[-0.04em]"
-          >
-            Ready to start?
-          </motion.p>
-          <motion.p
-            {...rise(0.06)}
-            className="text-title-on-dark font-montserrat mt-5 text-[clamp(26px,7.5vw,38px)] leading-none font-bold tracking-[-0.04em]"
+            className="text-title-on-dark font-montserrat text-[clamp(26px,7.5vw,38px)] leading-none font-bold tracking-[-0.04em]"
           >
             {INFO.email}
           </motion.p>
-          <motion.div {...rise(0.12)} className="mt-6 flex flex-col gap-4">
+          <motion.div {...rise(0.08)} className="mt-6 flex flex-col gap-4">
             <div>
               <p className="text-text-nav text-[14px] leading-[1.3] font-normal tracking-[-0.04em]">
                 Address
@@ -92,47 +167,20 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
               </p>
             </div>
           </motion.div>
-          <motion.button
-            type="button"
-            {...rise(0.18)}
-            className="group border-accent text-accent hover:bg-accent hover:text-title-on-dark mt-6 inline-flex items-center gap-2 self-start rounded-full border-2 py-2.5 pr-2.5 pl-3.5 text-[16px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors"
-          >
-            GET IN TOUCH
-            <ArrowUpRight strokeWidth={2} className="size-5 shrink-0" />
-          </motion.button>
 
-          <div className="mt-7 flex flex-wrap gap-2.5">
-            {BADGES.map((b, i) => (
-              <motion.span
-                key={b}
-                {...rise(0.1 + i * 0.05)}
-                className="border-text-on-dark text-text-on-dark inline-flex h-9 items-center rounded-full border px-3 text-[14px] leading-[1.2] font-normal tracking-[-0.04em]"
+          <motion.div {...rise(0.14)} className="mt-7 flex gap-5">
+            {MENUS.map((m) => (
+              <span
+                key={m}
+                onClick={() => handleMenu(m)}
+                className="text-title-on-dark hover:text-accent decoration-accent cursor-pointer text-[18px] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap underline-offset-[5px] transition-colors hover:underline hover:decoration-2"
               >
-                {b}
-              </motion.span>
+                {m}
+              </span>
             ))}
-          </div>
-
-          <div className="mt-auto">
-            <motion.p
-              {...fade(0.1)}
-              className="text-title-on-dark text-[clamp(52px,15vw,104px)] leading-none font-bold tracking-[-0.04em]"
-            >
-              CONTACT
-            </motion.p>
-            <motion.div {...fade(0.2)} className="mt-3 flex gap-5">
-              {MENUS.map((m) => (
-                <span
-                  key={m}
-                  onClick={() => handleMenu(m)}
-                  className="text-title-on-dark hover:text-accent decoration-accent cursor-pointer text-[clamp(20px,5.5vw,26px)] leading-[1.4] font-bold tracking-[-0.04em] whitespace-nowrap underline-offset-[5px] transition-colors hover:underline hover:decoration-2"
-                >
-                  {m}
-                </span>
-              ))}
-            </motion.div>
-          </div>
+          </motion.div>
         </Container>
+        {scrollUpBadge}
       </section>
     )
   }
@@ -143,25 +191,20 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
       id={def.id}
       className="relative flex h-dvh w-full items-center justify-center overflow-hidden"
     >
+      {visual}
       <div
-        className="relative shrink-0"
+        className="relative z-10 shrink-0"
         style={{ width: DESIGN_WIDTH, height: H, transform: `scale(${ratio})` }}
       >
-        {/* 좌상단 블록 */}
+        {/* 좌상단: 이메일 + Address / Phone Number */}
         <div className="absolute" style={{ left: 64, top: 100 }}>
           <motion.p
             {...rise(0)}
-            className="text-text-on-dark text-[20px] leading-[1.3] font-normal tracking-[-0.04em]"
-          >
-            Ready to start?
-          </motion.p>
-          <motion.p
-            {...rise(0.06)}
-            className="text-title-on-dark font-montserrat mt-9 text-[44px] leading-none font-bold tracking-[-0.04em]"
+            className="text-title-on-dark font-montserrat text-[44px] leading-none font-bold tracking-[-0.04em]"
           >
             {INFO.email}
           </motion.p>
-          <motion.div {...rise(0.12)} className="mt-10 flex gap-10.5">
+          <motion.div {...rise(0.08)} className="mt-10 flex gap-10.5">
             <div>
               <p className="text-text-on-dark text-[20px] leading-[1.3] font-normal tracking-[-0.04em]">
                 Address
@@ -179,46 +222,13 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
               </p>
             </div>
           </motion.div>
-          <motion.button
-            type="button"
-            {...rise(0.18)}
-            className="group border-accent text-accent hover:bg-accent hover:text-title-on-dark mt-9 inline-flex items-center gap-2 rounded-full border-2 py-3 pr-3 pl-4 text-[20px] leading-[1.2] font-bold tracking-[-0.04em] transition-colors"
-          >
-            GET IN TOUCH
-            <ArrowUpRight strokeWidth={2} className="size-6 shrink-0" />
-          </motion.button>
         </div>
 
-        {/* 우상단 고스트 뱃지(패딩 제외 62px → top 162) */}
-        <div
-          className="absolute flex flex-col items-end gap-5"
-          style={{ right: 64, top: 162 }}
-        >
-          {BADGES.map((b, i) => (
-            <motion.span
-              key={b}
-              {...rise(0.1 + i * 0.06)}
-              className="border-text-on-dark text-text-on-dark inline-flex h-12 items-center rounded-full border px-4 text-[20px] leading-[1.2] font-normal tracking-[-0.04em]"
-            >
-              {b}
-            </motion.span>
-          ))}
-        </div>
-
-        {/* 좌하단 CONTACT */}
-        <motion.p
-          {...fade(0.1)}
-          className="text-title-on-dark absolute text-[136px] leading-none font-bold tracking-[-0.04em]"
-          style={{ left: 64, bottom: 100 }}
-        >
-          CONTACT
-        </motion.p>
-
-        {/* 우하단 메뉴(호버 기존 유지) */}
+        {/* 우상단: Company Profile / Portfolio(흰색 볼드, 호버 밑줄 유지) */}
         <motion.div
-          {...fade(0.24)}
+          {...rise(0.14)}
           className="absolute flex items-baseline gap-8"
-          style={{ right: 64, bottom: 100 }}
+          style={{ right: 64, top: 100 }}
         >
           {MENUS.map((m) => (
             <span
@@ -231,6 +241,7 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
           ))}
         </motion.div>
       </div>
+      {scrollUpBadge}
     </section>
   )
 }
