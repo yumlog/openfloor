@@ -92,20 +92,20 @@
 
 ## 디자인 토큰 (`src/index.css`의 `@theme`)
 
-| 토큰                     | 값                      | 유틸리티 예시         |
-| ------------------------ | ----------------------- | --------------------- |
-| `--color-bg-dark`        | `#171717`               | `bg-bg-dark`          |
-| `--color-bg-light`       | `#ffffff`               | `bg-bg-light`         |
-| `--color-accent`         | `#FB3640`               | `text-accent`         |
-| `--color-title-on-dark`  | `#ffffff`               | `text-title-on-dark`  |
-| `--color-text-on-dark`   | `#a3a3a3`               | `text-text-on-dark`   |
-| `--color-text-nav`       | `#d4d4d4`               | `text-text-nav`       |
-| `--color-ghost-on-dark`  | `#262626`               | `text-ghost-on-dark`  |
-| `--color-line`           | `#525252`               | `stroke`/`bg-line`    |
-| `--color-muted`          | `#737373`               | `text-muted`          |
-| `--color-card-deep`      | `#404040`               | `bg-card-deep`        |
-| `--font-sans`            | Montserrat → Pretendard | `font-sans`           |
-| `--container-frame`      | `1440px`                | `max-w-frame`         |
+| 토큰                    | 값                      | 유틸리티 예시        |
+| ----------------------- | ----------------------- | -------------------- |
+| `--color-bg-dark`       | `#171717`               | `bg-bg-dark`         |
+| `--color-bg-light`      | `#ffffff`               | `bg-bg-light`        |
+| `--color-accent`        | `#FB3640`               | `text-accent`        |
+| `--color-title-on-dark` | `#ffffff`               | `text-title-on-dark` |
+| `--color-text-on-dark`  | `#a3a3a3`               | `text-text-on-dark`  |
+| `--color-text-nav`      | `#d4d4d4`               | `text-text-nav`      |
+| `--color-ghost-on-dark` | `#262626`               | `text-ghost-on-dark` |
+| `--color-line`          | `#525252`               | `stroke`/`bg-line`   |
+| `--color-muted`         | `#737373`               | `text-muted`         |
+| `--color-card-deep`     | `#404040`               | `bg-card-deep`       |
+| `--font-sans`           | Montserrat → Pretendard | `font-sans`          |
+| `--container-frame`     | `1440px`                | `max-w-frame`        |
 
 - **색은 항상 토큰으로.** 컴포넌트·데이터 파일에 hex/`rgb()`/Tailwind 표준 팔레트
   색(`text-white`, `text-neutral-400` 등)을 하드코딩하지 말고 `@theme` 토큰에서 온

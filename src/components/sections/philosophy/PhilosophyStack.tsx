@@ -77,7 +77,7 @@ function CardContent({
         className={
           compact
             ? 'text-title-on-dark mt-10 text-[18px] leading-[1.6] font-bold break-keep whitespace-pre-line'
-            : 'text-title-on-dark mt-18.5 text-[24px] leading-[1.6] font-bold break-keep whitespace-pre-line tracking-[-0.015em]'
+            : 'text-title-on-dark mt-18.5 text-[24px] leading-[1.6] font-bold tracking-[-0.015em] break-keep whitespace-pre-line'
         }
       >
         {card.body}

@@ -331,8 +331,14 @@ export function VisionSection({ active }: VisionSectionProps) {
         as="p"
         active={active}
         lines={[
-          <><span className="tracking-[-0.04em]">AI</span>가 일의 방식을 바꾸는 시대,</>,
-          <><span className="tracking-[-0.04em]">OPENFLOOR</span>는 통제 가능한 실전 <span className="tracking-[-0.04em]">AI</span>를 만듭니다.</>,
+          <>
+            <span className="tracking-[-0.04em]">AI</span>가 일의 방식을 바꾸는
+            시대,
+          </>,
+          <>
+            <span className="tracking-[-0.04em]">OPENFLOOR</span>는 통제 가능한
+            실전 <span className="tracking-[-0.04em]">AI</span>를 만듭니다.
+          </>,
         ]}
         baseDelay={0.1}
         className="text-title-on-dark mt-4 text-[44px] leading-normal font-bold tracking-[-0.02em] break-keep max-md:mt-3 max-md:text-[20px] max-md:leading-[1.35] max-md:tracking-[-0.015em]"

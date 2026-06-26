@@ -15,7 +15,7 @@ export function Container({ className, children }: ContainerProps) {
     <div
       className={cn(
         'max-w-frame mx-auto w-full px-[clamp(32px,4.44vw,64px)] max-md:px-6',
-        className,
+        className
       )}
     >
       {children}
