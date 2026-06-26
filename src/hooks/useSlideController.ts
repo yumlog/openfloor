@@ -202,10 +202,11 @@ export function useSlideController({
       // 입력을 잠가, 역스크롤 잔여 모멘텀이 philosophyRoll을 마지막 카드 임계값(0.42)
       // 밑으로 끌어내려 카드가 풀리는 걸 막는다(정방향 확대 잠금과 대칭).
       const isReverseSeam = !isMobile && from === PORT_IDX && next === PHILO_IDX
-      // Philosophy 인접 seam이 아닌, 위쪽(Hero/About)에서 포트폴리오로 정방향 점프
-      // 진입 — 착지 후 reveal을 자동재생해 통짜 텍스트에 멈춰 있지 않게 한다.
-      const isPortJumpEntry =
-        next === PORT_IDX && next > from && from !== PHILO_IDX
+      // Philosophy 인접 seam(정방향)만 제외한 모든 포트폴리오 진입 — 위쪽(Hero/About)에서
+      // 정방향 점프든, 아래쪽(Vision/Contact/헤더)에서 역방향 점프든 착지 후 reveal을
+      // 자동재생해 첫 슬라이드(01)가 펼쳐지게 한다(역방향도 정방향 진입과 동일한 첫 화면).
+      // 역방향 진입 seat은 trap의 reverseSeat:0이 0으로 맞춰 통짜→split이 0부터 재생된다.
+      const isPortJumpEntry = next === PORT_IDX && from !== PHILO_IDX
       animate(slide, next, {
         duration: isSeam ? SEAM_DURATION : SLIDE_DURATION,
         ease: SLIDE_EASE,

@@ -8,6 +8,7 @@ import { SLIDES, SLIDE_EASE } from '@/config/slides'
 
 const def = SLIDES[0]
 const CONTACT_INDEX = SLIDES.length - 1
+const ABOUT_INDEX = SLIDES.findIndex((s) => s.id === 'about')
 
 const HEADLINE_LINES = ['각자의 모서리가', '맞닿을 때', '비로소 완성됩니다']
 
@@ -96,7 +97,9 @@ export function HeroSection({ slide, active, goTo }: HeroSectionProps) {
             transition={{ delay: 0.9, duration: 0.6 }}
             className="absolute right-6 bottom-0 md:right-16"
           >
-            <CircularBadge />
+            {/* 클릭 시 About 섹션으로 이동(Contact 뱃지의 goTo 패턴과 동일).
+                회전·화살표·색·자간은 기본값 그대로 — 클릭 동작만 추가. */}
+            <CircularBadge onClick={() => goTo(ABOUT_INDEX)} />
           </motion.div>
         </Container>
       </motion.div>

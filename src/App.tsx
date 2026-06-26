@@ -50,6 +50,10 @@ export default function App() {
         progress: portfolioRoll,
         sensitivity: 0.0004,
         snap: true,
+        // 아래(Vision/Contact/헤더)에서 역방향 진입 시 progress를 0(첫 슬라이드)에
+        // 앉힌다. 기본값 1이면 마지막 프로젝트로 가버린다. 착지 후 컨트롤러가
+        // reveal을 자동재생해 첫 프로젝트(01)가 펼쳐지며 등장한다.
+        reverseSeat: 0,
       },
       {
         index: 5,
