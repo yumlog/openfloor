@@ -49,10 +49,13 @@ const TEXT_FADE_MID = 0.635
 // 글자 페이드 지속시간(s) — 페이드 '속도' 노브. 기존(progress 결합) 대비 약 2배 길게.
 // 정방향(진입, opacity→0)과 모바일 역방향에 쓴다.
 const TEXT_FADE_DURATION = 0.4
-// 역방향(Portfolio→Philosophy 복귀, 글자가 다시 모이며 나타나는 opacity→1) 전용 — 정방향보다
-// 짧게(0.5배) 해 되돌아갈 때 페이드가 빠릿하게. 데스크탑만 적용(모바일은 빨강 덮개가 없어
-// 기존 TEXT_FADE_DURATION 유지 → 모바일 동작 불변).
-const TEXT_FADE_REVERSE_DURATION = 0.2
+// 역방향(Portfolio→Philosophy 복귀, 글자가 다시 모이며 나타나는 opacity→1) 전용 페이드 시간(s).
+// 직관과 반대로 '길게' 둔다: 역방향은 글자가 fade로 사라지는 게 아니라 끝의 빨강 덮개(핸드오프)에
+// 의해 덮인다. fade-in을 길게 두면 덮개 시점에도 글자가 full opacity에 못 미친 채(≈75%) 잘려
+// 옅게 쓸려나가, 또렷이 머무는 구간 없이 '더 빨리 사라지는' 느낌이 된다(짧게 두면 오히려 full로
+// 톡 떠서 덮개까지 한참 머문다). regather/dwell/핸드오프가 고정 시간이라 이 관계는 결정적.
+// 데스크탑만 적용(모바일은 빨강 덮개가 없어 TEXT_FADE_DURATION 유지 → 모바일 동작 불변).
+const TEXT_FADE_REVERSE_DURATION = 0.6
 // reveal 구간: 페이드/스케일 시작 · 안착
 const SLIDE_SCALE_IN: number[] = [0.25, 0.9]
 // scale: 0 → 1.0. 작게 시작해 점점 커지며 안착(오버슈트=바운스 없이 단조 증가).
@@ -165,7 +168,9 @@ function PortfolioText({
 
   // 위치(split)와 분리된 시간 기반 페이드: reveal이 중점을 넘으면 hidden, 그 아래면 보임.
   // reveal은 진입/이탈 모두 컨트롤러가 오토 트윈으로 움직이므로(손 스크럽 없음) 트리거가 안정적.
-  const [textHidden, setTextHidden] = useState(() => reveal.get() >= TEXT_FADE_MID)
+  const [textHidden, setTextHidden] = useState(
+    () => reveal.get() >= TEXT_FADE_MID
+  )
   useEffect(() => {
     const apply = (v: number) => setTextHidden(v >= TEXT_FADE_MID)
     apply(reveal.get())
