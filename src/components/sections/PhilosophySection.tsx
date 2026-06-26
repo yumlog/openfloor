@@ -47,6 +47,9 @@ const TITLE_GAP = 72 // 헤딩 ↔ 첫 카드 간격(design px)
 
 interface PhilosophySectionProps {
   active: boolean
+  /** 현재 이동의 도착이 philosophy/portfolio일 때만 true — 빨강 grow 오버레이를
+      이때만 보이게 게이트해, 무관한 슬라이드 통과 시 빨강이 스치지 않게 한다. */
+  bridgeActive: boolean
   /** philosophy 트랩 progress(0..1). */
   progress: MotionValue<number>
   /** 전역 슬라이드 위치(2≈philosophy, 3≈portfolio) — 확대 오버레이가 전환 seam을
@@ -58,6 +61,7 @@ interface PhilosophySectionProps {
 
 export function PhilosophySection({
   active,
+  bridgeActive,
   progress,
   slide,
   goTo,
@@ -198,6 +202,7 @@ export function PhilosophySection({
             cx={center.cx}
             cy={center.cy}
             frameH={frame.h}
+            bridgeActive={bridgeActive}
           />,
           document.body
         )}
@@ -222,6 +227,7 @@ function PhilosophyGrow({
   cx,
   cy,
   frameH,
+  bridgeActive,
 }: {
   g: MotionValue<number>
   slide: MotionValue<number>
@@ -229,6 +235,7 @@ function PhilosophyGrow({
   cx: number
   cy: number
   frameH: number
+  bridgeActive: boolean
 }) {
   // 카드가 화면을 '딱 덮는' 스케일(여유 배율 없이).
   const exactCover = Math.max(
@@ -260,7 +267,9 @@ function PhilosophyGrow({
   return (
     <motion.div
       className="pointer-events-none fixed inset-0 z-40 overflow-hidden"
-      style={{ opacity: overlayOpacity }}
+      // bridgeActive가 false면(도착이 2/3이 아님) slide가 2~3을 스쳐도 즉시 0으로
+      // 숨겨 빨강 깜빡임을 막는다. true면 기존 slide 기반 seam 페이드를 그대로 쓴다.
+      style={{ opacity: bridgeActive ? overlayOpacity : 0 }}
     >
       <motion.div
         className="absolute"

@@ -50,7 +50,15 @@ function ContactGhost({ active }: { active: boolean }) {
         <motion.h2
           initial={{ opacity: 0 }}
           animate={{ opacity: active ? 1 : 0 }}
-          transition={{ delay: 0.8, duration: 1.2, ease: 'easeOut' }}
+          // enter는 Hero와 동일한 느린 reveal(0.8s 지연 + 1.2s); exit는 즉시 리셋.
+          // Hero는 바깥 slide 기반 opacity가 크리스프 리셋을 해주지만 Contact엔 그게
+          // 없어, exit까지 느리면 빠른 왕복에서 0까지 못 내려가 재진입 페이드인이
+          // 안 보인다 → exit만 빠르게 해서 재진입마다 0→1을 다시 재생.
+          transition={{
+            delay: active ? 0.8 : 0,
+            duration: active ? 1.2 : 0.3,
+            ease: 'easeOut',
+          }}
           className="text-ghost-on-dark text-[clamp(46px,8vw,115px)] leading-none font-bold tracking-[-0.04em] whitespace-nowrap max-md:text-[44px]"
         >
           <span className="block">UNDERSTAND DEEPER</span>
@@ -142,7 +150,9 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
         className="relative flex h-dvh w-full flex-col overflow-hidden"
       >
         {visual}
-        <Container className="relative z-10 flex h-full flex-col pt-22 pb-12">
+        {/* Hero 모바일과 동일: 크리스탈을 위로 올리고(-0.26h) 콘텐츠를 pt-[39vh]로
+            내려 3D 오브젝트 → 텍스트 → 고스트 순으로 겹치지 않게 한다. */}
+        <Container className="relative z-10 flex h-full flex-col pt-[39vh] pb-12">
           <motion.p
             {...rise(0)}
             className="text-title-on-dark font-montserrat text-[clamp(26px,7.5vw,38px)] leading-none font-bold tracking-[-0.04em]"

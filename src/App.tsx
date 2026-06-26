@@ -125,6 +125,11 @@ export default function App() {
         <AboutSection active={index === 1} />
         <PhilosophySection
           active={index === 2 && (target === 2 || source === 2)}
+          // 빨강 grow 오버레이는 현재 이동의 도착이 philosophy(2)/portfolio(3)일
+          // 때만 보이게 게이트 — Hero↔Contact 등 무관한 점프가 slide로 2~3을
+          // 스쳐도(그때 g 잔여값이 있어도) 오버레이가 강제로 숨어 빨강이 안 스친다.
+          // 정상 2↔3 seam·grow·parked 상태는 모두 target∈{2,3}이라 그대로 보존.
+          bridgeActive={target === 2 || target === 3}
           progress={philosophyRoll}
           slide={slide}
           goTo={goTo}
