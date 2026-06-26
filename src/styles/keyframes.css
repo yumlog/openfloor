@@ -4,21 +4,6 @@
    추가할 수 있다.
 --------------------------------------------------------------------------- */
 
-/* 블록 reveal — 콘텐츠를 왼쪽에서부터 닦아낸다. 섹션이 나중에 쓸 reveal
-   인터랙션의 플레이스홀더. */
-@keyframes block-reveal {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-.animate-block-reveal {
-  animation: block-reveal 0.8s cubic-bezier(0.77, 0, 0.175, 1) both;
-}
-
 /* ---------------------------------------------------------------------------
    Hero 헤드라인 reveal — 효과는 움직이는 경계에만 존재한다.
 
@@ -114,11 +99,6 @@
   /* 기본: 완전히 숨김(마스크를 미드러난 끝에 둠). */
   -webkit-mask-position: 100% 0;
   mask-position: 100% 0;
-}
-
-/* 라이트 배경: 청·적 색수차만 제거하고 흰 halo/blur는 유지. */
-.hero-reveal-line.reveal-no-chroma .hero-reveal-edge {
-  text-shadow: 0 0 var(--edge-blur) rgba(255, 255, 255, 0.5);
 }
 
 /* active일 때만 sweep 재생 — RevealText가 진입 시 .is-playing을 더하고 섹션이
