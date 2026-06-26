@@ -180,9 +180,9 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
         className="relative flex h-dvh w-full flex-col overflow-hidden"
       >
         {visual}
-        {/* Hero 모바일과 동일: 크리스탈을 위로 올리고(-0.26h) 콘텐츠를 pt-[39vh]로
+        {/* Hero 모바일과 동일: 크리스탈을 위로 올리고(-0.26h) 콘텐츠를 pt-[40vh]로
             내려 3D 오브젝트 → 텍스트 → 고스트 순으로 겹치지 않게 한다. */}
-        <Container className="relative z-10 flex h-full flex-col pt-[39vh] pb-12">
+        <Container className="relative z-10 flex h-full flex-col pt-[40vh] pb-12">
           <motion.p
             {...rise(0)}
             className="text-title-on-dark font-montserrat text-[clamp(26px,7.5vw,38px)] leading-none font-bold tracking-[-0.04em]"
