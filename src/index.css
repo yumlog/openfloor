@@ -24,12 +24,6 @@
   /* 다크 슬라이드의 큼직한 고스트 배경 텍스트 */
   --color-ghost-on-dark: #262626;
 
-  /* 라이트 배경 위 텍스트 */
-  --color-title-on-light: #111111;
-  --color-text-on-light: #666666;
-  /* 카드 이름 라벨(Philosophy 덱) */
-  --color-card-name: #333333;
-
   /* 가는 커넥터·구분선(Vision 트리) */
   --color-line: #525252;
   /* 보조 아이콘 / 중간 회색 카드면(Vision Chevron, Philosophy 카드2) */

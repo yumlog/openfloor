@@ -5,9 +5,9 @@
 
 ## 상태
 
-1단계(엔진 + 스켈레톤 + 플레이스홀더 섹션)는 완료. 각 섹션은 라벨이 붙은
-플레이스홀더(`PlaceholderSection`)이며, 실제 콘텐츠/인터랙션은 이후 단계에서
-한 섹션씩 추가한다. **요청받지 않으면 섹션 콘텐츠를 만들지 말 것.**
+엔진 + 스켈레톤은 완료되었고, 모든 섹션에 실제 콘텐츠/인터랙션이 들어가 있다
+(초기 `PlaceholderSection` 스캐폴드는 제거됨). 섹션은 한 번에 하나씩 다듬는다.
+**요청받지 않으면 섹션 콘텐츠를 만들지 말 것.**
 
 ## 스택
 
@@ -101,9 +101,6 @@
 | `--color-text-on-dark`   | `#a3a3a3`               | `text-text-on-dark`   |
 | `--color-text-nav`       | `#d4d4d4`               | `text-text-nav`       |
 | `--color-ghost-on-dark`  | `#262626`               | `text-ghost-on-dark`  |
-| `--color-title-on-light` | `#111111`               | `text-title-on-light` |
-| `--color-text-on-light`  | `#666666`               | `text-text-on-light`  |
-| `--color-card-name`      | `#333333`               | `text-card-name`      |
 | `--color-line`           | `#525252`               | `stroke`/`bg-line`    |
 | `--color-muted`          | `#737373`               | `text-muted`          |
 | `--color-card-deep`      | `#404040`               | `bg-card-deep`        |
@@ -173,10 +170,9 @@
 
 ## 섹션 (순서)
 
-7개 슬라이드: **Hero, About, Philosophy, Vision, Portfolio, Manifesto, Contact
-(+ Footer)**. Hero·About·Philosophy·Portfolio·Manifesto는 구현됨; Vision·Contact는
-아직 섹션 이름만 보여주는 플레이스홀더. (Manifesto는 내비에 없는 스크롤 트랩
-3D 드럼 섹션이다.)
+7개 슬라이드: **Hero, About, Philosophy, Portfolio, Vision, Manifesto, Contact**
+(순서는 `SLIDES` 기준). 모두 실제 콘텐츠/인터랙션이 구현되어 있다. (Manifesto는
+내비에 없는 스크롤 트랩 3D 드럼 섹션이다.)
 
 ## 폴더 구조
 
@@ -185,7 +181,7 @@ src/
   components/
     layout/    Frame, Slides, Container, Header, CentralCrystal
     sections/  Hero, About, Philosophy, Vision, Portfolio, Manifesto, Contact
-    ui/        공용 UI (PlaceholderSection, RevealText)
+    ui/        공용 UI (RevealText)
   hooks/       useSlideController, useFrameSize
   lib/         cn.ts, motion.ts
   config/      slides.ts (슬라이드 순서, 테마, 내비, 엔진 타이밍)
