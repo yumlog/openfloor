@@ -37,7 +37,7 @@ export default function App() {
 
   // Manifesto 드럼 롤: 스크롤 엔진이 슬라이드 4를 가두고 이 0..1 값을 제스처당
   // 한 칸씩 구동한다; 섹션이 이를 원통 롤로 바꾼다.
-  const rollProgress = useMotionValue(0)
+  const manifestoRoll = useMotionValue(0)
   const portfolioRoll = useMotionValue(0)
   const philosophyRoll = useMotionValue(0)
   const traps = useMemo(
@@ -59,7 +59,7 @@ export default function App() {
       {
         index: 5,
         steps: MANIFESTO_STEPS,
-        progress: rollProgress,
+        progress: manifestoRoll,
         sensitivity: 0.0008,
         autoFlow: {
           speed: 0.08,
@@ -71,7 +71,7 @@ export default function App() {
         },
       },
     ],
-    [isMobile, philosophyRoll, portfolioRoll, rollProgress]
+    [isMobile, philosophyRoll, portfolioRoll, manifestoRoll]
   )
   const { slide, index, goTo, source, target } = useSlideController({
     total: TOTAL_SLIDES,
@@ -85,25 +85,20 @@ export default function App() {
   // 트랙 translate: 100dvh당 한 섹션.
   const trackY = useTransform(slide, (v) => `${-v * 100}dvh`)
 
-  // 중앙 비디오, 슬라이드 0 -> 1: 축소 + 우상단으로 이동, 그 뒤 Philosophy
-  // 슬라이드 전에 페이드 아웃해 덱이 무대를 독차지하게.
-  //
-  // 전체 합성은 1440 기준으로 정의하고 `ratio`(frame.w / 1440)로 스케일해 좁은
-  // 화면에서 프레임에 비례해 줄어든다 — 기본 크기, about 상태 목표 크기,
-  // about 상태 오프셋(우측에서 402, 상단에서 301)이 함께 스케일되므로 about
-  // 상태가 모든 너비에서 동일하게 읽힌다.
-  // 슬라이드 0: `videoSize` 정사각 가운데. 슬라이드 1: 그 354/860 스케일을
-  // (frame.w - 402*ratio, 301*ratio)에 가운데 정렬. x/y translate는 가운데 박스를
-  // 절대 px만큼 옮기므로 기본 크기와 무관하다 — about 상태는 스케일(상수 354/860)만
-  // 결정한다.
-  // 모바일에선 슬라이드-0 박스를 아래로 살짝 내려 쌓인 hero 텍스트를 피한다.
+  // 중앙 크리스탈: hero 자리(가운데, scale 0.78)에 고정한 채 hero를 벗어나면
+  // 페이드아웃만 한다(about으로 이동/축소하지 않음). 박스 크기 `videoSize`는
+  // 1440 기준을 `ratio`(frame.w / 1440)로 스케일해 좁은 화면에서 비례 축소.
+  // 모바일에선 박스를 위로 올려(heroCrystalY) 쌓인 hero 텍스트를 피한다.
   const ratio = frame.w / DESIGN_WIDTH
   const videoSize = 860 * ratio
-  // hero 전용: about으로 이동/축소시키지 않고 hero 자리(가운데, scale 0.78)에 고정.
   const heroCrystalY = isMobile ? -frame.h * 0.26 : 0
-  const videoScale = useTransform(slide, [0, 1], [0.78, 0.78])
-  const videoX = useTransform(slide, [0, 1], [0, 0])
-  const videoY = useTransform(slide, [0, 1], [heroCrystalY, heroCrystalY])
+  const videoScale = useMotionValue(0.78)
+  const videoX = useMotionValue(0)
+  // 리사이즈/모바일 토글로 heroCrystalY가 바뀌면 반영(useMotionValue는 초기값만 잡음).
+  const videoY = useMotionValue(heroCrystalY)
+  useEffect(() => {
+    videoY.set(heroCrystalY)
+  }, [heroCrystalY, videoY])
   // hero를 벗어나면(0→0.8) 그 자리에서 페이드아웃 → about에선 안 보임.
   const videoOpacity = useTransform(slide, [0, 0.8], [1, 0])
 
@@ -148,7 +143,7 @@ export default function App() {
           progress={portfolioRoll}
         />
         <VisionSection active={index === 4} />
-        <ManifestoSection active={index === 5} progress={rollProgress} />
+        <ManifestoSection active={index === 5} progress={manifestoRoll} />
         <ContactSection active={index === 6} goTo={goTo} />
       </Slides>
 
