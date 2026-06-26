@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 import { Container } from '@/components/layout/Container'
 import { RevealText } from '@/components/ui/RevealText'
-import { RISE, entryTransition } from '@/lib/motion'
+import { RISE, entryProps } from '@/lib/motion'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { clamp } from '@/lib/math'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
@@ -317,12 +317,7 @@ export function VisionSection({ active }: VisionSectionProps) {
     return `M ${x1} ${y1} C ${x1 + k} ${y1}, ${x2 - k} ${y2}, ${x2} ${y2}`
   }
 
-  const rise = (d: number) => ({
-    variants: RISE,
-    initial: 'hidden' as const,
-    animate: active ? 'show' : 'hidden',
-    transition: entryTransition(d),
-  })
+  const rise = (d: number) => entryProps(RISE, active, d)
 
   const TitleBlock = (
     <div>

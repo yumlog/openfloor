@@ -29,3 +29,14 @@ export const entryTransition = (delay = 0) => ({
   duration: ENTRY_DURATION,
   ease: SLIDE_EASE,
 })
+
+/**
+ * `active` 토글로 (재)진입 애니메이션을 재생하는 motion props 묶음. variants만
+ * 갈아끼우면 rise / fade가 된다 — 섹션이 `{...riseProps(RISE, active, delay)}`로 스프레드.
+ */
+export const entryProps = (variants: Variants, active: boolean, delay = 0) => ({
+  variants,
+  initial: 'hidden' as const,
+  animate: (active ? 'show' : 'hidden') as 'show' | 'hidden',
+  transition: entryTransition(delay),
+})

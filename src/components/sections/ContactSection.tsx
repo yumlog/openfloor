@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import { ArrowUpRight } from 'lucide-react'
 import { Container } from '@/components/layout/Container'
-import { RISE, FADE, entryTransition } from '@/lib/motion'
+import { RISE, FADE, entryProps } from '@/lib/motion'
 import { useFrameSize } from '@/hooks/useFrameSize'
 import { DESIGN_WIDTH, SLIDES } from '@/config/slides'
 
@@ -51,18 +51,8 @@ export function ContactSection({ active, goTo }: ContactSectionProps) {
   const ratio = frame.ratio
   const H = frame.h / ratio
 
-  const rise = (d: number) => ({
-    variants: RISE,
-    initial: 'hidden' as const,
-    animate: active ? ('show' as const) : ('hidden' as const),
-    transition: entryTransition(d),
-  })
-  const fade = (d: number) => ({
-    variants: FADE,
-    initial: 'hidden' as const,
-    animate: active ? ('show' as const) : ('hidden' as const),
-    transition: entryTransition(d),
-  })
+  const rise = (d: number) => entryProps(RISE, active, d)
+  const fade = (d: number) => entryProps(FADE, active, d)
 
   // 모바일(<768): 한 컬럼 풀폭 스택.
   if (isMobile) {
